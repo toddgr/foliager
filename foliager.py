@@ -12,6 +12,7 @@ client = OpenAI(api_key='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')
 import os
 import pandas as pd
 import time
+import re
 
 
 def ask_nlp(prompt, model="gpt-3.5-turbo"):
@@ -22,8 +23,37 @@ def ask_nlp(prompt, model="gpt-3.5-turbo"):
 
     return response.choices[0].message.content   
 
-prompt = "Give a list of foliage types that can be found in Corvallis Oregon"
+def make_valid_filename(input_string):
+    # Remove any characters that are not alphanumeric, underscores, or hyphens
+    cleaned_string = re.sub(r'[^a-zA-Z0-9_-]', '_', input_string)
 
-response = ask_nlp(prompt)
+    # Remove leading and trailing underscores and hyphens
+    cleaned_string = cleaned_string.strip('_-')
 
-print(response)
+    # Ensure the file name is not empty
+    if not cleaned_string:
+        cleaned_string = 'untitled'
+
+    # Limit the length of the file name to a reasonable size (adjust as needed)
+    max_length = 255
+    cleaned_string = cleaned_string[:max_length]
+
+    return cleaned_string + "_Foliage.txt"
+
+
+prompt = "Give a list of foliage types that can be found in "
+location = input("Enter the climate, city, or area:")
+prompt += location
+print(prompt)
+
+#response = ask_nlp(prompt) #commented out to save query time
+#print(response)
+
+response = "1. Douglas Fir\n2. Western Hemlock"
+foliage_file = make_valid_filename(location)
+
+print("foliage filename:", foliage_file)
+
+# with open(foliage_file, 'w') as file:
+#     # Write the string to the file
+#     file.write(response)
