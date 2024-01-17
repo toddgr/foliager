@@ -3,16 +3,14 @@ File: foliager.py
 Author: Grace Todd
 Date: January 17, 2024
 Description: Uses ChatGPT to derive a list of foliage from an area specified by the user.
+    OpenAI Documentation: https://platform.openai.com/docs/overview
 """
 
 from openai import OpenAI
-
 client = OpenAI(api_key='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')
 
 import os
-
 import pandas as pd
-
 import time
 
 
