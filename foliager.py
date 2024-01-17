@@ -24,35 +24,31 @@ def ask_nlp(prompt, model="gpt-3.5-turbo"):
     return response.choices[0].message.content   
 
 def make_valid_filename(input_string):
-    # Remove any characters that are not alphanumeric, underscores, or hyphens
-    cleaned_string = re.sub(r'[^a-zA-Z0-9_-]', '_', input_string)
-
-    # Remove leading and trailing underscores and hyphens
+    extension = "_foliage.txt"
+    cleaned_string = re.sub(r'[^\w\s-]', '', input_string)  # Remove special characters except for spaces and hyphens
+    cleaned_string = re.sub(r'\s+', '_', cleaned_string)    # Replace consecutive spaces with a single underscore
     cleaned_string = cleaned_string.strip('_-')
 
-    # Ensure the file name is not empty
     if not cleaned_string:
         cleaned_string = 'untitled'
 
-    # Limit the length of the file name to a reasonable size (adjust as needed)
-    max_length = 255
+    max_length = 255 - len(extension)
     cleaned_string = cleaned_string[:max_length]
 
-    return cleaned_string + "_foliage.txt"
+    return cleaned_string + extension
 
+if __name__ == '__main__':
+    prompt = "Give a list of foliage types that can be found in "
+    location = input("Enter the climate, city, or area:")
+    prompt += location
+    print(prompt)
 
+    #response = ask_nlp(prompt) #commented out to save query time
+    #print(response)
 
-prompt = "Give a list of foliage types that can be found in "
-location = input("Enter the climate, city, or area:")
-prompt += location
-print(prompt)
+    test_response = "1. Douglas Fir\n2. Western Hemlock"
+    foliage_file = make_valid_filename(location)
 
-#response = ask_nlp(prompt) #commented out to save query time
-#print(response)
-
-test_response = "1. Douglas Fir\n2. Western Hemlock"
-foliage_file = make_valid_filename(location)
-
-with open(foliage_file, 'w') as file:
-    # Write the string to the file
-    file.write(test_response)
+    with open(foliage_file, 'w') as file:
+        # Write the string to the file
+        file.write(test_response)
