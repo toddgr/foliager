@@ -38,7 +38,8 @@ def make_valid_filename(input_string):
     max_length = 255
     cleaned_string = cleaned_string[:max_length]
 
-    return cleaned_string + "_Foliage.txt"
+    return cleaned_string + "_foliage.txt"
+
 
 
 prompt = "Give a list of foliage types that can be found in "
@@ -49,11 +50,9 @@ print(prompt)
 #response = ask_nlp(prompt) #commented out to save query time
 #print(response)
 
-response = "1. Douglas Fir\n2. Western Hemlock"
+test_response = "1. Douglas Fir\n2. Western Hemlock"
 foliage_file = make_valid_filename(location)
 
-print("foliage filename:", foliage_file)
-
-# with open(foliage_file, 'w') as file:
-#     # Write the string to the file
-#     file.write(response)
+with open(foliage_file, 'w') as file:
+    # Write the string to the file
+    file.write(test_response)
