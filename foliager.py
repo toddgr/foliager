@@ -42,6 +42,7 @@ if __name__ == '__main__':
     location = input("Enter the climate, city, or area:")
     prompt += location
     print(prompt)
+    print("Generating foliage list for ", location, "...")
 
     #response = ask_nlp(prompt) #commented out to save query time
     #print(response)
@@ -52,3 +53,4 @@ if __name__ == '__main__':
     with open(foliage_file, 'w') as file:
         # Write the string to the file
         file.write(test_response)
+        print("Writing to file ", foliage_file)
