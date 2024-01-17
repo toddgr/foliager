@@ -16,16 +16,16 @@ import pandas as pd
 import time
 
 
-def get_completion(prompt, model="gpt-3.5-turbo"):
-
+def ask_nlp(prompt, model="gpt-3.5-turbo"):
+    # Ask ChatGPT a question, return the answer.
     messages = [{"role": "user", "content": prompt}]
 
     response = client.chat.completions.create(model=model, messages=messages, temperature=0)
 
     return response.choices[0].message.content   
 
-prompt = "What kinds of trees can you find in the high desert?"
+prompt = "Give a list of foliage types that can be found in Corvallis Oregon"
 
-response = get_completion(prompt)
+response = ask_nlp(prompt)
 
 print(response)
