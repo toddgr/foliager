@@ -14,6 +14,8 @@ import pandas as pd
 import time
 import re
 
+from tree_class import parse_tree_file, Tree
+
 
 def ask_nlp(prompt, model="gpt-3.5-turbo"):
     # Ask ChatGPT a question, return the answer.
@@ -54,3 +56,6 @@ if __name__ == '__main__':
         # Write the string to the file
         file.write(test_response)
         print("Writing to file ", foliage_file)
+
+    foliage_list = parse_tree_file(foliage_file)
+    
