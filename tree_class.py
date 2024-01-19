@@ -9,7 +9,22 @@ Description: Tree class. Holds information on a given tree type, derives informa
 class Tree:
     def __init__(self, name):
         self.name = name
-        # 
+        # Potential attributes:
+        # Deciduous vs. coniferous
+        # Leaf shape and arrangement
+        # Bark Texture and Color
+        # Form and Habit
+        # Flower Type and Structure
+        # Fruit and seed characteristics
+        # Growth rate
+        # Lifespan
+        # Climate tolerance
+        # Soil preferences
+        # Disease resistance
+        # Fall coloration (interesting)
+        # Root system
+        # Wood density and hardness
+
     
 class TreeList:
     def __init__(self):
