@@ -10,7 +10,7 @@ Description: Generates tree class and ensures that the tree class updates with n
 from datetime import datetime
 from parse_tree_input import csv_file_to_list
 
-tree_class_file_name = "tree_class_test.py"
+tree_class_file_name = "tree_class.py"
 default_tree_chart = "default_tree_chart.csv"
 
 def create_header():
