@@ -8,6 +8,7 @@ Description: Generates tree class and ensures that the tree class updates with n
 """
 
 from datetime import datetime
+from parse_tree_input import csv_file_to_list
 tree_class_file_name = "tree_class_test.py"
 
 def create_header():
@@ -24,7 +25,24 @@ def create_header():
     header = '\"\"\"\n' + file_name + author + todays_date + description + '\"\"\"\n'
     return header
 
+def get_attributes_from_csv(file_name):
+    attributes = csv_file_to_list(file_name)
+    return attributes
+
+
+def create_tree_class():
+    definition = "class Tree():\n"
+    #create_init with attributes from csv
+    #create get functions for all attributes from csv
+
+    pass
+
+def create_tree_list_class():
+    pass
+
 if __name__ == '__main__':
+    attributes_list = get_attributes_from_csv('default_tree_chart.csv')
+    print("Attributes:", attributes_list)
     with open(tree_class_file_name, 'w') as file:
         # Create header
         file.write(
