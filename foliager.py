@@ -14,7 +14,7 @@ import pandas as pd
 import time
 import re
 
-from tree_class import parse_tree_file, Tree
+#from tree_class import parse_tree_file, Tree
 
 
 def ask_nlp(prompt, model="gpt-3.5-turbo"):
@@ -26,7 +26,7 @@ def ask_nlp(prompt, model="gpt-3.5-turbo"):
     return response.choices[0].message.content   
 
 def make_valid_filename(input_string):
-    extension = "_foliage.txt"
+    extension = "_foliage.csv"
     cleaned_string = re.sub(r'[^\w\s-]', '', input_string)  # Remove special characters except for spaces and hyphens
     cleaned_string = re.sub(r'\s+', '_', cleaned_string)    # Replace consecutive spaces with a single underscore
     cleaned_string = cleaned_string.strip('_-')
@@ -40,16 +40,21 @@ def make_valid_filename(input_string):
     return cleaned_string + extension
 
 if __name__ == '__main__':
-    prompt = "Give a list of foliage types that can be found in "
+    prompt = "Give an unnumbered list of foliage types in CSV format that can be found in "
     location = input("Enter the climate, city, or area:")
     prompt += location
+    attributes = " with the following attributes: Name, Growth Rate, Average Lifespan" # Make this dynamic
+    prompt += attributes
     print(prompt)
     print("Generating foliage list for ", location, "...")
 
-    #response = ask_nlp(prompt) #commented out to save query time
-    #print(response)
+    # response = ask_nlp(prompt) #commented out to save query time
+    # print(response)
 
-    test_response = "1. Douglas Fir\n2. Western Hemlock"
+    test_response = "Name,              Growth Rate,    Average Lifespan\n \
+                    Douglas Fir,        Medium,         500 years\n \
+                    Western Red Cedar,  Medium,         500 years \
+                    Bigleaf Maple,      Medium,         100 years"
     foliage_file = make_valid_filename(location)
 
     with open(foliage_file, 'w') as file:
@@ -57,5 +62,5 @@ if __name__ == '__main__':
         file.write(test_response)
         print("Writing to file ", foliage_file)
 
-    foliage_list = parse_tree_file(foliage_file)
-    
+    #foliage_list = parse_tree_file(foliage_file)
+

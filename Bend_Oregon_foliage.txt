@@ -1,2 +1,15 @@
-1. Douglas Fir
-2. Western Hemlock
+Here is a list of foliage types that can be found in Bend, Oregon in CSV format:
+
+Foliage Type
+Evergreen Tree
+Deciduous Tree
+Shrub
+Grass
+Fern
+Moss
+Wildflower
+Succulent
+Cactus
+Bamboo
+
+Please note that this is not an exhaustive list and there may be other foliage types present in Bend, Oregon.

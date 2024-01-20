@@ -14,9 +14,10 @@ class Tree:
         # Leaf shape and arrangement
         # Bark Texture and Color
         # Form and Habit
+            # Average
         # Flower Type and Structure
         # Fruit and seed characteristics
-        # Growth rate
+        # Growth rate (fast-growing, moderate-growing, slow-growing)
         # Lifespan
         # Climate tolerance
         # Soil preferences
