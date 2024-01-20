@@ -77,7 +77,7 @@ def create_tree_list_get_functions():
     for i, attribute in enumerate(attributes_list):
         get_functions += "\n\t" + create_function_definition("get_tree_" + attribute + "s", "self")
         if i== 0:
-            get_functions += "\t\treturn [[tree.get_" + attribute + "()] for tree in self.trees]\n"
+            get_functions += "\t\treturn [tree.get_" + attribute + "() for tree in self.trees]\n"
         else:
             get_functions += "\t\treturn [[tree.get_tree_" + attributes_list[0] + "(), tree.get_" + attribute + "()] for tree in self.trees]\n"
 

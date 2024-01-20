@@ -2,7 +2,11 @@
 # Determines what information is gathered about each tree species.
 # Tree and TreeList classes are automatically generated with these values
 # Make sure that there are no spaces between the attributes
+#
 Name,Growth Rate,Average Lifespan
+
+
+
 
 # Other potential attributes:
 # Deciduous vs. coniferous

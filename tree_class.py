@@ -37,7 +37,7 @@ class TreeList:
 		self.trees.append(tree)
 
 	def get_tree_names(self):
-		return [[tree.get_name()] for tree in self.trees]
+		return [tree.get_name() for tree in self.trees]
 
 	def get_tree_growth_rates(self):
 		return [[tree.get_tree_name(), tree.get_growth_rate()] for tree in self.trees]
