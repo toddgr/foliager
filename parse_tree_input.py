@@ -43,3 +43,18 @@ def parse_csv_file(file_path):
             trees.append(tree)
 
     return trees
+
+def csv_file_to_string(file_path):
+    # Reads in the default_tree_chart.csv headers and converts them to a 
+    # usable string for the NLP prompt
+    result_string = ""
+
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            # Exclude lines starting with a comment character (e.g., #)
+            if not row or row[0].startswith("#"):
+                continue
+            result_string += ','.join(row) + '\n'
+
+    return result_string

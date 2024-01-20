@@ -14,7 +14,7 @@ import pandas as pd
 import time
 import re
 
-from parse_tree_input import parse_csv_file
+from parse_tree_input import parse_csv_file, csv_file_to_string
 
 from tree_class import Tree, TreeList
 
@@ -41,15 +41,20 @@ def make_valid_filename(input_string):
 
     return cleaned_string + extension
 
-if __name__ == '__main__':
+def generate_prompt():
+    attributes = csv_file_to_string("default_tree_chart.csv")
     prompt = "Give an unnumbered list of foliage types in CSV format that can be found in "
     location = input("Enter the climate, city, or area:")
-    prompt += location
-    attributes = " with the following attributes: Name, Growth Rate, Average Lifespan" # Make this dynamic
+    prompt += location + " with the following attributes:" + attributes
     prompt += attributes
     print(prompt)
     print("Generating foliage list for ", location, "...")
 
+    return prompt, location
+
+if __name__ == '__main__':
+
+    prompt, location = generate_prompt()
     # response = ask_nlp(prompt) #commented out to save query time
     # print(response)
 
@@ -57,10 +62,11 @@ if __name__ == '__main__':
 Douglas Fir,Medium,500 years\n \
 Western Red Cedar,Medium,500 years\n \
 Bigleaf Maple,Medium,100 years\n"
-    foliage_file = make_valid_filename(location)
 
+    foliage_file = make_valid_filename(location)
+    
+    # Write the NLP response to a csv file
     with open(foliage_file, 'w') as file:
-        # Write the string to the file
         file.write(test_response)
         print("Writing to file ", foliage_file)
 
