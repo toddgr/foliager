@@ -1,5 +1,5 @@
 """
-File: foliager.py
+File: foliager.py (i.e. main)
 Author: Grace Todd
 Date: January 17, 2024
 Description: Uses ChatGPT to derive a list of foliage from an area specified by the user.
