@@ -71,12 +71,21 @@ def create_tree_class():
     return definition + init + get_functions
 
 def create_tree_list_class():
-    pass
+    definition = "class TreeList:\n\n"
+    #create init
+    init = "\tdef __init__(self, tree_list=None):\n\
+\t\tif tree_list is not None:\n\
+\t\t\tself.trees = tree_list\n\
+\t\telse:\n\
+\t\t\tself.trees = []\n"
+
+    return definition + init
 
 def write_file():
     header = create_header()
     tree_class = create_tree_class()
-    return header + tree_class
+    tree_list_class = create_tree_list_class()
+    return header + tree_class + tree_list_class
 
 if __name__ == '__main__':
     attributes_list = get_attributes_from_csv(default_tree_chart)

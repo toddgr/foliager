@@ -22,3 +22,10 @@ class Tree:
 
 	def get_tree_info(self):
 		return self.name, self.growth_rate, self.average_lifespan, 
+class TreeList:
+
+	def __init__(self, tree_list=None):
+		if tree_list is not None:
+			self.trees = tree_list
+		else:
+			self.trees = []
