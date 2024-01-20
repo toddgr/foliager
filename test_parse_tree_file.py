@@ -1,5 +1,6 @@
 import unittest
-from tree_class import parse_csv_file, Tree, TreeList
+from tree_class import Tree, TreeList
+from parse_tree_input import parse_tree_file
 
 class TestParseTreeFile(unittest.TestCase):
     def setUp(self):
