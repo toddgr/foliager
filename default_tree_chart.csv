@@ -1,5 +1,0 @@
-# default_tree_chart.csv
-# Determines what information is gathered about each tree species.
-# Tree and TreeList classes are automatically generated with these values
-# Make sure that there are no spaces between the attributes
-Name,Growth Rate,Average Lifespan
