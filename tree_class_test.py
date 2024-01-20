@@ -6,7 +6,7 @@ Description: Tree class. Holds information on a given tree type, derives informa
 """
 class Tree:
 
-	def __init__(self, name, growth_rate, average_lifespan):
+	def __init__(self, name=None, growth_rate=None, average_lifespan=None):
 		self.name = name
 		self.growth_rate = growth_rate
 		self.average_lifespan = average_lifespan

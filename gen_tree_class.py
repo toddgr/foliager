@@ -42,7 +42,7 @@ def create_tree_constructor():
     parameters = "self"
     assignments = ""
     for attribute in attributes_list:
-        parameters = parameters + ", " + attribute
+        parameters = parameters + ", " + attribute + "=None"
         assignments += "\t\tself." + attribute + " = " + attribute + "\n"
 
     definition = "\t" + create_function_definition("__init__", parameters)
