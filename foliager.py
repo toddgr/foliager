@@ -3,6 +3,7 @@ File: foliager.py
 Author: Grace Todd
 Date: January 17, 2024
 Description: Uses ChatGPT to derive a list of foliage from an area specified by the user.
+    Implements Tree and TreeList classes to turn list of foliage data into modifiable Python objects
     OpenAI Documentation: https://platform.openai.com/docs/overview
 """
 
@@ -58,9 +59,9 @@ if __name__ == '__main__':
     # response = ask_nlp(prompt) #commented out to save query time
     # print(response)
 
-    test_response = "Name,Growth Rate,Average Lifespan\n \
-Douglas Fir,Medium,500 years\n \
-Western Red Cedar,Medium,500 years\n \
+    test_response = "Name,Growth Rate,Average Lifespan\n\
+Douglas Fir,Medium,500 years\n\
+Western Red Cedar,Medium,500 years\n\
 Bigleaf Maple,Medium,100 years\n"
 
     foliage_file = make_valid_filename(location)
