@@ -52,9 +52,13 @@ def create_tree_constructor():
 def create_get_functions():
     attributes_list = get_attributes_from_csv(default_tree_chart)
     get_functions = ""
+    get_all_function = "\n\t" + create_function_definition("get_tree_info", "self") + "\t\treturn "
     for attribute in attributes_list:
         get_functions += "\n\t" + create_function_definition("get_" + attribute, "self")
         get_functions += "\t\treturn self." + attribute + "\n"
+        get_all_function += "self." + attribute + ", "
+
+    get_functions += get_all_function + "\n"
 
     return get_functions
 
@@ -79,7 +83,6 @@ if __name__ == '__main__':
     print("Attributes:", attributes_list)
 
     with open(tree_class_file_name, 'w') as file:
-        # Create header
         file.write(
             write_file()
         )

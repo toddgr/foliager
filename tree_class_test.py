@@ -19,3 +19,6 @@ class Tree:
 
 	def get_average_lifespan(self):
 		return self.average_lifespan
+
+	def get_tree_info(self):
+		return self.name, self.growth_rate, self.average_lifespan, 
