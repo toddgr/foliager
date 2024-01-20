@@ -27,6 +27,9 @@ def create_header():
 
 def get_attributes_from_csv(file_name):
     attributes = csv_file_to_list(file_name)
+    attributes = [element for sublist in attributes for element in sublist]
+    attributes = [s.lower() for s in attributes]
+    attributes = [s.replace(' ', '_') for s in attributes]
     return attributes
 
 
@@ -43,6 +46,7 @@ def create_tree_list_class():
 if __name__ == '__main__':
     attributes_list = get_attributes_from_csv('default_tree_chart.csv')
     print("Attributes:", attributes_list)
+    
     with open(tree_class_file_name, 'w') as file:
         # Create header
         file.write(
