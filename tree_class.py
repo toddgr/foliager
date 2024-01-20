@@ -7,7 +7,7 @@ Description: Tree class. Holds information on a given tree type, derives informa
 """
 
 class Tree:
-    def __init__(self, name):
+    def __init__(self, name, growth_rate, average_lifespan):
         self.name = name
         # Potential attributes:
         # Deciduous vs. coniferous
@@ -18,7 +18,9 @@ class Tree:
         # Flower Type and Structure
         # Fruit and seed characteristics
         # Growth rate (fast-growing, moderate-growing, slow-growing)
+        self.growth_rate = growth_rate
         # Lifespan
+        self.average_lifespan = average_lifespan
         # Climate tolerance
         # Soil preferences
         # Disease resistance

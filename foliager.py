@@ -14,6 +14,8 @@ import pandas as pd
 import time
 import re
 
+from parse_tree_input import parse_csv_file
+
 #from tree_class import parse_tree_file, Tree
 
 
@@ -62,5 +64,6 @@ if __name__ == '__main__':
         file.write(test_response)
         print("Writing to file ", foliage_file)
 
-    #foliage_list = parse_tree_file(foliage_file)
+    # Now to parse input into Tree and TreeList objects
+    foliage_list = parse_csv_file(foliage_file)
 
