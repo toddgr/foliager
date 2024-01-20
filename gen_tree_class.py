@@ -9,6 +9,7 @@ Description: Generates tree class and ensures that the tree class updates with n
 
 from datetime import datetime
 from parse_tree_input import csv_file_to_list
+
 tree_class_file_name = "tree_class_test.py"
 default_tree_chart = "default_tree_chart.csv"
 
@@ -18,7 +19,7 @@ def create_header():
     # Get today's date
     current_date = datetime.now().date()
     # Format the date as a string
-    date_string = current_date.strftime("%Y-%m-%d")
+    date_string = current_date.strftime("%B %d, %Y")
     todays_date = "Date: " + date_string + "\n"
     description = "Description: " + "Tree class. Holds information on a given tree type, derives information on each tree by parsing an input file.\n"
     
