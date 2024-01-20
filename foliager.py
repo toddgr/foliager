@@ -68,3 +68,4 @@ Bigleaf Maple,Medium,100 years\n"
     foliage_list = parse_csv_file(foliage_file)
     treelist = TreeList(foliage_list)
     print(treelist.get_tree_names())
+    print(treelist.get_all_tree_info())

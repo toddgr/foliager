@@ -27,6 +27,19 @@ class Tree:
         # Fall coloration (interesting)
         # Root system
         # Wood density and hardness
+        # Invasive/noninvasive to area
+    
+    def get_name(self):
+        return self.name
+    
+    def get_growth_rate(self):
+        return self.growth_rate
+    
+    def get_average_lifespan(self):
+        return self.average_lifespan
+    
+    def get_tree_info(self):
+        return self.name, self.growth_rate, self.average_lifespan
 
     
 class TreeList:
@@ -40,6 +53,13 @@ class TreeList:
         self.trees.append(tree)
 
     def get_tree_names(self):
-        # for tree in self.trees:
-        #     print(tree.name)
-        return [tree.name for tree in self.trees]
+        return [tree.get_name() for tree in self.trees]
+    
+    def get_tree_growth_rates(self):
+        return [[tree.get_name(), tree.get_growth_rate()] for tree in self.trees]
+    
+    def get_tree_average_lifespans(self):
+        return [[tree.get_name(), tree.get_average_lifespan()] for tree in self.trees]
+    
+    def get_all_tree_info(self):
+        return [tree.get_tree_info() for tree in self.trees]
