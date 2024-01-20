@@ -30,11 +30,16 @@ class Tree:
 
     
 class TreeList:
-    def __init__(self):
-        self.trees = []
+    def __init__(self, tree_list=None):
+        if tree_list is not None:
+            self.trees = tree_list
+        else:
+            self.trees = []
 
     def add_tree(self, tree):
         self.trees.append(tree)
 
     def get_tree_names(self):
+        # for tree in self.trees:
+        #     print(tree.name)
         return [tree.name for tree in self.trees]

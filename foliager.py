@@ -16,7 +16,7 @@ import re
 
 from parse_tree_input import parse_csv_file
 
-#from tree_class import parse_tree_file, Tree
+from tree_class import Tree, TreeList
 
 
 def ask_nlp(prompt, model="gpt-3.5-turbo"):
@@ -53,10 +53,10 @@ if __name__ == '__main__':
     # response = ask_nlp(prompt) #commented out to save query time
     # print(response)
 
-    test_response = "Name,              Growth Rate,    Average Lifespan\n \
-                    Douglas Fir,        Medium,         500 years\n \
-                    Western Red Cedar,  Medium,         500 years \
-                    Bigleaf Maple,      Medium,         100 years"
+    test_response = "Name,Growth Rate,Average Lifespan\n \
+Douglas Fir,Medium,500 years\n \
+Western Red Cedar,Medium,500 years\n \
+Bigleaf Maple,Medium,100 years\n"
     foliage_file = make_valid_filename(location)
 
     with open(foliage_file, 'w') as file:
@@ -66,4 +66,5 @@ if __name__ == '__main__':
 
     # Now to parse input into Tree and TreeList objects
     foliage_list = parse_csv_file(foliage_file)
-
+    treelist = TreeList(foliage_list)
+    print(treelist.get_tree_names())
