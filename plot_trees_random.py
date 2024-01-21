@@ -13,7 +13,7 @@ tree_names = treelist.get_tree_names()
 labels = np.random.choice(tree_names, num_points)  # Randomly select tree names
 
 # Define colors for each label
-label_colors = {label: plt.cm.get_cmap('viridis')(i / len(tree_names)) for i, label in enumerate(tree_names)}
+label_colors = {label: plt.colormaps.get_cmap('viridis')(i / len(tree_names)) for i, label in enumerate(tree_names)}
 
 # Create a scatter plot with colored points
 for label, color in label_colors.items():
