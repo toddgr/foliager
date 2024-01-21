@@ -44,7 +44,7 @@ def make_valid_filename(input_string):
 
 def generate_prompt():
     attributes = csv_file_to_string("default_tree_chart.csv")
-    prompt = "Give an unnumbered list of foliage types in CSV format that can be found in "
+    prompt = "Output an unnumbered list of foliage types in CSV format that can be found in "
     location = input("Enter the climate, city, or area:")
     prompt += location + " with the following attributes:" + attributes
     prompt += attributes
