@@ -72,7 +72,7 @@ Bigleaf Maple,Medium,100 years\n"
 
     # Now to parse input into Tree and TreeList objects
     #foliage_list = parse_csv_file(foliage_file)
-    foliage_list = parse_csv_file("Portland_Oregon_foliage.csv") #Name, Growth Rate, Average Lifespan
+    foliage_list = parse_csv_file("Test_Data/Portland_Oregon_foliage.csv") #Name, Growth Rate, Average Lifespan
     treelist = TreeList(foliage_list)
     print(treelist.get_tree_names())
     print(treelist.get_all_tree_info())

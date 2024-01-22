@@ -11,7 +11,7 @@ from datetime import datetime
 from parse_tree_input import csv_file_to_list
 
 tree_class_file_name = "tree_class.py"
-default_tree_chart = "default_tree_chart.csv"
+default_tree_chart = "Parameters/default_tree_chart.csv"
 
 def create_header():
     file_name = 'File name: ' + tree_class_file_name + '\n'
