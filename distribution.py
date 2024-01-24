@@ -22,6 +22,8 @@ max_soil_water = mystery
 t_max = mystery
 t_min = mystery
 
+ta = mystery
+
 
 def calculate_phys_mod():
     phys_mod = 1.
@@ -48,7 +50,7 @@ def calculate_temp_mod():
     # getting mean monthly temp from site data ie monthly max - monthly min / 2
     #ta = (monthdata[current_month].site_tmax + monthdata[current_month].site_tmin)/2.
     if ta > t_max and ta < t_min:
-
+        return
     pass
 
 #FORMULAS AND EQUATIONS
