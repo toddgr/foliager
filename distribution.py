@@ -19,6 +19,9 @@ E = mystery
 kd = mystery
 soil_water = mystery
 max_soil_water = mystery
+t_max = mystery
+t_min = mystery
+
 
 def calculate_phys_mod():
     phys_mod = 1.
@@ -36,13 +39,22 @@ def calculate_phys_mod():
     ftheta = 1./(1. + pow(base1, n_theta))
     
 def calculate_temp_mod():
-    # do this next
+    """ 
+    Temperature modifier: accounts for the effect of temperature on tree growth.
+    If the average of the month's maximum and minimum temperatures is outside of the
+    growth range for the species, the temperature mod is 0.
+    """
+    ft = 1.
+    # getting mean monthly temp from site data ie monthly max - monthly min / 2
+    #ta = (monthdata[current_month].site_tmax + monthdata[current_month].site_tmin)/2.
+    if ta > t_max and ta < t_min:
+
     pass
 
 #FORMULAS AND EQUATIONS
 
 phys_mod = calculate_phys_mod()    #accounts for the effects of age, vapor pressure deficit, and available soil water
-temp_mod = mystery
+temp_mod = calculate_temp_mod()
 frost_mod = mystery
 nutrient_mod = mystery
 maximum_potential_cqe = mystery
@@ -50,5 +62,7 @@ co2_mod = mystery
 
 cqe = (maximum_potential_cqe) * phys_mod * temp_mod * frost_mod * nutrient_mod * co2_mod
 par = mystery
+cr = mystery
 
 gpp = cqe * par     #gross primary production
+npp = gpp * cr
