@@ -68,6 +68,7 @@ Bigleaf Maple,Medium,100 years\n"
     # Write the NLP response to a csv file
     foliage_file = make_valid_filename(location)
     with open(foliage_file, 'w') as file:
+        file.write("Name,Growth Rate,Average Lifespan\n")
         file.write(response)
         print("Writing to file ", foliage_file)
 
@@ -79,3 +80,4 @@ Bigleaf Maple,Medium,100 years\n"
     # print(treelist.get_all_tree_info())
 
     # Now to plot these trees on a graph of size (1,1)
+    init_trees(foliage_file)

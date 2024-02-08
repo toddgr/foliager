@@ -3,13 +3,13 @@ import numpy as np
 from tree_class import TreeList
 from parse_tree_input import parse_csv_file
 
-def init_trees():
+def init_trees(foliage_file):
     # Generate random data
     np.random.seed(42)
     num_points = 100
     x_values = np.random.rand(num_points)
     y_values = np.random.rand(num_points)
-    treelist = TreeList(parse_csv_file("Test_Data/Portland_Oregon_foliage.csv"))  # Name, Growth Rate, Average Lifespan
+    treelist = TreeList(parse_csv_file(foliage_file))  # Name, Growth Rate, Average Lifespan
     tree_names = treelist.get_tree_names()
     labels = np.random.choice(tree_names, num_points)  # Randomly select tree names
 
