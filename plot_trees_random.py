@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from tree_class import TreeList
 from parse_tree_input import parse_csv_file
 
@@ -13,12 +14,20 @@ def init_trees(foliage_file):
     tree_names = treelist.get_tree_names()
     labels = np.random.choice(tree_names, num_points)  # Randomly select tree names
 
+    # Create a DataFrame to store the data
+    data = pd.DataFrame({'X': x_values, 'Y': y_values, 'Label': labels})
+
+    # Save the DataFrame to a CSV file
+    data.to_csv("scatter_plot_coordinates.csv", index=False)
+
+
     # Define colors for each label
     label_colors = {label: plt.colormaps.get_cmap('viridis')(i / len(tree_names)) for i, label in enumerate(tree_names)}
 
     # Create a scatter plot with colored points
     for label, color in label_colors.items():
         plt.scatter(x_values[labels == label], y_values[labels == label], label=label, color=color)
+
 
     # Add labels and title
     plt.title('Random Tree Placement')
