@@ -12,4 +12,7 @@ class SpeciesData:
             Reads in the CSV of the specific species data,
             and parses it into the class object.
             I don't think we really need anything more than that.
+
+            Actually... I'm going to have foliager generate a CSV of ALL 
+            the tree species info, then this will focus on one line at a time.
         """
