@@ -155,28 +155,27 @@ wsx1000 = MYSTERY # value of wsx when n = 1000
 nm = MYSTERY # exponent of self-thinning rule
 
 """
-    ================ MISC ============
+    ================ MISC ===============
 """
 cr = 0.47 # conversion ratio for making GPP into NPP
 
 """
-
-/************************** 3PG outputs ****************************/
-int n; /* trees per square hectare */
-float gpp; /* gross primary production */
-float npp; /* net primary production */
-float wf; /* foliage biomass (Mg/ha which is megagramme/hectare a megagramme is a tonne)*/
-float wr; /* root biomass (Mg/ha)*/
-float ws; /* stem biomass (Mg/ha)*/
-float par; /* absorbtion of photosynthetically active radiation */
-float mean_stem_mass; /* this comes from the mortality calculations?? i think?? */
-float live_crown_length; /* length of live portion of tree foliage */
-float crown_base_height; /* how far off ground does live crown start */
-float b; /* mean diameter at breast height, aka B or DBH (cm) */
-float h; /* mean total tree height, aka H (m)*/
-float hl; /* live crown length (m) */
-float k; /* crown diameter (m)*/
-float ba; /* basal area (m^2)*/
-float vs; /* stand volume (m^3/ha)*/
-float gac; /* proportion of ground area covered  by the canopy */
+    ==================== 3PG OUTPUTS ========================
 """
+n = MYSTERY # trees per square hectare
+gpp = MYSTERY # gross primary production
+npp = MYSTERY # net primary production
+wf = MYSTERY # foliage biomass (Mg/ha which is megagramme/hectare, a megagramme is a tonne)
+wr = MYSTERY # root biomass (Mg/ha)
+ws = MYSTERY # stem biomass (Mg/ha)
+par = MYSTERY # absorption of photosynthetically active radiation
+mean_stem_mass = MYSTERY # this comes from the mortality calculations? We think
+live_crown_length = MYSTERY # length of live portion of tree foliage
+crown_base_height = MYSTERY # how far off ground does the live crown start
+b = MYSTERY # mean diameter at breast height, aks B or DBH (cm)
+h = MYSTERY # mean total tree height, aka H (m)
+hl = MYSTERY # live crown length (m)
+k = MYSTERY # crown diameter (m)
+ba = MYSTERY # basal area (m^2)
+vs = MYSTERY # stand volume (m^3/ha)
+gac = MYSTERY # proportion of ground area covered by the canopy
