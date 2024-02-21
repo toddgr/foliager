@@ -1,7 +1,7 @@
 """
 File name: tree_class.py
 Author: Grace Todd
-Date: January 19, 2024
+Date: February 21, 2024
 Description: Tree class. Holds information on a given tree type, derives information on each tree by parsing an input file.
 """
 
