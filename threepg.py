@@ -7,6 +7,7 @@ Description: My attempt at converting 3-PG to Python so that I can use it in my 
 """
 
 import math # for log
+from threepg_species_data import parse_species_data
 
 # So I'm going to start out by using Allison's implementation of a tree struct for the sake of visualization. 
 # In the future, though, I'll integrate this with my own tree_class. I jsut don't know how different they will
@@ -47,7 +48,10 @@ n = 1200 # number of trees per square hectare
 # monthly climate data
 # month_data = [Month() for _ in range(13)]
 # init_month_data = [Month() for _ in range(13)]
-filename = MYSTERY # Need to create this
+climate_filename = MYSTERY # Need to create this
+speciesdata_filename = 'test_data/douglas_fir_species_data.csv'
+speciesdata_list = parse_species_data(speciesdata_filename)
+douglasfir = speciesdata_list[0] # Using Douglas fir as a starting pooint bc we know all the values
 month_data, init_month_data = read_climate_data(filename)
 
 # for modding sliders -- what else is this used for?
@@ -58,27 +62,27 @@ site_solar_rad_mod = 0.
 site_frost_days_mod = 0.
 
 # temperature- all in degrees C
-t_min = SPECIES_SPECIFIC # minimun monthly temperature for growth 
-t_opt = SPECIES_SPECIFIC # Optimum monthly temperature for growth 
-t_max = SPECIES_SPECIFIC # maximum monthly temperature for growth
+t_min = douglasfir.t_min # minimun monthly temperature for growth 
+t_opt = douglasfir.t_opt # Optimum monthly temperature for growth 
+t_max = douglasfir.t_max # maximum monthly temperature for growth
 
 # frost
-df = SPECIES_SPECIFIC # mean number of frost days per month 
-kf = SPECIES_SPECIFIC # number of days of production lost for each frost day
+df = douglasfir.df # mean number of frost days per month 
+kf = douglasfir.kf # number of days of production lost for each frost day
 
 # CO2 
-fcax_700 = SPECIES_SPECIFIC # This one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2"
+fcax_700 = douglasfir.fcax_700 # This one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2"
 co2 = 350 # Atmospheric CO2 (ppm) -- number from oregon values from random site, change later
 
 # VPD 
 d = 1. # mean daytime VPD --> SLIDER 0.5 - 2.
-kd = SPECIES_SPECIFIC # defines the stomatal response to VPD
+kd = douglasfir.kd # defines the stomatal response to VPD
 
 # Soil water mod, and other soil stuff
-soil_water = SPECIES_SPECIFIC # Available soil water
-max_soil_water = SPECIES_SPECIFIC # Maximum available soil water
-n_theta = SPECIES_SPECIFIC # "Power of moisture ration deficit" "differences in the relationship between transpiration rate and soil water content for different soil textures"
-c_theta = SPECIES_SPECIFIC # Moisture ration deficit for fq = 0.5
+soil_water = douglasfir.soil_water # Available soil water
+max_soil_water = douglasfir.max_soil_water # Maximum available soil water
+n_theta = douglasfir.n_theta # "Power of moisture ration deficit" "differences in the relationship between transpiration rate and soil water content for different soil textures"
+c_theta = douglasfir.c_theta # Moisture ration deficit for fq = 0.5
 
 
 """
@@ -100,7 +104,7 @@ init_sw = 200   # initiial available soil water
 #et = MYSTERY # evapotranspiration (mm/month).
 
 # general for GPP
-t = SPECIES_SPECIFIC # months since beginning of simulation
+t = 1 # months since beginning of simulation
 
 fr = 1 # fertility rating, ranges from 0 to 1
 
@@ -126,43 +130,45 @@ display_mode = 0 # cones vs textures. Probably won't use this but I'll keep for 
     Eventually, maybe I can automate this so that it reads in these values from a generated CSV, which then assigns it values in the program.
 """
 
-lec = SPECIES_SPECIFIC # a light extinction coefficient
 
-p2 = SPECIES_SPECIFIC # diameter at breast height at 2cm, used in partitioning ratios
-p20 = SPECIES_SPECIFIC # diameter at breast height at 20cm, used in partitioning ratios
 
-acx = SPECIES_SPECIFIC # species-specific max potential canopy quantum efficiency
+lec = douglasfir.lec # a light extinction coefficient
 
-sla_1 = SPECIES_SPECIFIC # SLA in older stands
-sla_0 = SPECIES_SPECIFIC # SLA in younger stands
-t_sla_mid = SPECIES_SPECIFIC # age where SLA = 0.5(sla_0-sla_1)
+p2 = douglasfir.p2 # diameter at breast height at 2cm, used in partitioning ratios
+p20 = douglasfir.p20 # diameter at breast height at 20cm, used in partitioning ratios
 
-fn0 = SPECIES_SPECIFIC # value of fN when FR = 0
-nfn = SPECIES_SPECIFIC # power of (1-FR) in fN
+acx = douglasfir.acx # species-specific max potential canopy quantum efficiency
 
-tc = SPECIES_SPECIFIC # age when canopy closes
+sla_1 = douglasfir.sla_1 # SLA in older stands
+sla_0 = douglasfir.sla_0 # SLA in younger stands
+t_sla_mid = douglasfir.t_sla_mid # age where SLA = 0.5(sla_0-sla_1)
 
-max_age = SPECIES_SPECIFIC # Max stand age, used in age mod
-r_age = SPECIES_SPECIFIC # relative age to give fage = 0.5
-n_age = SPECIES_SPECIFIC # power of relative age in f_age function
+fn0 = douglasfir.fn0 # value of fN when FR = 0
+nfn = douglasfir.nfn # power of (1-FR) in fN
+
+tc = douglasfir.tc # age when canopy closes
+
+max_age = douglasfir.max_age # Max stand age, used in age mod
+r_age = douglasfir.r_age # relative age to give fage = 0.5
+n_age = douglasfir.n_age # power of relative age in f_age function
 
 # Mean fractions of biomass per tree that is lost when a tree dies -- per pool
-mf = SPECIES_SPECIFIC
-mr = SPECIES_SPECIFIC
-ms = SPECIES_SPECIFIC
+mf = douglasfir.mf
+mr = douglasfir.mr
+ms = douglasfir.ms
 
 # Biomass
-yfx = SPECIES_SPECIFIC
-yf0 = SPECIES_SPECIFIC
-tyf = SPECIES_SPECIFIC
-yr = SPECIES_SPECIFIC # average monthly root turnover rate (1/month)
-nr_min = SPECIES_SPECIFIC # minimum root partitioning ratio
-nr_max = SPECIES_SPECIFIC # maximum root partitioning ratio
-m_0 = SPECIES_SPECIFIC # m on sites of poor fertility, eg. FR=0
+yfx = douglasfir.yfx
+yf0 = douglasfir.yf0
+tyf = douglasfir.tyf
+yr = douglasfir.yr # average monthly root turnover rate (1/month)
+nr_min = douglasfir.nr_min # minimum root partitioning ratio
+nr_max = douglasfir.nr_max # maximum root partitioning ratio
+m_0 = douglasfir.m_0 # m on sites of poor fertility, eg. FR=0
 
 # for mortality
-wsx1000 = SPECIES_SPECIFIC # value of wsx when n = 1000
-nm = SPECIES_SPECIFIC # exponent of self-thinning rule
+wsx1000 = douglasfir.wsx1000 # value of wsx when n = 1000
+nm = douglasfir.nm # exponent of self-thinning rule
 
 """
     ================ MISC ===============
