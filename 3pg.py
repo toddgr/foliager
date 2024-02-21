@@ -72,37 +72,32 @@ c_theta = MYSTERY # Moisture ration deficit for fq = 0.5
 
 
 """
-    ==================== SITE DATA ========================
+    ==================== STAND DATA ========================
+    This data is about the stand in question. This is largely decided by
+    the user of 3PG, as the point is to be able to use this program 
+    for whatever your tree stand is. 
 """
-"""
-/****************************STAND DATA**************************************/
-/* This data is about the stand in question. This is largely decided by
- * the user of 3PG, as the point is to be able to use this program 
- * for whatever your tree stand is. 
- */
-/* initial biomasses */
-/* all are in tonnes of dry mass per hectare, or tDM/ha */
-float init_wf;
-float init_wr;
-float init_ws;
 
-float init_b; /* initial DBH (cm)*/
-float init_sw; /* initial available soil water */
+# Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
+init_wf = MYSTERY
+init_wr = MYSTERY
+init_ws = MYSTERY
 
-float irr; /* irrigation (mm/month)*/
-float et; /* evapotranspiration (mm/month)*/
+init_b = MYSTERY # initial dbh
+init_sw = MYSTERY   # initiial available soil water
 
+irr = MYSTERY # irrigation (mm/month)
+et = MYSTERY # evapotranspiration (mm/month)
 
-/* general for gpp */
-int t; /* months since beginning of simulation */
+# general for GPP
+r = MYSTERY # months since beginning of simulation
 
-float fr; /* fertility rating, ranges from 0 to 1 */
+fr = MYSTERY # fertility rating, ranges from 0 to 1
 
-float age0; /* this is the stand's age in years at t = 0 */
-int start_month; /* this is the number of the month in which the simulation is beginning */
-int start_year; /* this is the year the simulation was begun. Used for prints only */
+age0 = MYSTERY # this is the stand's age in years at t = 0
+start_month = MYSTERY # this is the number of the month in which the simulation is beginning
+start_year = MYSTERY # this is the year the simulation was started. Used for prints only?
 
-int physmod_method; /* this denotes the method used to caluclate physmod. 0 = combo 1 = limiting */
-int agemod_method; /* 0 = agemod not used, 1 = agemod used */
-int display_mode; /* 0 = cones 1 = OBJ and textures */
-"""
+physmod_method = MYSTERY # this denotes the method used to calculate physmod. 0 = combo 1= limiting
+agemod_method = MYSTERY # 0 = agemod not used, 1 = agemod used
+display_mode = MYSTERY # cones vs textures. Probably won't use this but I'll keep for ref, for now.
