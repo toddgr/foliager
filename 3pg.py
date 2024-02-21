@@ -101,3 +101,82 @@ start_year = MYSTERY # this is the year the simulation was started. Used for pri
 physmod_method = MYSTERY # this denotes the method used to calculate physmod. 0 = combo 1= limiting
 agemod_method = MYSTERY # 0 = agemod not used, 1 = agemod used
 display_mode = MYSTERY # cones vs textures. Probably won't use this but I'll keep for ref, for now.
+
+
+"""
+    ==================== SPECIES DATA ========================
+    Original -- This data is all from Forrester et al. in press, and featured on the 3PDGmix.Data
+    Excel sheet. The data is refered to as 
+    Since this program deals specifically with Douglas Firs, this data will not change. 
+
+    So... these are the parameters that I either need to a) force the NLP to find data on,
+    or b) generalize for the purposes of the program. Also double check that these have constant values
+    and aren't computed based on something. I want to give the NLP as few things to look for as possible.
+
+    Eventually, maybe I can automate this so that it reads in these values from a generated CSV, which then assigns it values in the program.
+"""
+
+lec = MYSTERY # a light extinction coefficient
+
+p2 = MYSTERY # diameter at breast height at 2cm, used in partitioning ratios
+p20 = MYSTERY # diameter at breast height at 20cm, used in partitioning ratios
+
+acx = MYSTERY # species-specific max potential canopy quantum efficiency
+
+sla_1 = MYSTERY # SLA in older stands
+sla_0 = MYSTERY # SLA in younger stands
+t_sla_mid = MYSTERY # age where SLA = 0.5(sla_0-sla_1)
+
+fn0 = MYSTERY # value of fN when FR = 0
+nfn = MYSTERY # power of (1-FR) in fN
+
+tc = MYSTERY # age when canopy closes
+
+max_age = MYSTERY # Max stand age, used in age mod
+r_age = MYSTERY # relative age to give fage = 0.5
+n_age = MYSTERY # power of relative age in f_age function
+
+# Mean fractions of biomass per tree that is lost when a tree dies -- per pool
+mf = MYSTERY
+mr = MYSTERY
+ms = MYSTERY
+
+# Biomass
+yfx = MYSTERY
+yf0 = MYSTERY
+tyf = MYSTERY
+yr = MYSTERY # average monthly root turnover rate (1/month)
+nr_min = MYSTERY # minimum root partitioning ratio
+nr_max = MYSTERY # maximum root partitioning ratio
+m_0 = MYSTERY # m on sites of poor fertility, eg. FR=0
+
+# for mortality
+wsx1000 = MYSTERY # value of wsx when n = 1000
+nm = MYSTERY # exponent of self-thinning rule
+
+"""
+    ================ MISC ============
+"""
+cr = 0.47 # conversion ratio for making GPP into NPP
+
+"""
+
+/************************** 3PG outputs ****************************/
+int n; /* trees per square hectare */
+float gpp; /* gross primary production */
+float npp; /* net primary production */
+float wf; /* foliage biomass (Mg/ha which is megagramme/hectare a megagramme is a tonne)*/
+float wr; /* root biomass (Mg/ha)*/
+float ws; /* stem biomass (Mg/ha)*/
+float par; /* absorbtion of photosynthetically active radiation */
+float mean_stem_mass; /* this comes from the mortality calculations?? i think?? */
+float live_crown_length; /* length of live portion of tree foliage */
+float crown_base_height; /* how far off ground does live crown start */
+float b; /* mean diameter at breast height, aka B or DBH (cm) */
+float h; /* mean total tree height, aka H (m)*/
+float hl; /* live crown length (m) */
+float k; /* crown diameter (m)*/
+float ba; /* basal area (m^2)*/
+float vs; /* stand volume (m^3/ha)*/
+float gac; /* proportion of ground area covered  by the canopy */
+"""
