@@ -38,9 +38,11 @@ class Month:
     ==================== SITE DATA ========================
 """
 MYSTERY = None # Using MYSTERY to define variables that I don't know the value of yet.
+SPECIES_SPECIFIC = None # Don't want to hard code Douglas fir values for tree parameters
 E = 2.718
 PI = 3.1415
-t = MYSTERY # this is going to signify time
+d = 0.8
+n = 1200 # number of trees per square hectare
 
 # monthly climate data
 # month_data = [Month() for _ in range(13)]
@@ -56,27 +58,27 @@ site_solar_rad_mod = 0.
 site_frost_days_mod = 0.
 
 # temperature- all in degrees C
-t_min = MYSTERY # minimun monthly temperature for growth 
-t_opt = MYSTERY # Optimum monthly temperature for growth 
-t_max = MYSTERY # maximum monthly temperature for growth
+t_min = SPECIES_SPECIFIC # minimun monthly temperature for growth 
+t_opt = SPECIES_SPECIFIC # Optimum monthly temperature for growth 
+t_max = SPECIES_SPECIFIC # maximum monthly temperature for growth
 
 # frost
-df = MYSTERY # mean number of frost days per month 
-kf = MYSTERY # number of days of production lost for each frost day
+df = SPECIES_SPECIFIC # mean number of frost days per month 
+kf = SPECIES_SPECIFIC # number of days of production lost for each frost day
 
 # CO2 
-fcax_700 = MYSTERY # This one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2"
-co2 = MYSTERY # Atmospheric CO2 (ppm) -- number from oregon values from random site, change later
+fcax_700 = SPECIES_SPECIFIC # This one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2"
+co2 = 350 # Atmospheric CO2 (ppm) -- number from oregon values from random site, change later
 
 # VPD 
-d = MYSTERY # mean daytime VPD
-kd = MYSTERY # defines the stomatal response to VPD
+d = 1. # mean daytime VPD --> SLIDER 0.5 - 2.
+kd = SPECIES_SPECIFIC # defines the stomatal response to VPD
 
 # Soil water mod, and other soil stuff
-soil_water = MYSTERY # Available soil water
-max_soil_water = MYSTERY # Maximum available soil water
-n_theta = MYSTERY # "Power of moisture ration deficit" "differences in the relationship between transpiration rate and soil water content for different soil textures"
-c_theta = MYSTERY # Moisture ration deficit for fq = 0.5
+soil_water = SPECIES_SPECIFIC # Available soil water
+max_soil_water = SPECIES_SPECIFIC # Maximum available soil water
+n_theta = SPECIES_SPECIFIC # "Power of moisture ration deficit" "differences in the relationship between transpiration rate and soil water content for different soil textures"
+c_theta = SPECIES_SPECIFIC # Moisture ration deficit for fq = 0.5
 
 
 """
@@ -87,28 +89,28 @@ c_theta = MYSTERY # Moisture ration deficit for fq = 0.5
 """
 
 # Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
-init_wf = MYSTERY
-init_wr = MYSTERY
-init_ws = MYSTERY
+init_wf = 7.
+init_wr = 9.
+init_ws = 20.
 
-init_b = MYSTERY # initial dbh
-init_sw = MYSTERY   # initiial available soil water
+init_b = 18 # initial dbh
+init_sw = 200   # initiial available soil water
 
-irr = MYSTERY # irrigation (mm/month)
-et = MYSTERY # evapotranspiration (mm/month)
+#irr = MYSTERY # irrigation (mm/month).
+#et = MYSTERY # evapotranspiration (mm/month).
 
 # general for GPP
-r = MYSTERY # months since beginning of simulation
+t = SPECIES_SPECIFIC # months since beginning of simulation
 
-fr = MYSTERY # fertility rating, ranges from 0 to 1
+fr = 1 # fertility rating, ranges from 0 to 1
 
-age0 = MYSTERY # this is the stand's age in years at t = 0
-start_month = MYSTERY # this is the number of the month in which the simulation is beginning
-start_year = MYSTERY # this is the year the simulation was started. Used for prints only?
+age0 = 5 # this is the stand's age in years at t = 0
+start_month = 5 # this is the number of the month in which the simulation is beginning
+start_year = 2024 # this is the year the simulation was started. Used for prints only?
 
-physmod_method = MYSTERY # this denotes the method used to calculate physmod. 0 = combo 1= limiting
-agemod_method = MYSTERY # 0 = agemod not used, 1 = agemod used
-display_mode = MYSTERY # cones vs textures. Probably won't use this but I'll keep for ref, for now.
+physmod_method = 0 # this denotes the method used to calculate physmod. 0 = combo 1= limiting
+agemod_method = 0 # 0 = agemod not used, 1 = agemod used
+display_mode = 0 # cones vs textures. Probably won't use this but I'll keep for ref, for now.
 
 
 """
@@ -124,43 +126,43 @@ display_mode = MYSTERY # cones vs textures. Probably won't use this but I'll kee
     Eventually, maybe I can automate this so that it reads in these values from a generated CSV, which then assigns it values in the program.
 """
 
-lec = MYSTERY # a light extinction coefficient
+lec = SPECIES_SPECIFIC # a light extinction coefficient
 
-p2 = MYSTERY # diameter at breast height at 2cm, used in partitioning ratios
-p20 = MYSTERY # diameter at breast height at 20cm, used in partitioning ratios
+p2 = SPECIES_SPECIFIC # diameter at breast height at 2cm, used in partitioning ratios
+p20 = SPECIES_SPECIFIC # diameter at breast height at 20cm, used in partitioning ratios
 
-acx = MYSTERY # species-specific max potential canopy quantum efficiency
+acx = SPECIES_SPECIFIC # species-specific max potential canopy quantum efficiency
 
-sla_1 = MYSTERY # SLA in older stands
-sla_0 = MYSTERY # SLA in younger stands
-t_sla_mid = MYSTERY # age where SLA = 0.5(sla_0-sla_1)
+sla_1 = SPECIES_SPECIFIC # SLA in older stands
+sla_0 = SPECIES_SPECIFIC # SLA in younger stands
+t_sla_mid = SPECIES_SPECIFIC # age where SLA = 0.5(sla_0-sla_1)
 
-fn0 = MYSTERY # value of fN when FR = 0
-nfn = MYSTERY # power of (1-FR) in fN
+fn0 = SPECIES_SPECIFIC # value of fN when FR = 0
+nfn = SPECIES_SPECIFIC # power of (1-FR) in fN
 
-tc = MYSTERY # age when canopy closes
+tc = SPECIES_SPECIFIC # age when canopy closes
 
-max_age = MYSTERY # Max stand age, used in age mod
-r_age = MYSTERY # relative age to give fage = 0.5
-n_age = MYSTERY # power of relative age in f_age function
+max_age = SPECIES_SPECIFIC # Max stand age, used in age mod
+r_age = SPECIES_SPECIFIC # relative age to give fage = 0.5
+n_age = SPECIES_SPECIFIC # power of relative age in f_age function
 
 # Mean fractions of biomass per tree that is lost when a tree dies -- per pool
-mf = MYSTERY
-mr = MYSTERY
-ms = MYSTERY
+mf = SPECIES_SPECIFIC
+mr = SPECIES_SPECIFIC
+ms = SPECIES_SPECIFIC
 
 # Biomass
-yfx = MYSTERY
-yf0 = MYSTERY
-tyf = MYSTERY
-yr = MYSTERY # average monthly root turnover rate (1/month)
-nr_min = MYSTERY # minimum root partitioning ratio
-nr_max = MYSTERY # maximum root partitioning ratio
-m_0 = MYSTERY # m on sites of poor fertility, eg. FR=0
+yfx = SPECIES_SPECIFIC
+yf0 = SPECIES_SPECIFIC
+tyf = SPECIES_SPECIFIC
+yr = SPECIES_SPECIFIC # average monthly root turnover rate (1/month)
+nr_min = SPECIES_SPECIFIC # minimum root partitioning ratio
+nr_max = SPECIES_SPECIFIC # maximum root partitioning ratio
+m_0 = SPECIES_SPECIFIC # m on sites of poor fertility, eg. FR=0
 
 # for mortality
-wsx1000 = MYSTERY # value of wsx when n = 1000
-nm = MYSTERY # exponent of self-thinning rule
+wsx1000 = SPECIES_SPECIFIC # value of wsx when n = 1000
+nm = SPECIES_SPECIFIC # exponent of self-thinning rule
 
 """
     ================ MISC ===============
@@ -169,24 +171,24 @@ cr = 0.47 # conversion ratio for making GPP into NPP
 
 """
     ==================== 3PG OUTPUTS ========================
-"""
 n = MYSTERY # trees per square hectare
-gpp = MYSTERY # gross primary production
-npp = MYSTERY # net primary production
-wf = MYSTERY # foliage biomass (Mg/ha which is megagramme/hectare, a megagramme is a tonne)
-wr = MYSTERY # root biomass (Mg/ha)
-ws = MYSTERY # stem biomass (Mg/ha)
-par = MYSTERY # absorption of photosynthetically active radiation
-mean_stem_mass = MYSTERY # this comes from the mortality calculations? We think
-live_crown_length = MYSTERY # length of live portion of tree foliage
-crown_base_height = MYSTERY # how far off ground does the live crown start
+#gpp = MYSTERY # gross primary production
+#npp = MYSTERY # net primary production
+#wf = MYSTERY # foliage biomass (Mg/ha which is megagramme/hectare, a megagramme is a tonne)
+#wr = MYSTERY # root biomass (Mg/ha)
+#ws = MYSTERY # stem biomass (Mg/ha)
+#par = MYSTERY # absorption of photosynthetically active radiation
+#mean_stem_mass = MYSTERY # this comes from the mortality calculations? We think
+#live_crown_length = MYSTERY # length of live portion of tree foliage
+#crown_base_height = MYSTERY # how far off ground does the live crown start
 b = MYSTERY # mean diameter at breast height, aks B or DBH (cm)
-h = MYSTERY # mean total tree height, aka H (m)
+h = 8 # mean total tree height, aka H (m)
 hl = MYSTERY # live crown length (m)
-k = MYSTERY # crown diameter (m)
+k = SPECIES_SPECIFIC # crown diameter (m)
 ba = MYSTERY # basal area (m^2)
 vs = MYSTERY # stand volume (m^3/ha)
 gac = MYSTERY # proportion of ground area covered by the canopy
+"""
 
 def read_climate_data(filename):
     """
@@ -229,6 +231,8 @@ def read_climate_data(filename):
 def compute():
     """
         Computes the outputs for the 3PG algorithm
+        TODO: Change this so that it takes in a SpeciesData class object and applies the stuff to it? 
+        I think that the monthly site data can stay as a global variable
     """
     # values of biomass pools that will be used throughout the incremental calculations
     last_wf = init_wf
@@ -239,14 +243,11 @@ def compute():
 
     delta_n = 0 # number of trees that died last month
 
-    # t that will be used as an iterator throughout the incremental calculations
-    inc_t = MYSTERY
-
     # setting initial b from user input initial b so that it can be used to compute WF
     # Fix this so no user input?
     b = init_b
 
-    for inc_t in range(t+1):
+    for inc_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
         current_month = (start_month + inc_t) % 12
         if current_month == 0:
             current_month = 12
