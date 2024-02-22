@@ -21,7 +21,7 @@ def init_trees(foliage_file):
         plt.scatter(x_values[labels == label], y_values[labels == label], label=label, color=color)
 
     # Add labels and title
-    plt.title('Random Tree Placement')
+    plt.title('Initial Tree Placement')
 
     # Add legend
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
