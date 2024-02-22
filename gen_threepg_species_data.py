@@ -56,7 +56,8 @@ def generate_python_file(csv_file_path, output_file_path):
         output_file.write("    return species_data_list\n\n")
 
         output_file.write("# Example usage:\n")
-        output_file.write("species = parse_species_data(\"your_species_data.csv\")\n")
+        output_file.write("species_csv = \"test_data/douglas_fir_species_data.csv\"\n")
+        output_file.write(f"species = parse_species_data(species_csv)\n")
         output_file.write("for tree in species:\n")
         output_file.write("    tree.print_species_data()\n")
 

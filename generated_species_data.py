@@ -6,11 +6,10 @@ Description: Holds the SpeciesData class, which will be used to manipulate commo
 	for each of the species used in a simulation.
 """
 
-
 from parse_tree_input import csv_file_to_list
 
 class SpeciesData:
-    def __init__(self, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k):
+    def __init__(self, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
         """
         Initializes the SpeciesData class with the provided attributes.
         """
@@ -51,6 +50,21 @@ class SpeciesData:
         self.wsx1000 = wsx1000
         self.nm = nm
         self.k = k
+        self.aws = aws
+        self.nws = nws
+        self.ah = ah
+        self.nhb = nhb
+        self.nhc = nhc
+        self.ahl = ahl
+        self.nhlb = nhlb
+        self.nhlc = nhlc
+        self.ak = ak
+        self.nkb = nkb
+        self.nkh = nkh
+        self.av = av
+        self.nvb = nvb
+        self.nvh = nvh
+        self.nvbh = nvbh
 
     def print_species_data(self):
         """
@@ -70,6 +84,7 @@ def parse_species_data(file_path):
     return species_data_list
 
 # Example usage:
-species = parse_species_data("your_species_data.csv")
+species_csv = "test_data/douglas_fir_species_data.csv"
+species = parse_species_data(species_csv)
 for tree in species:
     tree.print_species_data()
