@@ -78,6 +78,8 @@ Bigleaf Maple,Medium,100 years\n"
         print(treelist.get_all_tree_info())
     else:
         # Use portland data
+        location = 'Portland Oregon'
+        coordinates_file = make_valid_filename(location + " coordinates")
         foliage_file = "Test_Data/Portland_Oregon_foliage.csv"
         foliage_list = parse_csv_file(foliage_file) #Name, Growth Rate, Average Lifespan
         treelist = TreeList(foliage_list)
@@ -85,4 +87,4 @@ Bigleaf Maple,Medium,100 years\n"
         print(treelist.get_all_tree_info())
 
     # Now to plot these trees on a graph of size (1,1)
-    init_trees(foliage_file)
+    init_trees(foliage_file, coordinates_file)
