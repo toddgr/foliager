@@ -451,3 +451,11 @@ def compute():
     wf = last_wf
     ws = last_ws
     wr = last_wr
+
+def init_trees():
+    # base this off of a combination of allison's code, as well as my random generation for scatter plots
+    # I have the code where it writes the coordinates to a csv file, but I didn't push it from my pc so we will have to wait
+    # take in the csv, parse each tree species collaection of coordinates, give the trees random height and breast height and stuff
+    # I migth not even want to take in the csv-- i might want to just take the proof of concept and 
+    # recreate it here
+    pass

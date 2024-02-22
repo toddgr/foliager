@@ -55,29 +55,34 @@ def generate_prompt():
     return prompt, location
 
 if __name__ == '__main__':
-
-    prompt, location = generate_prompt()
-    response = ask_nlp(prompt) #commented out to save query time
-    print(response)
-
+    asknlp = False
     test_response = "Name,Growth Rate,Average Lifespan\n\
 Douglas Fir,Medium,500 years\n\
 Western Red Cedar,Medium,500 years\n\
 Bigleaf Maple,Medium,100 years\n"
  
-    # Write the NLP response to a csv file
-    foliage_file = make_valid_filename(location)
-    with open(foliage_file, 'w') as file:
-        file.write("Name,Growth Rate,Average Lifespan\n")
-        file.write(response)
-        print("Writing to file ", foliage_file)
-
-    # Now to parse input into Tree and TreeList objects
-    #foliage_list = parse_csv_file(foliage_file)
-    # foliage_list = parse_csv_file("Test_Data/Portland_Oregon_foliage.csv") #Name, Growth Rate, Average Lifespan
-    # treelist = TreeList(foliage_list)
-    # print(treelist.get_tree_names())
-    # print(treelist.get_all_tree_info())
+    if asknlp: # If we want to generate new data --> usage is limited
+        prompt, location = generate_prompt()
+        response = ask_nlp(prompt) #commented out to save query time
+        print(response)
+        # Write the NLP response to a csv file
+        foliage_file = make_valid_filename(location)
+        with open(foliage_file, 'w') as file:
+            file.write("Name,Growth Rate,Average Lifespan\n")
+            file.write(response)
+            print("Writing to file ", foliage_file)
+            # Now to parse input into Tree and TreeList objects
+        foliage_list = parse_csv_file(foliage_file)
+        treelist = TreeList(foliage_list)
+        print(treelist.get_tree_names())
+        print(treelist.get_all_tree_info())
+    else:
+        # Use portland data
+        foliage_file = "Test_Data/Portland_Oregon_foliage.csv"
+        foliage_list = parse_csv_file(foliage_file) #Name, Growth Rate, Average Lifespan
+        treelist = TreeList(foliage_list)
+        print(treelist.get_tree_names())
+        print(treelist.get_all_tree_info())
 
     # Now to plot these trees on a graph of size (1,1)
     init_trees(foliage_file)
