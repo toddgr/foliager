@@ -57,10 +57,6 @@ def generate_prompt():
 if __name__ == '__main__':
     asknlp = False # If we want to generate new data --> usage is limited
     threepg = True # If we want to use 3PG
-    test_response = "Name,Growth Rate,Average Lifespan\n\
-Douglas Fir,Medium,500 years\n\
-Western Red Cedar,Medium,500 years\n\
-Bigleaf Maple,Medium,100 years\n"
  
     if asknlp: 
         prompt, location = generate_prompt()
