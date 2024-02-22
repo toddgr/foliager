@@ -1,27 +1,17 @@
 """
-File: 3pg.py
+File name: threepg_species_data.py
 Author: Grace Todd
 Date: February 21, 2024
 Description: Holds the SpeciesData class, which will be used to manipulate common parameters
-            for each of the species used in a simulation.
+	for each of the species used in a simulation.
 """
 
-import csv
 from parse_tree_input import csv_file_to_list
 
 class SpeciesData:
-    def __init__(self,t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta,\
-            lec, p2, p20, acx, sla_1, sla0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, \
-            ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k):
+    def __init__(self, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
         """
-            Reads in the CSV of the specific species data,
-            and parses it into the class object.
-            I don't think we really need anything more than that.
-
-            Actually... I'm going to have foliager generate a CSV of ALL 
-            the tree species info, then this will focus on one line at a time.
-            TODO Sort through these and add comments for what is what
-            TODO need to clean this up or automate generation for it or something, this is super delicate
+        Initializes the SpeciesData class with the provided attributes.
         """
         self.t_min = t_min
         self.t_opt = t_opt
@@ -60,27 +50,41 @@ class SpeciesData:
         self.wsx1000 = wsx1000
         self.nm = nm
         self.k = k
-    
+        self.aws = aws
+        self.nws = nws
+        self.ah = ah
+        self.nhb = nhb
+        self.nhc = nhc
+        self.ahl = ahl
+        self.nhlb = nhlb
+        self.nhlc = nhlc
+        self.ak = ak
+        self.nkb = nkb
+        self.nkh = nkh
+        self.av = av
+        self.nvb = nvb
+        self.nvh = nvh
+        self.nvbh = nvbh
+
     def print_species_data(self):
+        """
+        Prints all attributes of the SpeciesData instance.
+        """
         for attr, value in vars(self).items():
             print(f"{attr}: {value}")
-
 
 def parse_species_data(file_path):
     species_list = csv_file_to_list(file_path)
     species_data_list = []
 
     for tree_data in species_list:
-        species_data_input = []
-        for variable_value in tree_data:
-            species_data_input.append(variable_value)
-        species_instance = SpeciesData(*species_data_input)
+        species_instance = SpeciesData(*tree_data)
         species_data_list.append(species_instance)
 
     return species_data_list
 
-
-# test case
-species = parse_species_data("test_data/douglas_fir_species_data.csv")
+# Example usage:
+species_csv = "test_data/douglas_fir_species_data.csv"
+species = parse_species_data(species_csv)
 for tree in species:
     tree.print_species_data()

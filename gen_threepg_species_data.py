@@ -2,7 +2,7 @@ import csv
 from datetime import datetime
 from parse_tree_input import csv_file_to_list
 
-gen_file = "generated_species_data.py"
+gen_file = "threepg_species_data.py"
 csv_file = "Parameters/default_species_data.csv"
 
 def create_header():
