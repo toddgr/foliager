@@ -402,6 +402,7 @@ def compute():
         # These are all empirical parameters and are species-specific. They are only used here.
         # all values are from Forrester et al in press from Forrester's excel sheet unless otherwise noted.
         # aws and ans are from forrester et al
+        # TODO Add these to species_data_.csv
         aws = 0.082
         nws = 2.523
 
