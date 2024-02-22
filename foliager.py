@@ -94,3 +94,5 @@ if __name__ == '__main__':
 
     # Now to plot these trees on a graph of size (1,1)
     init_trees(foliage_file, coordinates_file)
+
+    
