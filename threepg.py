@@ -402,7 +402,7 @@ def compute():
         # These are all empirical parameters and are species-specific. They are only used here.
         # all values are from Forrester et al in press from Forrester's excel sheet unless otherwise noted.
         # aws and ans are from forrester et al
-        # TODO Add these to species_data_.csv
+        # TODO Reconfigure the file so that it's not douglasfir, it's whatever however many trees are in the species list
         aws = douglasfir.aws
         nws = douglasfir.nws
 
