@@ -403,25 +403,25 @@ def compute():
         # all values are from Forrester et al in press from Forrester's excel sheet unless otherwise noted.
         # aws and ans are from forrester et al
         # TODO Add these to species_data_.csv
-        aws = 0.082
-        nws = 2.523
+        aws = douglasfir.aws
+        nws = douglasfir.nws
 
-        ah = 46.09
-        nhb = 24.57
-        nhc = 0.00576
+        ah = douglasfir.ah
+        nhb = douglasfir.nhb
+        nhc = douglasfir.nhc
 
-        ahl = 21.18
-        nhlb = 24.73
-        nhlc = 0.002
+        ahl = douglasfir.ahl
+        nhlb = douglasfir.nhlb
+        nhlc = douglasfir.nhlc
 
-        ak = 0.65
-        nkb = 0.69
-        nkh = 0.
+        ak = douglasfir.ak
+        nkb = douglasfir.nkb
+        nkh = douglasfir.nkh
 
-        av = 0.000139
-        nvb = 2.04
-        nvh = 0.54
-        nvbh = 0.
+        av = douglasfir.av
+        nvb = douglasfir.nvb
+        nvh = douglasfir.nvh
+        nvbh = douglasfir.nvbh
 
         # calculaating b from mean individual stem mass (inversioon of A65 of user manual)
         iws = last_ws / n # individual stem mass
