@@ -35,21 +35,26 @@ import csv
 import matplotlib.pyplot as plt
 from tree_class import TreeList
 from parse_tree_input import parse_csv_file
+from threepg_species_data import SpeciesData, get_tree_names, parse_species_data
 
 def init_trees(foliage_file, output_csv_file):
     """
         Takes in a tree_chart csv, outputs a series of random tree placements to a CSV (name,x,y)
         Used for initial placement of trees to apply 3PG
     """
-    threepg = false # If true, use species data instead of Treelist. TODO make these the same class
+    threepg = True # If true, use species data instead of Treelist. TODO make these the same class
 
     # Generate random data
     np.random.seed(42)
     num_trees = 50
     x_values = np.random.rand(num_trees)
     y_values = np.random.rand(num_trees)
-    treelist = TreeList(parse_csv_file(foliage_file))  # Assuming TreeList and parse_csv_file functions are defined
-    tree_names = treelist.get_tree_names()
+    if threepg:
+        treelist = parse_species_data(foliage_file)
+        tree_names = get_tree_names(treelist)
+    else:
+        treelist = TreeList(parse_csv_file(foliage_file))
+        tree_names = treelist.get_tree_names()
     tree_name = np.random.choice(tree_names, num_trees)  # Randomly select tree names
 
     # Define colors for each label

@@ -9,10 +9,11 @@ Description: Holds the SpeciesData class, which will be used to manipulate commo
 from parse_tree_input import csv_file_to_list
 
 class SpeciesData:
-    def __init__(self, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
+    def __init__(self, name, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
         """
         Initializes the SpeciesData class with the provided attributes.
         """
+        self.name = name
         self.t_min = t_min
         self.t_opt = t_opt
         self.t_max = t_max
