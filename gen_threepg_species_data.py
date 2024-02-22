@@ -21,6 +21,17 @@ def create_header():
     header = '\"\"\"\n' + file_name + author + todays_date + description + '\"\"\"\n'
     return header
 
+def get_tree_names_function():
+    # Only if there is a names label in there, but there SHOULD BE
+    get_tree_names =  "def get_tree_names(species_data_list):\n"
+    get_tree_names += "\t# returns a list of the tree names found in the species data CSV.\n"
+    get_tree_names += "\ttree_names = []\n"
+    get_tree_names += "\tfor tree in species_data_list:\n"
+    get_tree_names += "\t\ttree_names.append(tree.name)\n"
+    get_tree_names += "\treturn tree_names\n\n"
+    return get_tree_names
+
+
 def generate_python_file(csv_file_path, output_file_path):
     with open(csv_file_path, 'r') as file:
         # Read the header to get the attribute names
@@ -44,6 +55,8 @@ def generate_python_file(csv_file_path, output_file_path):
         output_file.write("        \"\"\"\n")
         output_file.write("        for attr, value in vars(self).items():\n")
         output_file.write("            print(f\"{attr}: {value}\")\n\n")
+
+        output_file.write(get_tree_names_function())
 
         output_file.write("def parse_species_data(file_path):\n")
         output_file.write("    species_list = csv_file_to_list(file_path)\n")

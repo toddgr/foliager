@@ -73,6 +73,13 @@ class SpeciesData:
         for attr, value in vars(self).items():
             print(f"{attr}: {value}")
 
+def get_tree_names(species_data_list):
+	# returns a list of the tree names found in the species data CSV.
+	tree_names = []
+	for tree in species_data_list:
+		tree_names.append(tree.name)
+	return tree_names
+
 def parse_species_data(file_path):
     species_list = csv_file_to_list(file_path)
     species_data_list = []
