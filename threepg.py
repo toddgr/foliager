@@ -42,10 +42,7 @@ class Month:
 """
 MYSTERY = None # Using MYSTERY to define variables that I don't know the value of yet.
 SPECIES_SPECIFIC = None # Don't want to hard code Douglas fir values for tree parameters
-E = 2.718
-PI = 3.1415
-d = 0.8
-n = 1200 # number of trees per square hectare
+
 
 # monthly climate data
 # month_data = [Month() for _ in range(13)]
@@ -269,6 +266,10 @@ def compute(climatedata_filename, speciesdata_filename, t):
         TODO: Change this so that it takes in a SpeciesData class object and applies the stuff to it? 
         I think that the monthly site data can stay as a global variable
     """
+    E = 2.718
+    PI = 3.1415
+    d = 0.8
+    n = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
     douglasfir = speciesdata_list[0] # Using Douglas fir as a starting pooint bc we know all the values
 

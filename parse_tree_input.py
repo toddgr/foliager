@@ -79,15 +79,9 @@ def csv_file_to_float_list(file_path):
             # Exclude lines starting with a comment character (e.g., #)
             if not row or row[0].startswith("#"):
                 continue
-            # Convert each element in the row to float
-            #new_row = [row[0], float(element) for element in row[1:]]
-            #new_row.append(float(element) for element in row[1:])
-            #float_row = [float(element) for element in row[1:]]
 
-            # Convert all elements in the row to float, excluding the first one
-            float_row = [row[0]] + [float(element) for element in row[1:]]
-            attribute_list.append(float_row)
-            #attribute_list.append(new_row)
-    print("attribute_list:", attribute_list)
+            # Convert all elements in the row to float, excluding the first one (first element is species name, string)
+            data_row = [row[0]] + [float(element) for element in row[1:]]
+            attribute_list.append(data_row)
     return attribute_list
 
