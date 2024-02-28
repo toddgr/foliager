@@ -427,7 +427,7 @@ def compute(climatedata_filename, speciesdata_filename, t):
         nvh = douglasfir.nvh
         nvbh = douglasfir.nvbh
 
-        # calculaating b from mean individual stem mass (inversioon of A65 of user manual)
+        # calculating b from mean individual stem mass (inversioon of A65 of user manual)
         iws = last_ws / n # individual stem mass
         b = pow(iws/aws, (1.0/nws)) *100
 
