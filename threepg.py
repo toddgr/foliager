@@ -465,5 +465,5 @@ def compute(climatedata_filename, speciesdata_filename, t):
 #     pass
 
 if __name__ =='__main__':
-    compute()
+    compute(climatedata_filename, speciesdata_filename, t)
     init_trees()
