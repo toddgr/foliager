@@ -9,6 +9,7 @@ Description: My attempt at converting 3-PG to Python so that I can use it in my 
 import math # for log
 from threepg_species_data import parse_species_data
 from plot_trees_random import init_trees
+import csv
 
 # So I'm going to start out by using Allison's implementation of a tree struct for the sake of visualization. 
 # In the future, though, I'll integrate this with my own tree_class. I jsut don't know how different they will
@@ -34,7 +35,7 @@ class Month:
         self.tmin = site_tmin   # Average minimum temperature for the month
         self.rain = site_rain   # Average rainfall for the month
         self.solar_rad = site_solar_rad # Average solar radiation for the month
-        self.forst_days = site_frost_days   # Average number of frost days for the month
+        self.frost_days = site_frost_days   # Average number of frost days for the month
 
 """
     ==================== SITE DATA ========================
@@ -195,7 +196,7 @@ vs = MYSTERY # stand volume (m^3/ha)
 gac = MYSTERY # proportion of ground area covered by the canopy
 """
 
-def read_climate_data(filename):
+def read_climate_data_original(filename):
     """
         Reads in a CSV file that contains data on the monthdata
     """
@@ -222,9 +223,36 @@ def read_climate_data(filename):
                 site_solar_rad=month_data[i].site_solar_rad,
                 site_frost_days=month_data[i].site_frost_days
             ))
-
+            print(i)
             i += 1
 
+    return month_data, init_month_data
+
+def read_climate_data(file_path):
+    # Parses a CSV file output from NLP into Tree and TreeList objects
+    # Needs to be updated as more attributes for trees are included
+    month_data = []  # Assuming monthdata is a list of objects with attributes site_tmax, site_tmin, etc.
+    init_month_data = []  # Assuming initmonthdata is also a list of objects with similar attributes
+
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file)
+        i = 0
+        for row in reader:
+            month_data.append(Month(
+                site_tmax = row['tmax'],
+                site_tmin = row['tmin'],
+                site_rain = row['rain'],
+                site_solar_rad = row['solar_rad'],
+                site_frost_days = row['frost_days']
+            ))
+            init_month_data.append(Month(
+                site_tmax=month_data[i].tmax,
+                site_tmin=month_data[i].tmin,
+                site_rain=month_data[i].rain,
+                site_solar_rad=month_data[i].solar_rad,
+                site_frost_days=month_data[i].frost_days,
+            ))
+            i = i + 1
     return month_data, init_month_data
 
 """
@@ -465,5 +493,6 @@ def compute(climatedata_filename, speciesdata_filename, t):
 #     pass
 
 if __name__ =='__main__':
-    compute(climatedata_filename, speciesdata_filename, t)
-    init_trees()
+    # compute(climatedata_filename, speciesdata_filename, t)
+    # init_trees()
+    pass
