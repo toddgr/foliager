@@ -15,6 +15,7 @@ def init_trees(foliage_file):
     labels = np.random.choice(tree_names, num_points)  # Randomly select tree names
 
     # Create a DataFrame to store the data
+    # Could also initialize breast height and height and stuff here too, perhaps
     data = pd.DataFrame({'X': x_values, 'Y': y_values, 'Label': labels})
 
     # Save the DataFrame to a CSV file
