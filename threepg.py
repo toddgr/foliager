@@ -486,6 +486,10 @@ def compute(climatedata_filename, speciesdata_filename, t):
     ws = last_ws
     wr = last_wr
 
+    print("COMPUTING AT T=", t)
+    print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
+    print(f"Live crown length: {hl}\ncrown diameter: {k}\nbasal area: {ba}\nstand volume: {vs}")
+
 # def init_trees():
 #     # base this off of a combination of allison's code, as well as my random generation for scatter plots
 #     # I have the code where it writes the coordinates to a csv file, but I didn't push it from my pc so we will have to wait

@@ -62,5 +62,6 @@ if __name__ == '__main__':
     #speciesdata_list = parse_species_data(speciesdata_filename)
 
     # ========== TEST 3-PG COMPUTE FUNCTION ===========
-    compute(climatedata_filename, speciesdata_filename, t=1)
+    for i in range(5):
+        compute(climatedata_filename, speciesdata_filename, i)
     pass
