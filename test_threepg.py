@@ -30,16 +30,12 @@ climatedata_filename = 'test_data/sample_climate_data.csv'  # Create this
 
         // temperature-- all in degrees C
         -- float ta -- mean monthly temperature -> shouldn't need anymore (C code)
-        t_min -> minimum monthly temperature for growth
-        t_opt -> optimum monthly temperature for growth */
-        t_max -> maximum monthly temperature for growth */
 
         // frost */
         df -> mean number of frost days per month */
         kf -> number of days of production lost for each frost day */
 
         // CO2 */
-        fcax_700 -> this one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2" */
         co2 -> atmospheric CO2 (ppm) -- number from oregon values from random site, change later */
 
         /* VPD */
