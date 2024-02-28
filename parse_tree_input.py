@@ -69,3 +69,25 @@ def csv_file_to_list(file_path):
                 continue
             attribute_list.append(row)
     return attribute_list
+
+def csv_file_to_float_list(file_path):
+    # specifically for reading CSVs that contain floats, not strings
+    attribute_list = []
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            # Exclude lines starting with a comment character (e.g., #)
+            if not row or row[0].startswith("#"):
+                continue
+            # Convert each element in the row to float
+            #new_row = [row[0], float(element) for element in row[1:]]
+            #new_row.append(float(element) for element in row[1:])
+            #float_row = [float(element) for element in row[1:]]
+
+            # Convert all elements in the row to float, excluding the first one
+            float_row = [row[0]] + [float(element) for element in row[1:]]
+            attribute_list.append(float_row)
+            #attribute_list.append(new_row)
+    print("attribute_list:", attribute_list)
+    return attribute_list
+

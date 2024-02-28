@@ -6,7 +6,7 @@ Description: Holds the SpeciesData class, which will be used to manipulate commo
 	for each of the species used in a simulation.
 """
 
-from parse_tree_input import csv_file_to_list
+from parse_tree_input import csv_file_to_float_list
 
 class SpeciesData:
     def __init__(self, name, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla_0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
@@ -82,7 +82,7 @@ def get_tree_names(species_data_list):
 	return tree_names
 
 def parse_species_data(file_path):
-    species_list = csv_file_to_list(file_path)
+    species_list = csv_file_to_float_list(file_path)
     species_data_list = []
 
     for tree_data in species_list:

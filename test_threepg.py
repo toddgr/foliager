@@ -7,7 +7,7 @@ Description: This file tests out the 3-PG implementation in threepg.py using Dou
              are actually growing/dying how I expect them to be.
 """
 
-from threepg import read_climate_data
+from threepg import read_climate_data, parse_species_data, compute
 #from plot_trees_random import init_trees
 
 speciesdata_filename = 'test_data/douglas_fir_species_data.csv'
@@ -50,10 +50,16 @@ climatedata_filename = 'test_data/douglas_fir_climate_data.csv'
 """
 
 if __name__ == '__main__':
-    # CLIMATE DATA READS CORRECTLY
-    monthdata, initmonthdata = read_climate_data('test_data/douglas_fir_climate_data.csv')
+    # ============ CLIMATE DATA READS CORRECTLY =============
+    #monthdata, initmonthdata = read_climate_data('test_data/douglas_fir_climate_data.csv')
     #tmax,tmin,rain,solar_rad,frost_days
     # for i in range(len(monthdata)):
     #     print(f"MONTHDATA[{i}]: ", monthdata[i].tmax, monthdata[i].tmin, monthdata[i].rain, monthdata[i].solar_rad, monthdata[i].frost_days)
     #     #print("INITMONTHDATA: ", initmonthdata.tmax,tmin,)
+    
+    #=============== PARSE SPECIES READS CORRECTLY =================
+    speciesdata_list = parse_species_data(speciesdata_filename)
+
+    # ========== TEST 3-PG COMPUTE FUNCTION ===========
+    #compute(climatedata_filename, speciesdata_filename, t=1)
     pass

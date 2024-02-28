@@ -50,7 +50,7 @@ n = 1200 # number of trees per square hectare
 # monthly climate data
 # month_data = [Month() for _ in range(13)]
 # init_month_data = [Month() for _ in range(13)]
-climatedata_filename = 'test_data/sample_climate_data.csv' 
+climatedata_filename = 'test_data/douglas_fir_climate_data.csv'
 speciesdata_filename = 'test_data/douglas_fir_species_data.csv'
 speciesdata_list = parse_species_data(speciesdata_filename)
 douglasfir = speciesdata_list[0] # Using Douglas fir as a starting pooint bc we know all the values
@@ -229,8 +229,9 @@ def read_climate_data_original(filename):
     return month_data, init_month_data
 
 def read_climate_data(file_path):
-    # Parses a CSV file output from NLP into Tree and TreeList objects
-    # Needs to be updated as more attributes for trees are included
+    """
+        Reads in a CSV file that contains data on the monthdata
+    """
     month_data = []  # Assuming monthdata is a list of objects with attributes site_tmax, site_tmin, etc.
     init_month_data = []  # Assuming initmonthdata is also a list of objects with similar attributes
 
@@ -239,11 +240,11 @@ def read_climate_data(file_path):
         i = 0
         for row in reader:
             month_data.append(Month(
-                site_tmax = row['tmax'],
-                site_tmin = row['tmin'],
-                site_rain = row['rain'],
-                site_solar_rad = row['solar_rad'],
-                site_frost_days = row['frost_days']
+                site_tmax = float(row['tmax']),
+                site_tmin = float(row['tmin']),
+                site_rain = float(row['rain']),
+                site_solar_rad = float(row['solar_rad']),
+                site_frost_days = float(row['frost_days'])
             ))
             init_month_data.append(Month(
                 site_tmax=month_data[i].tmax,
