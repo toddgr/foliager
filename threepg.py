@@ -8,6 +8,7 @@ Description: My attempt at converting 3-PG to Python so that I can use it in my 
 
 import math # for log
 from threepg_species_data import parse_species_data
+from plot_trees_random import init_trees
 
 # So I'm going to start out by using Allison's implementation of a tree struct for the sake of visualization. 
 # In the future, though, I'll integrate this with my own tree_class. I jsut don't know how different they will
@@ -48,11 +49,11 @@ n = 1200 # number of trees per square hectare
 # monthly climate data
 # month_data = [Month() for _ in range(13)]
 # init_month_data = [Month() for _ in range(13)]
-climate_filename = MYSTERY # Need to create this
+climatedata_filename = 'test_data/sample_climate_data.csv' 
 speciesdata_filename = 'test_data/douglas_fir_species_data.csv'
 speciesdata_list = parse_species_data(speciesdata_filename)
 douglasfir = speciesdata_list[0] # Using Douglas fir as a starting pooint bc we know all the values
-month_data, init_month_data = read_climate_data(filename)
+# month_data, init_month_data = read_climate_data(filename)
 
 # for modding sliders -- what else is this used for?
 site_tmax_mod = 0.
@@ -104,8 +105,6 @@ init_sw = 200   # initiial available soil water
 #et = MYSTERY # evapotranspiration (mm/month).
 
 # general for GPP
-t = 1 # months since beginning of simulation
-
 fr = 1 # fertility rating, ranges from 0 to 1
 
 age0 = 5 # this is the stand's age in years at t = 0
@@ -200,8 +199,8 @@ def read_climate_data(filename):
     """
         Reads in a CSV file that contains data on the monthdata
     """
-    monthdata = []  # Assuming monthdata is a list of objects with attributes site_tmax, site_tmin, etc.
-    initmonthdata = []  # Assuming initmonthdata is also a list of objects with similar attributes
+    month_data = []  # Assuming monthdata is a list of objects with attributes site_tmax, site_tmin, etc.
+    init_month_data = []  # Assuming initmonthdata is also a list of objects with similar attributes
 
     with open(filename, 'r') as fp:
         i = 1
@@ -217,16 +216,16 @@ def read_climate_data(filename):
             ))
 
             init_month_data.append(Month(
-                site_tmax=monthdata[i].site_tmax,
-                site_tmin=monthdata[i].site_tmin,
-                site_rain=monthdata[i].site_rain,
-                site_solar_rad=monthdata[i].site_solar_rad,
-                site_frost_days=monthdata[i].site_frost_days
+                site_tmax=month_data[i].site_tmax,
+                site_tmin=month_data[i].site_tmin,
+                site_rain=month_data[i].site_rain,
+                site_solar_rad=month_data[i].site_solar_rad,
+                site_frost_days=month_data[i].site_frost_days
             ))
 
             i += 1
 
-    return monthdata, initmonthdata
+    return month_data, init_month_data
 
 """
     ================= COMPUTE THE OUTPUTS ====================
@@ -234,12 +233,17 @@ def read_climate_data(filename):
     We're basically just assigning and calculating values for all of the globals that we defined above. 
     Now that I think of it... breaking this up might help to optimize the proces. Maybe.
 """
-def compute():
+def compute(climatedata_filename, speciesdata_filename, t):
     """
+        Takes in climate data, species data, time in months since beginning of simulation
         Computes the outputs for the 3PG algorithm
         TODO: Change this so that it takes in a SpeciesData class object and applies the stuff to it? 
         I think that the monthly site data can stay as a global variable
     """
+    speciesdata_list = parse_species_data(speciesdata_filename)
+    douglasfir = speciesdata_list[0] # Using Douglas fir as a starting pooint bc we know all the values
+
+    month_data, init_month_data = read_climate_data(climatedata_filename)
     # values of biomass pools that will be used throughout the incremental calculations
     last_wf = init_wf
     last_ws = init_ws
@@ -452,10 +456,14 @@ def compute():
     ws = last_ws
     wr = last_wr
 
-def init_trees():
-    # base this off of a combination of allison's code, as well as my random generation for scatter plots
-    # I have the code where it writes the coordinates to a csv file, but I didn't push it from my pc so we will have to wait
-    # take in the csv, parse each tree species collaection of coordinates, give the trees random height and breast height and stuff
-    # I migth not even want to take in the csv-- i might want to just take the proof of concept and 
-    # recreate it here
-    pass
+# def init_trees():
+#     # base this off of a combination of allison's code, as well as my random generation for scatter plots
+#     # I have the code where it writes the coordinates to a csv file, but I didn't push it from my pc so we will have to wait
+#     # take in the csv, parse each tree species collaection of coordinates, give the trees random height and breast height and stuff
+#     # I migth not even want to take in the csv-- i might want to just take the proof of concept and 
+#     # recreate it here
+#     pass
+
+if __name__ =='__main__':
+    compute()
+    init_trees()
