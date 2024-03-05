@@ -271,224 +271,225 @@ def compute(climatedata_filename, speciesdata_filename, t):
     d = 0.8
     n = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
-    douglasfir = speciesdata_list[0] # Using Douglas fir as a starting pooint bc we know all the values
+    for species in speciesdata_list:
 
-    month_data, init_month_data = read_climate_data(climatedata_filename)
-    # values of biomass pools that will be used throughout the incremental calculations
-    last_wf = init_wf
-    last_ws = init_ws
-    last_wr = init_wr
+        month_data, init_month_data = read_climate_data(climatedata_filename)
+        # values of biomass pools that will be used throughout the incremental calculations
+        last_wf = init_wf
+        last_ws = init_ws
+        last_wr = init_wr
 
-    last_sw = init_sw
+        last_sw = init_sw
 
-    delta_n = 0 # number of trees that died last month
+        delta_n = 0 # number of trees that died last month
 
-    # setting initial b from user input initial b so that it can be used to compute WF
-    # Fix this so no user input?
-    b = init_b
+        # setting initial b from user input initial b so that it can be used to compute WF
+        # Fix this so no user input?
+        b = init_b
 
-    for inc_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
-        current_month = (start_month + inc_t) % 12
-        if current_month == 0:
-            current_month = 12
+        for inc_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
+            current_month = (start_month + inc_t) % 12
+            if current_month == 0:
+                current_month = 12
 
-        # compute the PAR/aC mods
-        # temperature mod
-        ft = 1.
-        ta = (month_data[current_month].tmax + month_data[current_month].tmin)/2. # getting mean monthly temp from site data
-        if (ta > t_max) or (ta < t_min):
-            # outside of growth range -> 0
-            ft = 0.
-        else:
-            # inside of growth range
-            base = (ta - t_min / (t_opt - t_min) * (t_max - ta)/(t_max - t_opt))
-            exp = (t_max - t_opt)/(t_opt - t_min)
-            ft = pow(base, exp)
+            # compute the PAR/aC mods
+            # temperature mod
+            ft = 1.
+            ta = (month_data[current_month].tmax + month_data[current_month].tmin)/2. # getting mean monthly temp from site data
+            if (ta > t_max) or (ta < t_min):
+                # outside of growth range -> 0
+                ft = 0.
+            else:
+                # inside of growth range
+                base = (ta - t_min / (t_opt - t_min) * (t_max - ta)/(t_max - t_opt))
+                exp = (t_max - t_opt)/(t_opt - t_min)
+                ft = pow(base, exp)
 
-        # frost mod
-        df = month_data[current_month].frost_days
-        ff = 1. - kf * (df/30.)
+            # frost mod
+            df = month_data[current_month].frost_days
+            ff = 1. - kf * (df/30.)
 
-        # nutrition mod
-        fn = 1. - (1. - fn0) * pow((1. - fr), nfn)
+            # nutrition mod
+            fn = 1. - (1. - fn0) * pow((1. - fr), nfn)
 
-        # C02 mod
-        fc = 1.
-        fcax = fcax_700/(2. - fcax_700) # we're not exactly sure that this does
-        fc = fcax * co2/(350. * (fcax - 1.) + co2)
+            # C02 mod
+            fc = 1.
+            fcax = fcax_700/(2. - fcax_700) # we're not exactly sure that this does
+            fc = fcax * co2/(350. * (fcax - 1.) + co2)
 
-        # phys mod stuff --> made from a combo of fd, ftheta, and age mod that can be changed in glui
-        # TODO change this so that it can't be modified from the GLUI
-        # vapor pressure deficit (VPD) mod
-        fd = pow(E, (-kd * d))
+            # phys mod stuff --> made from a combo of fd, ftheta, and age mod that can be changed in glui
+            # TODO change this so that it can't be modified from the GLUI
+            # vapor pressure deficit (VPD) mod
+            fd = pow(E, (-kd * d))
 
-        # soil water mod
-        base1 = ((1. - soil_water)/max_soil_water)/c_theta
-        ftheta = 1./(1. + pow(base1, n_theta))
+            # soil water mod
+            base1 = ((1. - soil_water)/max_soil_water)/c_theta
+            ftheta = 1./(1. + pow(base1, n_theta))
 
-        # age mod --> used if denoted in glui
-        # TODO maybe just not use this?
-        fa = 1.
-        if agemod_method:
-            age_base = ((age0 + (inc_t / 12.))/max_age)/r_age
-            fa = 1. / (1. + pow(age_base, n_age))
+            # age mod --> used if denoted in glui
+            # TODO maybe just not use this?
+            fa = 1.
+            if agemod_method:
+                age_base = ((age0 + (inc_t / 12.))/max_age)/r_age
+                fa = 1. / (1. + pow(age_base, n_age))
+            
+            # calculating phys mod
+            physmod = 1.
+            if physmod_method:
+                # limiting physmod, uses only most limiting of vpd and soil water mods
+                lim = fd if fd <= ftheta else ftheta
+                physmod = fa * lim
+            else:
+                # combo physmod, both vpd and soil water mods influence physmods
+                physmod = fa * fd * ftheta
+            
+            # SLA -- specific leaf area
+            exp1 = pow(((age0 * 12.) + inc_t)/t_sla_mid, 2.)
+            sla = sla_1 + (sla_0 - sla_1) * pow(E, (-1 * math.log(2.) * exp1))
+
+            # leaf area index (m^2 / m^2)
+            l = 0.1 * sla * last_wf
+
+            # GAC --> percentage of ground area covered by canopy
+            if age0 + inc_t / 12 <tc:
+                gac = (age0 + inc_t / 12) / tc
+            else:
+                gac = 1.
+            
+            # light absorption --> absorption photosynthetically active radiation (PAR)
+            # Often called o/pa
+            e_exp = (-lec * l)/gac
+            par = (1. - pow(E, e_exp)) * 2.3 * gac * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
         
-        # calculating phys mod
-        physmod = 1.
-        if physmod_method:
-            # limiting physmod, uses only most limiting of vpd and soil water mods
-            lim = fd if fd <= ftheta else ftheta
-            physmod = fa * lim
-        else:
-            # combo physmod, both vpd and soil water mods influence physmods
-            physmod = fa * fd * ftheta
-        
-        # SLA -- specific leaf area
-        exp1 = pow(((age0 * 12.) + inc_t)/t_sla_mid, 2.)
-        sla = sla_1 + (sla_0 - sla_1) * pow(E, (-1 * math.log(2.) * exp1))
+            # Computing GPP and NPP
+            gpp = ft * ff * fn * fc * physmod * acx * par
+            npp = gpp * cr
 
-        # leaf area index (m^2 / m^2)
-        l = 0.1 * sla * last_wf
+            # Partitioning ratios
+            # computing m --> linear function of FR (fertility rating)
+            m = m_0 + ((1. - m_0) * fr)
 
-        # GAC --> percentage of ground area covered by canopy
-        if age0 + inc_t / 12 <tc:
-            gac = (age0 + inc_t / 12) / tc
-        else:
-            gac = 1.
-        
-        # light absorption --> absorption photosynthetically active radiation (PAR)
-        # Often called o/pa
-        e_exp = (-lec * l)/gac
-        par = (1. - pow(E, e_exp)) * 2.3 * gac * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
-    
-        # Computing GPP and NPP
-        gpp = ft * ff * fn * fc * physmod * acx * par
-        npp = gpp * cr
+            # computing the root partitioning ratio
+            nr = (nr_min * nr_max) / (nr_min + ((nr_max - nr_min) * m * physmod))
 
-        # Partitioning ratios
-        # computing m --> linear function of FR (fertility rating)
-        m = m_0 + ((1. - m_0) * fr)
+            # computing np and ap, which are used to calculate pfs
+            np = (math.log(p20/p2))/math.log(10.) # equation A29
+            ap = p2/(pow(2., np)) # equation A29
 
-        # computing the root partitioning ratio
-        nr = (nr_min * nr_max) / (nr_min + ((nr_max - nr_min) * m * physmod))
+            # computing pfs
+            pfs = ap * pow(b, np)
 
-        # computing np and ap, which are used to calculate pfs
-        np = (math.log(p20/p2))/math.log(10.) # equation A29
-        ap = p2/(pow(2., np)) # equation A29
+            # getting remaining partitioning ratios
+            nf = (pfs * (1. - nr))/(1. + pfs)
+            ns = (1. - nr)/(1. + pfs)
 
-        # computing pfs
-        pfs = ap * pow(b, np)
+            # mortality
+            # max individual tree stem mass (wsx)
+            wsx = wsx1000 * pow((1000.0/n), nm)
 
-        # getting remaining partitioning ratios
-        nf = (pfs * (1. - nr))/(1. + pfs)
-        ns = (1. - nr)/(1. + pfs)
+            # seeing if we nee to thin
+            while last_ws / n > wsx:
+                # need to thin
+                n -= 1  # decreasing n
+                delta_n += 1 # increasing delta_n counter
+                wsx = wsx1000 * pow((1000.0/n), nm) # recalculating wsx
 
-        # mortality
-        # max individual tree stem mass (wsx)
-        wsx = wsx1000 * pow((1000.0/n), nm)
+            # litterfall
+            current_age = age0 + t/12
+            lf_exp = -(current_age/tyf) * math.log(1.0 + yfx/yf0)
+            yf = (yfx * yf0)/(yf0 + (yfx - yf0) * pow(E, lf_exp))
 
-        # seeing if we nee to thin
-        while last_ws / n > wsx:
-            # need to thin
-            n -= 1  # decreasing n
-            delta_n += 1 # increasing delta_n counter
-            wsx = wsx1000 * pow((1000.0/n), nm) # recalculating wsx
+            # Computing biomass
+            # using init_wx and just plain n here because this is designed to be 
+            # calculated from any point in the simulation.
 
-        # litterfall
-        current_age = age0 + t/12
-        lf_exp = -(current_age/tyf) * math.log(1.0 + yfx/yf0)
-        yf = (yfx * yf0)/(yf0 + (yfx - yf0) * pow(E, lf_exp))
+            # doing this on a monthly time step
 
-        # Computing biomass
-        # using init_wx and just plain n here because this is designed to be 
-        # calculated from any point in the simulation.
+            # setting current = to last month's
+            curr_wf = last_wf
+            curr_ws = last_ws
+            curr_wr = last_wr
 
-        # doing this on a monthly time step
+            # incrementing the current using last month's values
+            curr_wf += (nf * npp) - (yf * last_wf) - (mf * (last_wf / n) * delta_n)
+            curr_wr += (nr * npp) - (yr * last_wr) - (mr * (last_wr / n) * delta_n)
+            curr_ws += (ns * npp) - (ms * (last_ws / n) * delta_n)
 
-        # setting current = to last month's
-        curr_wf = last_wf
-        curr_ws = last_ws
-        curr_wr = last_wr
+            # making the current into last month's for the next month
+            last_wf = curr_wf
+            last_ws = curr_ws
+            last_wr = curr_wr
 
-        # incrementing the current using last month's values
-        curr_wf += (nf * npp) - (yf * last_wf) - (mf * (last_wf / n) * delta_n)
-        curr_wr += (nr * npp) - (yr * last_wr) - (mr * (last_wr / n) * delta_n)
-        curr_ws += (ns * npp) - (ms * (last_ws / n) * delta_n)
+            delta_n = 0 # resetting delta_n
 
-        # making the current into last month's for the next month
-        last_wf = curr_wf
-        last_ws = curr_ws
-        last_wr = curr_wr
+            # Computing miscellaneous parameters
+            # these are all just for printing out, not viz...
+            """NOTE: for all the below stand level variables, the C parameter has been left out. 
+                C is a competition index and is only applicable to mixed species stands, which this
+                implementation does not cover. However, if you were to adapt this implementation to 
+                account for mixed species stands, it would be easy to add in the C parameter here
+                in the future, as described in section 11.11 of Forrester's User Manual. rh (relative
+                height) has also been left out for the same reason.
+                TODO: Add in the C parameter here
+            """
 
-        delta_n = 0 # resetting delta_n
+            # These are all empirical parameters and are species-specific. They are only used here.
+            # all values are from Forrester et al in press from Forrester's excel sheet unless otherwise noted.
+            # aws and ans are from forrester et al
+            # TODO Reconfigure the file so that it's not douglasfir, it's whatever however many trees are in the species list
+            aws = species.aws
+            nws = species.nws
 
-        # Computing miscellaneous parameters
-        # these are all just for printing out, not viz...
-        """NOTE: for all the below stand level variables, the C parameter has been left out. 
-            C is a competition index and is only applicable to mixed species stands, which this
-            implementation does not cover. However, if you were to adapt this implementation to 
-            account for mixed species stands, it would be easy to add in the C parameter here
-            in the future, as described in section 11.11 of Forrester's User Manual. rh (relative
-            height) has also been left out for the same reason.
-            TODO: Add in the C parameter here
-        """
+            ah = species.ah
+            nhb = species.nhb
+            nhc = species.nhc
 
-        # These are all empirical parameters and are species-specific. They are only used here.
-        # all values are from Forrester et al in press from Forrester's excel sheet unless otherwise noted.
-        # aws and ans are from forrester et al
-        # TODO Reconfigure the file so that it's not douglasfir, it's whatever however many trees are in the species list
-        aws = douglasfir.aws
-        nws = douglasfir.nws
+            ahl = species.ahl
+            nhlb = species.nhlb
+            nhlc = species.nhlc
 
-        ah = douglasfir.ah
-        nhb = douglasfir.nhb
-        nhc = douglasfir.nhc
+            ak = species.ak
+            nkb = species.nkb
+            nkh = species.nkh
 
-        ahl = douglasfir.ahl
-        nhlb = douglasfir.nhlb
-        nhlc = douglasfir.nhlc
+            av = species.av
+            nvb = species.nvb
+            nvh = species.nvh
+            nvbh = species.nvbh
 
-        ak = douglasfir.ak
-        nkb = douglasfir.nkb
-        nkh = douglasfir.nkh
+            # calculating b from mean individual stem mass (inversioon of A65 of user manual)
+            iws = last_ws / n # individual stem mass
+            b = pow(iws/aws, (1.0/nws)) *100
 
-        av = douglasfir.av
-        nvb = douglasfir.nvb
-        nvh = douglasfir.nvh
-        nvbh = douglasfir.nvbh
+            # bias correction to adjust b
+            # TODO implement later?
 
-        # calculating b from mean individual stem mass (inversioon of A65 of user manual)
-        iws = last_ws / n # individual stem mass
-        b = pow(iws/aws, (1.0/nws)) *100
+            # mean tree height
+            h = 1.3 + ah * pow(E, (-nhb/b)) + nhc * b # for single tree species
+            #h = ah * pow(b, nhb) # for data from individual tree data, not used
 
-        # bias correction to adjust b
-        # TODO implement later?
+            # live crown length
+            hl = 1.3 + ahl * pow(E, (-nhlb/b)) + nhlc * b # for single tree species
+            #hl = ahl * pow(b, nhlb) * pow(hl, nhll) # for data from individual tree data, not used
 
-        # mean tree height
-        h = 1.3 + ah * pow(E, (-nhb/b)) + nhc * b # for single tree species
-        #h = ah * pow(b, nhb) # for data from individual tree data, not used
+            # crown diameter
+            k = ak * pow(b, nkb) * pow(h, nkh)
 
-        # live crown length
-        hl = 1.3 + ahl * pow(E, (-nhlb/b)) + nhlc * b # for single tree species
-        #hl = ahl * pow(b, nhlb) * pow(hl, nhll) # for data from individual tree data, not used
+            # basal area
+            ba = (PI * b * b)/40000
 
-        # crown diameter
-        k = ak * pow(b, nkb) * pow(h, nkh)
+            # stand volume
+            vs = av * pow(b, nvb) * pow(h, nvh) * pow(b * b * h, nvbh) * n
 
-        # basal area
-        ba = (PI * b * b)/40000
+        # setting final biomass values
+        wf = last_wf
+        ws = last_ws
+        wr = last_wr
 
-        # stand volume
-        vs = av * pow(b, nvb) * pow(h, nvh) * pow(b * b * h, nvbh) * n
-
-    # setting final biomass values
-    wf = last_wf
-    ws = last_ws
-    wr = last_wr
-
-    print("COMPUTING AT T=", t)
-    print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
-    print(f"Live crown length: {hl}\ncrown diameter: {k}\nbasal area: {ba}\nstand volume: {vs}")
+        # some test prints
+        print(f"\n======= COMPUTING AT T={t} FOR SPECIES {species.name} =======")
+        print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
+        print(f"Live crown length: {hl}\ncrown diameter: {k}\nbasal area: {ba}\nstand volume: {vs}")
 
 # def init_trees():
 #     # base this off of a combination of allison's code, as well as my random generation for scatter plots
