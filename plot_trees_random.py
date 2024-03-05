@@ -1,30 +1,66 @@
-import matplotlib.pyplot as plt
+"""
+File name: plot_trees_random.py
+Author: Grace Todd
+Date: February 22, 2024
+Description: Initializes the coordinates for generated trees using scatter plot coordinates.
+"""
+
 import numpy as np
+import csv
+import matplotlib.pyplot as plt
 from tree_class import TreeList
 from parse_tree_input import parse_csv_file
+from threepg_species_data import SpeciesData, get_tree_names, parse_species_data
 
-# Generate random data
-np.random.seed(42)
-num_points = 100
-x_values = np.random.rand(num_points)
-y_values = np.random.rand(num_points)
-treelist = TreeList(parse_csv_file("Test_Data/Portland_Oregon_foliage.csv"))  # Name, Growth Rate, Average Lifespan
-tree_names = treelist.get_tree_names()
-labels = np.random.choice(tree_names, num_points)  # Randomly select tree names
+def init_trees(foliage_file, output_csv_file, threepg=True, plot=False):
+    """
+        Takes in a tree_chart csv, outputs a series of random tree placements to a CSV (name,x,y)
+        Can use 3pg, can create a scatter plot visualization
+        Used for initial placement of trees to apply 3PG
+    """
+    # Generate random data for the x and z coordinates
+    np.random.seed(42)
+    num_trees = 50
+    x_values = np.random.rand(num_trees)
+    z_values = np.random.rand(num_trees)
+    if threepg: 
+        # use species data instead of Treelist. TODO make these the same class
+        treelist = parse_species_data(foliage_file)
+        tree_names = get_tree_names(treelist)
+    else:
+        treelist = TreeList(parse_csv_file(foliage_file))
+        tree_names = treelist.get_tree_names()
+    tree_name = np.random.choice(tree_names, num_trees)  # Randomly select tree names
 
-# Define colors for each label
-label_colors = {label: plt.colormaps.get_cmap('viridis')(i / len(tree_names)) for i, label in enumerate(tree_names)}
+    # ============ PLOTTING STUFF ===============
+    if plot:
+        # Define colors for each label
+        label_colors = {label: plt.colormaps.get_cmap('viridis')(i / len(tree_names)) for i, label in enumerate(tree_names)}
 
-# Create a scatter plot with colored points
-for label, color in label_colors.items():
-    plt.scatter(x_values[labels == label], y_values[labels == label], label=label, color=color)
+        # Create a scatter plot with colored points
+        for label, color in label_colors.items():
+            plt.scatter(x_values[tree_name == label], z_values[tree_name == label], label=label, color=color)
 
-# Add labels and title
-plt.title('Random Tree Placement')
+        # Add labels and title
+        plt.title('Initial Tree Placement')
 
-# Add legend
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.tight_layout()  # Adjust layout to prevent clipping
+        # Add legend
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()  # Adjust layout to prevent clipping
 
-# Show the plot
-plt.show()
+        # Save the plot to a file (optional)
+        #plt.savefig('initial_tree_placement.png')
+
+    # Write x, y, and label data to CSV file
+    with open(output_csv_file, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(['name', 'x', 'z'])  # Write header
+        for x, z, label in zip(tree_name, x_values, z_values):
+            csv_writer.writerow([x, z, label])
+
+    # Show the plot
+    if plot:
+        plt.show()
+
+# Example usage:
+#init_trees('foliage_data.csv', 'output_data.csv')

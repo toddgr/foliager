@@ -5,6 +5,8 @@ Date: January 19, 2024
 Description: Generates tree class and ensures that the tree class updates with new attributes provided in default_tree_chart.csv.
             Takes in the attributes from default_tree_chart, ensures that the tree class has the correct attributes and 
             corresponding functions. If not, modifies tree_class
+
+            To generate tree_class.py, run python3 -m ./gen_tree_class.py
 """
 
 from datetime import datetime
@@ -14,6 +16,9 @@ tree_class_file_name = "tree_class.py"
 default_tree_chart = "Parameters/default_tree_chart.csv"
 
 def create_header():
+    """ 
+        Creates the description of the tree class file.
+    """
     file_name = 'File name: ' + tree_class_file_name + '\n'
     author = 'Author: Grace Todd\n'
     # Get today's date
@@ -27,6 +32,10 @@ def create_header():
     return header
 
 def get_attributes_from_csv(file_name):
+    """
+        Collects tree atributes from default_tree_chart.csv,
+        so that they can be used to create all of the set and get functions.
+    """
     attributes = csv_file_to_list(file_name)
     attributes = [element for sublist in attributes for element in sublist]
     attributes = [s.lower() for s in attributes]
@@ -34,6 +43,9 @@ def get_attributes_from_csv(file_name):
     return attributes
 
 def create_function_definition(function_title, parameters=None):
+    """
+        Creates function definition for a parameter from the default CSV.
+    """
     return "def " + function_title + "(" + parameters + "):\n"
 
 def create_tree_constructor():
@@ -50,6 +62,7 @@ def create_tree_constructor():
     return definition + assignments
 
 def create_tree_get_functions():
+    # For each attribute in the CSV file, create a get function.
     attributes_list = get_attributes_from_csv(default_tree_chart)
     get_functions = ""
     get_all_function = "\n\t" + create_function_definition("get_tree_info", "self") + "\t\treturn "
@@ -63,6 +76,9 @@ def create_tree_get_functions():
     return get_functions
 
 def create_tree_class():
+    """
+        Initializes the tree class
+    """
     definition = "\n\nclass Tree:\n\n"
     #create_init with attributes from csv
     init = create_tree_constructor()
@@ -71,6 +87,10 @@ def create_tree_class():
     return definition + init + get_functions
 
 def create_tree_list_get_functions():
+    """
+        For each attribute in the CSV, get all of the tree information on all of the 
+        attributes in the CSV
+    """
     attributes_list = get_attributes_from_csv(default_tree_chart)
     get_functions = ""
     get_all_function = "\n\t" + create_function_definition("get_all_tree_info", "self") + "\t\treturn [tree.get_tree_info() for tree in self.trees]"
@@ -84,6 +104,9 @@ def create_tree_list_get_functions():
     return get_functions + get_all_function
 
 def create_tree_list_class():
+    """
+        Creates a class that works with all the tree types at once
+    """
     definition = "\nclass TreeList:\n\n"
     #create init
     init = "\tdef __init__(self, tree_list=None):\n\
@@ -100,6 +123,10 @@ def create_tree_list_class():
     return definition + init + add_tree + get_functions
 
 def write_file():
+    """
+        Creates the file, puts together all the parts, 
+        writes it in
+    """
     header = create_header()
     tree_class = create_tree_class()
     tree_list_class = create_tree_list_class()

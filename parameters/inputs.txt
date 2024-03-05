@@ -1,0 +1,52 @@
+A brainstorm summary of Allison Thompson's thesis on 3-PG in C++
+
+Stand input parameters:
+- initial wf
+- initial wr
+- initial ws
+- time (months since the beginning of the simulation. Do I need this?)
+- start age (age of trees in years at beginning of simulation)
+- start month (month in which the simulation began. 1-12)
+- start year 
+- initial dbh (initial diameter at breast height, used for initial calculations)
+- fertility rating (between 0, very limiting, and 1, not limiting)
+
+Site input parameters:
+- monthly mean daily max temperature
+- monthly mean daily min temperature
+- monthly rainfall
+- monthly mean daily solar radiation
+- monthly frost days
+- soil water (available soil water)
+- max soil water
+
+Species input parameters:
+- lec       (light extinction coefficient)
+- p2        (diamter at breast height at 2cm, used in partitioning ratios)
+- p20       (diameter at breast height at 20cm, used in partitioning ratios)
+- acx       (species specific max potential canopy quantum efficiency)
+- sla_1     (SLA in older stands)
+- sla_0     (SLA in younger stands)
+- fn0       (value of FN when FR = 0)
+- nfn       (power of (1-FR) in FN)
+- tc        (age when canopy closes)
+- max age   (max age stand, used in age mod)
+- r age     (relative age to give fage=0.5)
+- mf        (mean fractions of biomass per tree that is lost when a tree dies-- foliage)
+- mr        (mean fractions of biomass per tree that is lost when a tree dies-- root)
+- ms        (mean fractions of biomass per tree that is lost when a tree dies-- stem)
+- yfx       (maximum litterfall rate per month)
+- yf0       (minimum litterfall rate per month)
+- tyf       (age when litterfall rate has median value)
+- yr        (average monthly root turnover rate (1/month))
+- nr_min    (minimum root partitioning ratio)
+- nr_max    (maximum root partitioning ratio)
+- m_0       (m on sites of poor fertility, eg. FR=0)
+- wsx1000   (value of wsx when n=1000)
+- nm        (exponent of self thinning rule)
+
+What is....
+* fn
+* fr
+* sla
+* n
