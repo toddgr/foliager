@@ -81,7 +81,7 @@ if __name__ == '__main__':
             foliage_file = "Test_Data/douglas_fir_species_data.csv"
             foliage_list = parse_species_data(foliage_file) #Name, Growth Rate, Average Lifespan
             treelist = get_tree_names(foliage_list)
-            
+            print("Generating sample Douglas Fir coordinates to CSV...")
         else:
         # Use portland data
             location = 'Portland Oregon'
