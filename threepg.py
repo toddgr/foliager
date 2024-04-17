@@ -263,8 +263,6 @@ def compute(climatedata_filename, speciesdata_filename, t):
     """
         Takes in climate data, species data, time in months since beginning of simulation
         Computes the outputs for the 3PG algorithm
-        TODO: Change this so that it takes in a SpeciesData class object and applies the stuff to it? 
-        I think that the monthly site data can stay as a global variable
     """
     E = 2.718
     PI = 3.1415
@@ -436,7 +434,7 @@ def compute(climatedata_filename, speciesdata_filename, t):
             # These are all empirical parameters and are species-specific. They are only used here.
             # all values are from Forrester et al in press from Forrester's excel sheet unless otherwise noted.
             # aws and ans are from forrester et al
-            # TODO Reconfigure the file so that it's not douglasfir, it's whatever however many trees are in the species list
+
             aws = species.aws
             nws = species.nws
 
