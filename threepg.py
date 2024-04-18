@@ -505,6 +505,7 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
 #     pass
 
 if __name__ =='__main__':
+    # TODO: convert this to its own function to be used in foliager main
     outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
     height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
 
