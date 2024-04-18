@@ -8,8 +8,9 @@ Description: My attempt at converting 3-PG to Python so that I can use it in my 
 
 import math # for log
 from threepg_species_data import parse_species_data
-from plot_trees_random import init_trees
+from plot_trees_random import init_trees, init_trees_dont_write_yet
 import csv
+import random
 
 # So I'm going to start out by using Allison's implementation of a tree struct for the sake of visualization. 
 # In the future, though, I'll integrate this with my own tree_class. I jsut don't know how different they will
@@ -259,7 +260,7 @@ def read_climate_data(file_path):
     We're basically just assigning and calculating values for all of the globals that we defined above. 
     Now that I think of it... breaking this up might help to optimize the proces. Maybe.
 """
-def compute(climatedata_filename, speciesdata_filename, t):
+def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
     """
         Takes in climate data, species data, time in months since beginning of simulation
         Computes the outputs for the 3PG algorithm
@@ -269,6 +270,7 @@ def compute(climatedata_filename, speciesdata_filename, t):
     d = 0.8
     n = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
+    height_dbh_list = [['name', 'height', 'dbh']]
     for species in speciesdata_list:
 
         month_data, init_month_data = read_climate_data(climatedata_filename)
@@ -486,9 +488,14 @@ def compute(climatedata_filename, speciesdata_filename, t):
 
         # some test prints
         print(f"\n======= COMPUTING AT T={t} FOR SPECIES {species.name} =======")
-        print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
+        #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
         print(f"Live crown length: {hl}\ncrown diameter: {k}\nbasal area: {ba}\nstand volume: {vs}")
-
+        #plot the trees
+        height = h # mean tree height
+        dbh = 2 * math.sqrt((4 * ba) / math.pi) # double check this
+        height_dbh_list.append([species.name, height, dbh ])
+    return height_dbh_list
+            
 # def init_trees():
 #     # base this off of a combination of allison's code, as well as my random generation for scatter plots
 #     # I have the code where it writes the coordinates to a csv file, but I didn't push it from my pc so we will have to wait
@@ -498,6 +505,34 @@ def compute(climatedata_filename, speciesdata_filename, t):
 #     pass
 
 if __name__ =='__main__':
-    # compute(climatedata_filename, speciesdata_filename, t)
+    outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
+
+    # so we have the height, the dbh, and now we need to plot the trees and combine the two.
+    # We'll need to randomize the actual height and dbh for each individual tree
+    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename)
+    print("tree_coordinates: ", tree_coordinates)
+    # print("height_dbh: ", height_dbh)
+    # for each of the 3-PG data entries in the height_dbh
+    tree_output = [['name, x, z, height, dbh']]
+    tree = 1 #for tree in range(1):
+    # while we're talking about the same tree species
+    i = 1 # counter for the tree coordinates
+    print("Tree:", tree)
+    print("height_dbh[tree][0]=", height_dbh[tree][0], ", tree_coordinates[i][0]= ", tree_coordinates[i][0])
+    while height_dbh[tree][0] == tree_coordinates[i][0] and i < len(tree_coordinates)-1:
+        
+        # assign sligthly randomized values to the height and dbh
+        factor = 0.1
+        random_height_offset = random.uniform(-factor, factor)
+        new_height = float(height_dbh[tree][1]) + random_height_offset
+
+        random_dbh_offset = random.uniform(-factor, factor)
+        new_dbh = float(height_dbh[tree][2]) + random_dbh_offset
+        # append it to the tree_coordinate entry
+        tree_output.append([tree_coordinates[i][0], tree_coordinates[i][1], tree_coordinates[i][2], new_height, new_dbh])
+        i += 1
     # init_trees()
-    pass
+    
+    print("tree_output:", tree_output)
+

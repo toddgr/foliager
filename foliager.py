@@ -93,6 +93,6 @@ if __name__ == '__main__':
             print(treelist.get_all_tree_info())
 
     # Now to plot these trees on a graph of size (1,1)
-    init_trees(foliage_file, coordinates_file)
+    init_trees(foliage_file, coordinates_file, plot =True)
 
     

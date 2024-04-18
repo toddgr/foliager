@@ -62,5 +62,54 @@ def init_trees(foliage_file, output_csv_file, threepg=True, plot=False):
     if plot:
         plt.show()
 
+def init_trees_dont_write_yet(foliage_file, threepg=True, plot=False):
+    """
+        Takes in a tree_chart csv, outputs a series of random tree placements to a CSV (name,x,y)
+        Can use 3pg, can create a scatter plot visualization
+        Used for initial placement of trees to apply 3PG
+    """
+    # Generate random data for the x and z coordinates
+    np.random.seed(42)
+    num_trees = 50
+    x_values = np.random.rand(num_trees)
+    z_values = np.random.rand(num_trees)
+    if threepg: 
+        # use species data instead of Treelist. TODO make these the same class
+        treelist = parse_species_data(foliage_file)
+        tree_names = get_tree_names(treelist)
+    else:
+        treelist = TreeList(parse_csv_file(foliage_file))
+        tree_names = treelist.get_tree_names()
+    tree_name = np.random.choice(tree_names, num_trees)  # Randomly select tree names
+
+    # ============ PLOTTING STUFF ===============
+    if plot:
+        # Define colors for each label
+        label_colors = {label: plt.colormaps.get_cmap('viridis')(i / len(tree_names)) for i, label in enumerate(tree_names)}
+
+        # Create a scatter plot with colored points
+        for label, color in label_colors.items():
+            plt.scatter(x_values[tree_name == label], z_values[tree_name == label], label=label, color=color)
+
+        # Add labels and title
+        plt.title('Initial Tree Placement')
+
+        # Add legend
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()  # Adjust layout to prevent clipping
+
+        # Save the plot to a file (optional)
+        #plt.savefig('initial_tree_placement.png')
+
+    # Show the plot
+    if plot:
+        plt.show()
+
+    rows = [['name', 'x', 'z']]
+    for x, z, label in zip(tree_name, x_values, z_values):
+        rows.append([x, z, label])
+    return rows
+
+
 # Example usage:
 #init_trees('foliage_data.csv', 'output_data.csv')
