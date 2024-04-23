@@ -62,27 +62,27 @@ site_solar_rad_mod = 0.
 site_frost_days_mod = 0.
 
 # temperature- all in degrees C
-t_min = douglasfir.t_min # minimun monthly temperature for growth 
-t_opt = douglasfir.t_opt # Optimum monthly temperature for growth 
-t_max = douglasfir.t_max # maximum monthly temperature for growth
+# t_min = douglasfir.t_min # minimun monthly temperature for growth 
+# t_opt = douglasfir.t_opt # Optimum monthly temperature for growth 
+# t_max = douglasfir.t_max # maximum monthly temperature for growth
 
 # frost
-df = douglasfir.df # mean number of frost days per month 
-kf = douglasfir.kf # number of days of production lost for each frost day
+# df = douglasfir.df # mean number of frost days per month 
+# kf = douglasfir.kf # number of days of production lost for each frost day
 
 # CO2 
-fcax_700 = douglasfir.fcax_700 # This one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2"
+# fcax_700 = douglasfir.fcax_700 # This one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2"
 co2 = 350 # Atmospheric CO2 (ppm) -- number from oregon values from random site, change later
 
 # VPD 
 d = 1. # mean daytime VPD --> SLIDER 0.5 - 2.
-kd = douglasfir.kd # defines the stomatal response to VPD
+# kd = douglasfir.kd # defines the stomatal response to VPD
 
 # Soil water mod, and other soil stuff
-soil_water = douglasfir.soil_water # Available soil water
-max_soil_water = douglasfir.max_soil_water # Maximum available soil water
-n_theta = douglasfir.n_theta # "Power of moisture ration deficit" "differences in the relationship between transpiration rate and soil water content for different soil textures"
-c_theta = douglasfir.c_theta # Moisture ration deficit for fq = 0.5
+# soil_water = douglasfir.soil_water # Available soil water
+# max_soil_water = douglasfir.max_soil_water # Maximum available soil water
+# n_theta = douglasfir.n_theta # "Power of moisture ration deficit" "differences in the relationship between transpiration rate and soil water content for different soil textures"
+# c_theta = douglasfir.c_theta # Moisture ration deficit for fq = 0.5
 
 
 """
@@ -130,43 +130,43 @@ display_mode = 0 # cones vs textures. Probably won't use this but I'll keep for 
 
 
 
-lec = douglasfir.lec # a light extinction coefficient
+# lec = douglasfir.lec # a light extinction coefficient
 
-p2 = douglasfir.p2 # diameter at breast height at 2cm, used in partitioning ratios
-p20 = douglasfir.p20 # diameter at breast height at 20cm, used in partitioning ratios
+# p2 = douglasfir.p2 # diameter at breast height at 2cm, used in partitioning ratios
+# p20 = douglasfir.p20 # diameter at breast height at 20cm, used in partitioning ratios
 
-acx = douglasfir.acx # species-specific max potential canopy quantum efficiency
+# acx = douglasfir.acx # species-specific max potential canopy quantum efficiency
 
-sla_1 = douglasfir.sla_1 # SLA in older stands
-sla_0 = douglasfir.sla_0 # SLA in younger stands
-t_sla_mid = douglasfir.t_sla_mid # age where SLA = 0.5(sla_0-sla_1)
+# sla_1 = douglasfir.sla_1 # SLA in older stands
+# sla_0 = douglasfir.sla_0 # SLA in younger stands
+# t_sla_mid = douglasfir.t_sla_mid # age where SLA = 0.5(sla_0-sla_1)
 
-fn0 = douglasfir.fn0 # value of fN when FR = 0
-nfn = douglasfir.nfn # power of (1-FR) in fN
+# fn0 = douglasfir.fn0 # value of fN when FR = 0
+# nfn = douglasfir.nfn # power of (1-FR) in fN
 
-tc = douglasfir.tc # age when canopy closes
+# tc = douglasfir.tc # age when canopy closes
 
-max_age = douglasfir.max_age # Max stand age, used in age mod
-r_age = douglasfir.r_age # relative age to give fage = 0.5
-n_age = douglasfir.n_age # power of relative age in f_age function
+# max_age = douglasfir.max_age # Max stand age, used in age mod
+# r_age = douglasfir.r_age # relative age to give fage = 0.5
+# n_age = douglasfir.n_age # power of relative age in f_age function
 
-# Mean fractions of biomass per tree that is lost when a tree dies -- per pool
-mf = douglasfir.mf
-mr = douglasfir.mr
-ms = douglasfir.ms
+# # Mean fractions of biomass per tree that is lost when a tree dies -- per pool
+# mf = douglasfir.mf
+# mr = douglasfir.mr
+# ms = douglasfir.ms
 
-# Biomass
-yfx = douglasfir.yfx
-yf0 = douglasfir.yf0
-tyf = douglasfir.tyf
-yr = douglasfir.yr # average monthly root turnover rate (1/month)
-nr_min = douglasfir.nr_min # minimum root partitioning ratio
-nr_max = douglasfir.nr_max # maximum root partitioning ratio
-m_0 = douglasfir.m_0 # m on sites of poor fertility, eg. FR=0
+# # Biomass
+# yfx = douglasfir.yfx
+# yf0 = douglasfir.yf0
+# tyf = douglasfir.tyf
+# yr = douglasfir.yr # average monthly root turnover rate (1/month)
+# nr_min = douglasfir.nr_min # minimum root partitioning ratio
+# nr_max = douglasfir.nr_max # maximum root partitioning ratio
+# m_0 = douglasfir.m_0 # m on sites of poor fertility, eg. FR=0
 
-# for mortality
-wsx1000 = douglasfir.wsx1000 # value of wsx when n = 1000
-nm = douglasfir.nm # exponent of self-thinning rule
+# # for mortality
+# wsx1000 = douglasfir.wsx1000 # value of wsx when n = 1000
+# nm = douglasfir.nm # exponent of self-thinning rule
 
 """
     ================ MISC ===============
@@ -296,25 +296,25 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
             # temperature mod
             ft = 1.
             ta = (month_data[current_month].tmax + month_data[current_month].tmin)/2. # getting mean monthly temp from site data
-            if (ta > t_max) or (ta < t_min):
+            if (ta > species.t_max) or (ta < species.t_min):
                 # outside of growth range -> 0
                 ft = 0.
             else:
                 # inside of growth range
-                base = (ta - t_min / (t_opt - t_min) * (t_max - ta)/(t_max - t_opt))
-                exp = (t_max - t_opt)/(t_opt - t_min)
+                base = (ta - species.t_min / (species.t_opt - species.t_min) * (species.t_max - ta)/(species.t_max - species.t_opt))
+                exp = (species.t_max - species.t_opt)/(species.t_opt - species.t_min)
                 ft = pow(base, exp)
 
             # frost mod
             df = month_data[current_month].frost_days
-            ff = 1. - kf * (df/30.)
+            ff = 1. - species.kf * (df/30.)
 
             # nutrition mod
-            fn = 1. - (1. - fn0) * pow((1. - fr), nfn)
+            fn = 1. - (1. - species.fn0) * pow((1. - fr), species.nfn)
 
             # C02 mod
             fc = 1.
-            fcax = fcax_700/(2. - fcax_700) # we're not exactly sure that this does
+            fcax = species.fcax_700/(2. - species.fcax_700) # we're not exactly sure that this does
             fc = fcax * co2/(350. * (fcax - 1.) + co2)
 
             # phys mod stuff --> made from a combo of fd, ftheta, and age mod that can be changed in glui
@@ -323,15 +323,15 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
             fd = pow(E, (-kd * d))
 
             # soil water mod
-            base1 = ((1. - soil_water)/max_soil_water)/c_theta
-            ftheta = 1./(1. + pow(base1, n_theta))
+            base1 = ((1. - species.soil_water)/species.max_soil_water)/species.c_theta
+            ftheta = 1./(1. + pow(base1, species.n_theta))
 
             # age mod --> used if denoted in glui
             # TODO maybe just not use this?
             fa = 1.
             if agemod_method:
-                age_base = ((age0 + (inc_t / 12.))/max_age)/r_age
-                fa = 1. / (1. + pow(age_base, n_age))
+                age_base = ((age0 + (inc_t / 12.))/species.max_age)/species.r_age
+                fa = 1. / (1. + pow(age_base, species.n_age))
             
             # calculating phys mod
             physmod = 1.
@@ -344,37 +344,37 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
                 physmod = fa * fd * ftheta
             
             # SLA -- specific leaf area
-            exp1 = pow(((age0 * 12.) + inc_t)/t_sla_mid, 2.)
-            sla = sla_1 + (sla_0 - sla_1) * pow(E, (-1 * math.log(2.) * exp1))
+            exp1 = pow(((age0 * 12.) + inc_t)/species.t_sla_mid, 2.)
+            sla = species.sla_1 + (species.sla_0 - species.sla_1) * pow(E, (-1 * math.log(2.) * exp1))
 
             # leaf area index (m^2 / m^2)
             l = 0.1 * sla * last_wf
 
             # GAC --> percentage of ground area covered by canopy
-            if age0 + inc_t / 12 <tc:
-                gac = (age0 + inc_t / 12) / tc
+            if age0 + inc_t / 12 < species.tc:
+                gac = (age0 + inc_t / 12) / species.tc
             else:
                 gac = 1.
             
             # light absorption --> absorption photosynthetically active radiation (PAR)
             # Often called o/pa
-            e_exp = (-lec * l)/gac
+            e_exp = (-species.lec * l)/gac
             par = (1. - pow(E, e_exp)) * 2.3 * gac * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
         
             # Computing GPP and NPP
-            gpp = ft * ff * fn * fc * physmod * acx * par
+            gpp = ft * ff * fn * fc * physmod * species.acx * par
             npp = gpp * cr
 
             # Partitioning ratios
             # computing m --> linear function of FR (fertility rating)
-            m = m_0 + ((1. - m_0) * fr)
+            m = species.m_0 + ((1. - species.m_0) * fr)
 
             # computing the root partitioning ratio
-            nr = (nr_min * nr_max) / (nr_min + ((nr_max - nr_min) * m * physmod))
+            nr = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * physmod))
 
             # computing np and ap, which are used to calculate pfs
-            np = (math.log(p20/p2))/math.log(10.) # equation A29
-            ap = p2/(pow(2., np)) # equation A29
+            np = (math.log(species.p20/species.p2))/math.log(10.) # equation A29
+            ap = species.p2/(pow(2., np)) # equation A29
 
             # computing pfs
             pfs = ap * pow(b, np)
@@ -385,19 +385,19 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
 
             # mortality
             # max individual tree stem mass (wsx)
-            wsx = wsx1000 * pow((1000.0/n), nm)
+            wsx = species.wsx1000 * pow((1000.0/n), species.nm)
 
             # seeing if we nee to thin
             while last_ws / n > wsx:
                 # need to thin
                 n -= 1  # decreasing n
                 delta_n += 1 # increasing delta_n counter
-                wsx = wsx1000 * pow((1000.0/n), nm) # recalculating wsx
+                wsx = species.wsx1000 * pow((1000.0/n), species.nm) # recalculating wsx
 
             # litterfall
             current_age = age0 + t/12
-            lf_exp = -(current_age/tyf) * math.log(1.0 + yfx/yf0)
-            yf = (yfx * yf0)/(yf0 + (yfx - yf0) * pow(E, lf_exp))
+            lf_exp = -(current_age/species.tyf) * math.log(1.0 + species.yfx/species.yf0)
+            yf = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(E, lf_exp))
 
             # Computing biomass
             # using init_wx and just plain n here because this is designed to be 
@@ -411,9 +411,9 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
             curr_wr = last_wr
 
             # incrementing the current using last month's values
-            curr_wf += (nf * npp) - (yf * last_wf) - (mf * (last_wf / n) * delta_n)
-            curr_wr += (nr * npp) - (yr * last_wr) - (mr * (last_wr / n) * delta_n)
-            curr_ws += (ns * npp) - (ms * (last_ws / n) * delta_n)
+            curr_wf += (nf * npp) - (yf * last_wf) - (species.mf * (last_wf / n) * delta_n)
+            curr_wr += (nr * npp) - (species.yr * last_wr) - (species.mr * (last_wr / n) * delta_n)
+            curr_ws += (ns * npp) - (species.ms * (last_ws / n) * delta_n)
 
             # making the current into last month's for the next month
             last_wf = curr_wf
