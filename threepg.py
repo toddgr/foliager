@@ -320,7 +320,7 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
             # phys mod stuff --> made from a combo of fd, ftheta, and age mod that can be changed in glui
             # TODO change this so that it can't be modified from the GLUI
             # vapor pressure deficit (VPD) mod
-            fd = pow(E, (-kd * d))
+            fd = pow(E, (-species.kd * d))
 
             # soil water mod
             base1 = ((1. - species.soil_water)/species.max_soil_water)/species.c_theta
