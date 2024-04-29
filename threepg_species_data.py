@@ -1,15 +1,15 @@
 """
 File name: threepg_species_data.py
 Author: Grace Todd
-Date: February 28, 2024
+Date: April 29, 2024
 Description: Holds the SpeciesData class, which will be used to manipulate common parameters
 	for each of the species used in a simulation.
 """
 
-from parse_tree_input import csv_file_to_float_list
+from parse_tree_input import csv_file_to_list
 
 class SpeciesData:
-    def __init__(self, name, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla_0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
+    def __init__(self, name, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla_0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color):
         """
         Initializes the SpeciesData class with the provided attributes.
         """
@@ -66,6 +66,15 @@ class SpeciesData:
         self.nvb = nvb
         self.nvh = nvh
         self.nvbh = nvbh
+        self.q_leaf_shape = q_leaf_shape
+        self.q_canopy_density = q_canopy_density
+        self.q_deciduous_evergreen = q_deciduous_evergreen
+        self.q_leaf_color = q_leaf_color
+        self.q_tree_form = q_tree_form
+        self.q_tree_roots = q_tree_roots
+        self.q_habitat = q_habitat
+        self.q_bark_texture = q_bark_texture
+        self.q_bark_color = q_bark_color
 
     def print_species_data(self):
         """
@@ -82,7 +91,7 @@ def get_tree_names(species_data_list):
 	return tree_names
 
 def parse_species_data(file_path):
-    species_list = csv_file_to_float_list(file_path)
+    species_list = csv_file_to_list(file_path)
     species_data_list = []
 
     for tree_data in species_list:
@@ -92,7 +101,7 @@ def parse_species_data(file_path):
     return species_data_list
 
 # Example usage:
-# species_csv = "test_data/douglas_fir_species_data.csv"
-# species = parse_species_data(species_csv)
-# for tree in species:
-#     tree.print_species_data()
+species_csv = "test_data/douglas_fir_species_data.csv"
+species = parse_species_data(species_csv)
+for tree in species:
+    tree.print_species_data()
