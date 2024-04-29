@@ -9,4 +9,7 @@ Description: A parameter estimation prototype for generating realistic
 knowledge_base = "test_data/species_data_kb.csv"
 
 def param_est(knowledge_base):
+    """ Input: Knowledge Base, general information for a list of trees
+        Output: Complete tree information for the list of trees """
+    
     pass
