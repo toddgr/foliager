@@ -52,7 +52,7 @@ def generate_python_file(csv_file_path, output_file_path):
             if attribute.startswith('name'):
                 output_file.write(f"        self.{attribute} = {attribute}\n")
             else:
-                output_file.write(f"        self.{attribute} = float({attribute})\n")
+                output_file.write(f"        self.{attribute} = {attribute}\n")
         
         output_file.write("\n    def print_species_data(self):\n")
         output_file.write("        \"\"\"\n")
