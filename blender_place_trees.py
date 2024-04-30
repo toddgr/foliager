@@ -9,9 +9,11 @@ Description: This file aims to test out different scripts for the Blender API, s
 
 import bpy
 import bmesh
+import csv
+
+FOREST_FLOOR_SCALE = 60
 
 def create_forest_floor():
-    FOREST_FLOOR_SCALE = 10
 
     # Create a new mesh data
     ff_mesh_data = bpy.data.meshes.new(name="MeshData")
@@ -42,7 +44,8 @@ def create_forest_floor():
     # Set the location of the forest floor
     forest_floor.location = (0, 0, 0)  # center at origin
     
-def create_tree(x, y, z, collection_name="Trees"):
+    
+def create_tree(x, y,dbh, height, collection_name="Trees"):
     # Path to the OBJ file
     obj_path = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/default_tree.obj"
 
@@ -53,8 +56,12 @@ def create_tree(x, y, z, collection_name="Trees"):
     imported_obj = bpy.context.selected_objects[0]
 
     # Set location of the imported object
-    imported_obj.location = (x, y, z)  # Example coordinates
+    imported_obj.location = (x, y, 0)  # Example coordinates
+    
+    imported_obj.scale = (dbh, height, dbh) #x, z, y? for some reason?
+    
     return imported_obj
+
 
 def add_trees_to_collection(tree_list, collection_name="Trees"):
     scene_collection = bpy.context.scene.collection
@@ -68,10 +75,14 @@ def add_trees_to_collection(tree_list, collection_name="Trees"):
     for tree in tree_list:
         collection.objects.link(tree)
         scene_collection.objects.unlink(tree)
-        
+   
     pass
     
+
 if __name__ == "__main__":
+    # filepaths
+    coordinates_filepath = "C:/Users/Grace/Documents/Masters_Project/douglas_fir_plot_data.csv"
+    
     create_forest_floor()
     
     collection_name = "Trees"
@@ -79,9 +90,17 @@ if __name__ == "__main__":
     new_collection = bpy.data.collections.new(collection_name)
 
     # accumulate tree objects and location
+    
     tree_list = []
-    #for loop
-    tree = create_tree(0,0,0)
-    tree_list.append(tree)
+    # Open the CSV file for reading
+    with open(coordinates_filepath, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            x = (float(row['x']) * FOREST_FLOOR_SCALE * 2) - FOREST_FLOOR_SCALE
+            y = (float(row['z']) * FOREST_FLOOR_SCALE * 2) - FOREST_FLOOR_SCALE # counterintuitive but temporary -- with newer data files, I'll use y instead
+            height = float(row['height'])
+            dbh = float(row['dbh'])
+            tree = create_tree(x,y,dbh,height)
+            tree_list.append(tree)
     
     add_trees_to_collection(tree_list, collection_name)
