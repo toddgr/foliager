@@ -11,7 +11,7 @@ import bpy
 import bmesh
 
 def create_forest_floor():
-    FOREST_FLOOR_SCALE = 2
+    FOREST_FLOOR_SCALE = 10
 
     # Create a new mesh data
     ff_mesh_data = bpy.data.meshes.new(name="MeshData")
@@ -42,7 +42,7 @@ def create_forest_floor():
     # Set the location of the forest floor
     forest_floor.location = (0, 0, 0)  # center at origin
     
-def create_tree(x, y, z):
+def create_tree(x, y, z, collection_name="Trees"):
     # Path to the OBJ file
     obj_path = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/default_tree.obj"
 
@@ -54,7 +54,27 @@ def create_tree(x, y, z):
 
     # Set location of the imported object
     imported_obj.location = (x, y, z)  # Example coordinates
+    return imported_obj
+
+def add_trees_to_collection():
+    pass
+    
+
+collection_name = "Trees"
+# Create a new collection
+new_collection = bpy.data.collections.new(collection_name)
+
+# Link the new collection to the scene collection
+scene_collection = bpy.context.scene.collection
+scene_collection.children.link(new_collection)
+
+create_forest_floor()
+obj1 = create_tree(0,0,0)
+obj2 = create_tree(3,5,0)
+
+scene_collection = bpy.context.scene.collection
 
 
-create_tree(0,0,0)
-create_tree(3,5,0)
+collection = bpy.data.collections.get(collection_name)
+collection.objects.link(obj1)
+scene_collection.objects.unlink(obj1)
