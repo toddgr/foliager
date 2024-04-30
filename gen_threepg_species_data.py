@@ -42,7 +42,7 @@ def generate_python_file(csv_file_path, output_file_path):
                 parameter_init+= parameter
             else:
                 parameter_init += parameter + "=None"
-            parameter_init += ","
+            parameter_init += ", "
     
     with open(output_file_path, 'w') as output_file:
         output_file.write(create_header())
