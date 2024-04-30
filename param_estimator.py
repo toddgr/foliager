@@ -10,7 +10,7 @@ from threepg_species_data import SpeciesData, parse_species_data
 
 knowledge_base_filepath = "test_data/species_data_kb.csv"
 
-def assign_points(tree, knowledge_base):
+def find_similarities(tree, knowledge_base):
     """ A rudimentary point-assigning system for determining which trees will have the 
         most algorithmic influence
         
@@ -18,7 +18,10 @@ def assign_points(tree, knowledge_base):
         
         Go through all of the trees in the knowledge base, find what is common, 
         and then later on in the code we can parse through this to determine
-        which points and trees will have the greatest effect over which aspects. 
+        which points and trees will have the greatest effect over which aspects?
+
+        Or maybe it would be better to calculate a score for each category and work from there?
+        Things to think about 
         
         For now, or maybe forever, we only compare attributes that are equal to
         that of the current tree... not those that are almost equal.
@@ -41,13 +44,22 @@ def assign_points(tree, knowledge_base):
         if tree.q_deciduous_evergreen == kb_tree.q_deciduous_evergreen:
             points += 1
 
-        # 
+        # root attributes
+
+        # habitat attributes
 
         # Check if the tree has earned any points
         if points > 0:
             points_dict[kb_tree] = points
 
     return points_dict
+
+def calculate_parameter_values(tree, point_dict):
+    """ This function will take into account the different point values assigned to each kb tree, and 
+        use those point values to calculate/estimate the values for each of the tree parameters.
+        
+        Different attributes will be influenced by different similarities"""
+    pass
 
 
 def estimate_parameters(tree, knowledge_base):
@@ -77,9 +89,9 @@ def estimate_parameters(tree, knowledge_base):
     # Find similar canopy density/leaf shape in the knowledge base
     # This is where the reward function would be really good; if a tree fulfills more than one of these, add a reward point
         # And then have a dictionary for them instead 
-    similar_canopies = assign_points(tree, knowledge_base)
+    similar_canopies = find_similarities(tree, knowledge_base)
     
-    print("\nSimilar leaves/canopies for", tree.name, ":")
+    print(f"\nSimilar leaves/canopies for {tree.name}:")
     # Print tree name and corresponding point value
     for tree, points in similar_canopies.items():
         print(f"{tree.name}: {points}")
