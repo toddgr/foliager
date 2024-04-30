@@ -8,18 +8,57 @@ Description: A parameter estimation prototype for generating realistic
 
 from threepg_species_data import SpeciesData, parse_species_data
 
-knowledge_base = "test_data/species_data_kb.csv"
+knowledge_base_filepath = "test_data/species_data_kb.csv"
+
+def assign_points(tree, knowledge_base):
+    """ A rudimentary point-assigning system for determining which trees will have the 
+        most algorithmic influence
+        
+        i.e. the more conditions a tree fulfills, the more influence it will have
+        
+        Go through all of the trees in the knowledge base, find what is common, 
+        and then later on in the code we can parse through this to determine
+        which points and trees will have the greatest effect over which aspects. 
+        
+        For now, or maybe forever, we only compare attributes that are equal to
+        that of the current tree... not those that are almost equal.
+        (i.e. if a kb tree has a "very thin" canopy and the estimated tree is "thin",
+        the code does not consider the kb tree. For that attribute, at least.)
+        """
+
+    points_dict = {}  # Dictionary to store tree and corresponding points
+
+    for kb_tree in knowledge_base:
+        points = 0  # Initialize points for current tree
+
+        # leaf attributes
+        if tree.q_canopy_density == kb_tree.q_canopy_density:
+            points += 1
+
+        if tree.q_leaf_shape == kb_tree.q_leaf_shape:
+            points += 1
+
+        if tree.q_deciduous_evergreen == kb_tree.q_deciduous_evergreen:
+            points += 1
+
+        # 
+
+        # Check if the tree has earned any points
+        if points > 0:
+            points_dict[kb_tree] = points
+
+    return points_dict
+
 
 def estimate_parameters(tree, knowledge_base):
-    """ Uses the native habitat quality to estimate values for:
-        df, kf, t_min, t_max, t_opt, kd, n_theta, c_theta 
+    """ Uses the common knowledge qualities of a tree to estimate scientific values
 
         To start, we're just going to take the average for each of these values
         based on the similar trees in the KB
 
         Input: tree species to be estimated, knowledge base from which the values
         are estimated
-        Output: tree with updated habitat values"""
+        Output: tree species with updated habitat values"""
 
     # Check if the tree is already in the knowledge base
     for kb_tree in knowledge_base:
@@ -27,6 +66,7 @@ def estimate_parameters(tree, knowledge_base):
             print(tree.name, " is already in the database.")
             return
 
+    #------ CHECK THE KNOWLEDGE BASE FOR SIMILARITIES -----
     # Find similar habitats in the knowledge base
     similar_habitats = [kb_tree for kb_tree in knowledge_base if tree.q_habitat == kb_tree.q_habitat]
     
@@ -37,28 +77,31 @@ def estimate_parameters(tree, knowledge_base):
     # Find similar canopy density/leaf shape in the knowledge base
     # This is where the reward function would be really good; if a tree fulfills more than one of these, add a reward point
         # And then have a dictionary for them instead 
-    similar_canopies = [kb_tree for kb_tree in knowledge_base if tree.q_canopy_density == kb_tree.q_canopy_density or \
-                        tree.q_leaf_shape == kb_tree.q_leaf_shape or tree.q_deciduous_evergreen == kb_tree.q_deciduous_evergreen]
-
+    similar_canopies = assign_points(tree, knowledge_base)
+    
     print("\nSimilar leaves/canopies for", tree.name, ":")
-    for t in similar_canopies:
-        print(t.name)
+    # Print tree name and corresponding point value
+    for tree, points in similar_canopies.items():
+        print(f"{tree.name}: {points}")
 
+
+    # ------ CALCULATE THE PARAMETER VALUES -------
     # Calculate average values for parameters
     # In the future, this will be replaced with a reward functionality
-    parameter_count = len(similar_habitats)
-    if parameter_count > 0:
+    habitats_count = len(similar_habitats)
+    if habitats_count > 0:
         # Initialize parameter sums
         parameter_sums = [0] * 8  # Initialize with 8 parameters
 
         # Sum up parameter values
         for similar_tree in similar_habitats:
-            for i in range(1, 9):  # Iterate through parameter values (from index 1 to 8)
-                parameter_sums[i - 1] += float(getattr(similar_tree, ['df', 'kf', 't_min', 't_max', 't_opt', 'kd', 'n_theta', 'c_theta'][i - 1]))
+            for i in range(8):  # Iterate through parameter values (from index 1 to 8)
+                parameter_sums[i] += float(getattr(similar_tree, ['df', 'kf', 't_min', 't_max', 't_opt', 'kd', 'n_theta', 'c_theta'][i]))
 
         # Calculate average parameter values
-        for i in range(1, 9):
-            setattr(tree, ['df', 'kf', 't_min', 't_max', 't_opt', 'kd', 'n_theta', 'c_theta'][i - 1], parameter_sums[i - 1] / parameter_count)
+        for i in range(8):
+            setattr(tree, ['df', 'kf', 't_min', 't_max', 't_opt', 'kd', 'n_theta', 'c_theta'][i], parameter_sums[i] / habitats_count)
+
 
 def estimate_tree_list(tree_list, knowledge_base=None):
     """ Input: Knowledge Base, general information for a list of trees
@@ -66,12 +109,14 @@ def estimate_tree_list(tree_list, knowledge_base=None):
     
     print("--- TREE LIST ---\n")
     for tree in tree_list:
-        print(tree.name, ", ", tree.q_habitat)
+        #print(tree.name, ", ", tree.q_habitat)
         estimate_parameters(tree,knowledge_base)
 
     pass
 
+# Example usage
 if __name__ == "__main__":
-    sample_tree = SpeciesData("Sessile Oak2","elliptical","dense","deciduous","green","oval","deep","temperate","furrows/ridges","gray/brown",4.3827,22.5405,35.9017,0,1,1.0739,0,0,0,9,0.7,0,0.433,0.035,0.0409,14.62,18.49,7.35,0.6,1,3,725,0.95,4,0.446,0.409,0.376,0,0,0,0.001,0,0,0,158.192,1.5916,0.5952,0.094,2.507,39.46,16.37,0,20.13,19.05,0,0.31,1.03,0,0.000031,2,1.05,0)
-    kb = parse_species_data(knowledge_base)
+    # Define a sample tree. All of these values are common knowledge and can be determined by the nlp
+    sample_tree = SpeciesData("Imaginary Tree","elliptical","dense","deciduous","green","oval","deep","temperate","furrows/ridges","gray/brown")
+    kb = parse_species_data(knowledge_base_filepath)
     estimate_tree_list([sample_tree], kb)

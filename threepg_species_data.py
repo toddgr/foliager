@@ -109,8 +109,9 @@ def parse_species_data(file_path):
 
     return species_data_list
 
+if __name__ == "__main":
 # Example usage:
-species_csv = "test_data/douglas_fir_species_data.csv"
-species = parse_species_data(species_csv)
-for tree in species:
-    tree.print_species_data()
+    species_csv = "test_data/douglas_fir_species_data.csv"
+    species = parse_species_data(species_csv)
+    for tree in species:
+        tree.print_species_data()
