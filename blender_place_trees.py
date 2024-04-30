@@ -41,3 +41,20 @@ def create_forest_floor():
 
     # Set the location of the forest floor
     forest_floor.location = (0, 0, 0)  # center at origin
+    
+def create_tree(x, y, z):
+    # Path to the OBJ file
+    obj_path = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/default_tree.obj"
+
+    # Import OBJ file
+    bpy.ops.wm.obj_import(filepath=obj_path)
+
+    # Get the imported object
+    imported_obj = bpy.context.selected_objects[0]
+
+    # Set location of the imported object
+    imported_obj.location = (x, y, z)  # Example coordinates
+
+
+create_tree(0,0,0)
+create_tree(3,5,0)
