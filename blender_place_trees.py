@@ -56,25 +56,32 @@ def create_tree(x, y, z, collection_name="Trees"):
     imported_obj.location = (x, y, z)  # Example coordinates
     return imported_obj
 
-def add_trees_to_collection():
+def add_trees_to_collection(tree_list, collection_name="Trees"):
+    scene_collection = bpy.context.scene.collection
+    
+    # Link the new collection to the scene collection
+    scene_collection = bpy.context.scene.collection
+    scene_collection.children.link(new_collection)
+    
+    collection = bpy.data.collections.get(collection_name)
+    
+    for tree in tree_list:
+        collection.objects.link(tree)
+        scene_collection.objects.unlink(tree)
+        
     pass
     
+if __name__ == "__main__":
+    create_forest_floor()
+    
+    collection_name = "Trees"
+    # Create a new collection
+    new_collection = bpy.data.collections.new(collection_name)
 
-collection_name = "Trees"
-# Create a new collection
-new_collection = bpy.data.collections.new(collection_name)
-
-# Link the new collection to the scene collection
-scene_collection = bpy.context.scene.collection
-scene_collection.children.link(new_collection)
-
-create_forest_floor()
-obj1 = create_tree(0,0,0)
-obj2 = create_tree(3,5,0)
-
-scene_collection = bpy.context.scene.collection
-
-
-collection = bpy.data.collections.get(collection_name)
-collection.objects.link(obj1)
-scene_collection.objects.unlink(obj1)
+    # accumulate tree objects and location
+    tree_list = []
+    #for loop
+    tree = create_tree(0,0,0)
+    tree_list.append(tree)
+    
+    add_trees_to_collection(tree_list, collection_name)
