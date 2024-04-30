@@ -36,12 +36,19 @@ def generate_python_file(csv_file_path, output_file_path):
     with open(csv_file_path, 'r') as file:
         # Read the header to get the attribute names
         header = next(csv.reader(file))
+        parameter_init = ""
+        for parameter in header:
+            if parameter.startswith('q_') or parameter.startswith("name"):
+                parameter_init+= parameter
+            else:
+                parameter_init += parameter + "=None"
+            parameter_init += ","
     
     with open(output_file_path, 'w') as output_file:
         output_file.write(create_header())
         output_file.write("\nfrom parse_tree_input import csv_file_to_list\n\n")
         output_file.write("class SpeciesData:\n")
-        output_file.write("    def __init__(self, " + ", ".join(header) + "):\n")
+        output_file.write("    def __init__(self, " + parameter_init + "):\n")
         output_file.write("        \"\"\"\n")
         output_file.write("        Initializes the SpeciesData class with the provided attributes.\n")
         output_file.write("        \"\"\"\n")

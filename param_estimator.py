@@ -29,12 +29,23 @@ def estimate_parameters(tree, knowledge_base):
 
     # Find similar habitats in the knowledge base
     similar_habitats = [kb_tree for kb_tree in knowledge_base if tree.q_habitat == kb_tree.q_habitat]
-
+    
     print("Similar habitats for", tree.name, ":")
     for t in similar_habitats:
         print(t.name)
 
+    # Find similar canopy density/leaf shape in the knowledge base
+    # This is where the reward function would be really good; if a tree fulfills more than one of these, add a reward point
+        # And then have a dictionary for them instead 
+    similar_canopies = [kb_tree for kb_tree in knowledge_base if tree.q_canopy_density == kb_tree.q_canopy_density or \
+                        tree.q_leaf_shape == kb_tree.q_leaf_shape or tree.q_deciduous_evergreen == kb_tree.q_deciduous_evergreen]
+
+    print("\nSimilar leaves/canopies for", tree.name, ":")
+    for t in similar_canopies:
+        print(t.name)
+
     # Calculate average values for parameters
+    # In the future, this will be replaced with a reward functionality
     parameter_count = len(similar_habitats)
     if parameter_count > 0:
         # Initialize parameter sums

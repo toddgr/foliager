@@ -1,7 +1,7 @@
 """
 File name: threepg_species_data.py
 Author: Grace Todd
-Date: April 29, 2024
+Date: April 30, 2024
 Description: Holds the SpeciesData class, which will be used to manipulate common parameters
 	for each of the species used in a simulation.
 """
@@ -9,7 +9,7 @@ Description: Holds the SpeciesData class, which will be used to manipulate commo
 from parse_tree_input import csv_file_to_list
 
 class SpeciesData:
-    def __init__(self, name, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min, t_opt, t_max, df, kf, fcax_700, kd, soil_water, max_soil_water, n_theta, c_theta, lec, p2, p20, acx, sla_1, sla_0, t_sla_mid, fn0, nfn, tc, max_age, r_age, n_age, mf, mr, ms, yfx, yf0, tyf, yr, nr_min, nr_max, m_0, wsx1000, nm, k, aws, nws, ah, nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
+    def __init__(self, name,q_leaf_shape,q_canopy_density,q_deciduous_evergreen,q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color,t_min=None,t_opt=None,t_max=None,df=None,kf=None,fcax_700=None,kd=None,soil_water=None,max_soil_water=None,n_theta=None,c_theta=None,lec=None,p2=None,p20=None,acx=None,sla_1=None,sla_0=None,t_sla_mid=None,fn0=None,nfn=None,tc=None,max_age=None,r_age=None,n_age=None,mf=None,mr=None,ms=None,yfx=None,yf0=None,tyf=None,yr=None,nr_min=None,nr_max=None,m_0=None,wsx1000=None,nm=None,k=None,aws=None,nws=None,ah=None,nhb=None,nhc=None,ahl=None,nhlb=None,nhlc=None,ak=None,nkb=None,nkh=None,av=None,nvb=None,nvh=None,nvbh=None,):
         """
         Initializes the SpeciesData class with the provided attributes.
         """
@@ -75,7 +75,7 @@ class SpeciesData:
         self.nhb = nhb
         self.nhc = nhc
         self.ahl = ahl
-        self.nhlb = nhlb
+git         self.nhlb = nhlb
         self.nhlc = nhlc
         self.ak = ak
         self.nkb = nkb
