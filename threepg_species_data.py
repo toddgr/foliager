@@ -1,7 +1,7 @@
 """
 File name: threepg_species_data.py
 Author: Grace Todd
-Date: April 30, 2024
+Date: May 01, 2024
 Description: Holds the SpeciesData class, which will be used to manipulate common parameters
 	for each of the species used in a simulation.
 """
@@ -9,11 +9,12 @@ Description: Holds the SpeciesData class, which will be used to manipulate commo
 from parse_tree_input import csv_file_to_list
 
 class SpeciesData:
-    def __init__(self, name, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min=None, t_opt=None, t_max=None, df=None, kf=None, fcax_700=None, kd=None, soil_water=None, max_soil_water=None, n_theta=None, c_theta=None, lec=None, p2=None, p20=None, acx=None, sla_1=None, sla_0=None, t_sla_mid=None, fn0=None, nfn=None, tc=None, max_age=None, r_age=None, n_age=None, mf=None, mr=None, ms=None, yfx=None, yf0=None, tyf=None, yr=None, nr_min=None, nr_max=None, m_0=None, wsx1000=None, nm=None, k=None, aws=None, nws=None, ah=None, nhb=None, nhc=None, ahl=None, nhlb=None, nhlc=None, ak=None, nkb=None, nkh=None, av=None, nvb=None, nvh=None, nvbh=None, ):
+    def __init__(self, name, name_scientific, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min=None, t_opt=None, t_max=None, kf=None, fcax_700=None, kd=None, n_theta=None, c_theta=None, p2=None, p20=None, acx=None, sla_1=None, sla_0=None, t_sla_mid=None, fn0=None, nfn=None, tc=None, max_age=None, r_age=None, n_age=None, mf=None, mr=None, ms=None, yfx=None, yf0=None, tyf=None, yr=None, nr_max=None, nr_min=None, m_0=None, wsx1000=None, nm=None, k=None, aws=None, nws=None, ah=None, nhb=None, nhc=None, ahl=None, nhlb=None, nhlc=None, ak=None, nkb=None, nkh=None, av=None, nvb=None, nvh=None, nvbh=None, ):
         """
         Initializes the SpeciesData class with the provided attributes.
         """
         self.name = name
+        self.name_scientific = name_scientific
         self.q_leaf_shape = q_leaf_shape.split('/')
         self.q_canopy_density = q_canopy_density.split('/')
         self.q_deciduous_evergreen = q_deciduous_evergreen.split('/')
@@ -26,15 +27,11 @@ class SpeciesData:
         self.t_min = float(t_min)
         self.t_opt = float(t_opt)
         self.t_max = float(t_max)
-        self.df = float(df)
         self.kf = float(kf)
         self.fcax_700 = float(fcax_700)
         self.kd = float(kd)
-        self.soil_water = float(soil_water)
-        self.max_soil_water = float(max_soil_water)
         self.n_theta = float(n_theta)
         self.c_theta = float(c_theta)
-        self.lec = float(lec)
         self.p2 = float(p2)
         self.p20 = float(p20)
         self.acx = float(acx)
@@ -54,8 +51,8 @@ class SpeciesData:
         self.yf0 = float(yf0)
         self.tyf = float(tyf)
         self.yr = float(yr)
-        self.nr_min = float(nr_min)
         self.nr_max = float(nr_max)
+        self.nr_min = float(nr_min)
         self.m_0 = float(m_0)
         self.wsx1000 = float(wsx1000)
         self.nm = float(nm)
@@ -96,8 +93,6 @@ def parse_species_data(file_path):
 
     for tree_data in species_list:
         species_instance = SpeciesData(*tree_data)
-        # delete later
-        species_instance.print_species_data()
         species_data_list.append(species_instance)
 
     return species_data_list
