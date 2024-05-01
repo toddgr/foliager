@@ -1,4 +1,0 @@
-# Default_environment_chart.csv
-# Based on the 3PG climactic variables, these parameters have an influence over tree distribution in a scene
-#Monthly Mean Daily Temperature, Solar Radiation, Vapour Pressure Deficit (VPD), Monthly Total Rainfall, Monthly Frost Days
-tmax,tmin,rain,solar_rad,frost_days

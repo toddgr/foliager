@@ -10,8 +10,13 @@ Description: This file aims to test out different scripts for the Blender API, s
 import bpy
 import bmesh
 import csv
+import sys
 
-FOREST_FLOOR_SCALE = 60
+sys.path.append('C:/Users/Grace/Documents/Masters_Project/foliager/')
+
+#import foliager
+
+FOREST_FLOOR_SCALE = 20
 
 def create_forest_floor():
 
@@ -45,7 +50,7 @@ def create_forest_floor():
     forest_floor.location = (0, 0, 0)  # center at origin
     
     
-def create_tree(x, y,dbh, height, collection_name="Trees"):
+def create_tree(x, y,dbh, height, name, collection_name="Trees"):
     # Path to the OBJ file
     obj_path = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/default_tree.obj"
 
@@ -58,7 +63,8 @@ def create_tree(x, y,dbh, height, collection_name="Trees"):
     # Set location of the imported object
     imported_obj.location = (x, y, 0)  # Example coordinates
     
-    imported_obj.scale = (dbh, height, dbh) #x, z, y? for some reason?
+    imported_obj.scale = (dbh, height/9, dbh) #x, z, y? for some reason?
+    imported_obj.name = name
     
     return imported_obj
 
@@ -79,9 +85,9 @@ def add_trees_to_collection(tree_list, collection_name="Trees"):
     pass
     
 
-if __name__ == "__main__":
+def gen_trees_in_blender(coordinates_filepath):
     # filepaths
-    coordinates_filepath = "C:/Users/Grace/Documents/Masters_Project/douglas_fir_plot_data.csv"
+    #coordinates_filepath = "C:/Users/Grace/Documents/Masters_Project/douglas_fir_plot_data.csv"
     
     create_forest_floor()
     
@@ -100,7 +106,8 @@ if __name__ == "__main__":
             y = (float(row['z']) * FOREST_FLOOR_SCALE * 2) - FOREST_FLOOR_SCALE # counterintuitive but temporary -- with newer data files, I'll use y instead
             height = float(row['height'])
             dbh = float(row['dbh'])
-            tree = create_tree(x,y,dbh,height)
+            name = row['name']
+            tree = create_tree(x,y,dbh,height, name)
             tree_list.append(tree)
     
     add_trees_to_collection(tree_list, collection_name)

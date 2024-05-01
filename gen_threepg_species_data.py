@@ -56,10 +56,10 @@ def generate_python_file(csv_file_path, output_file_path):
         for attribute in header:
             if attribute.startswith('q_'):
                 output_file.write(f"        self.{attribute} = {attribute}.split('/')\n")
-            if attribute.startswith('name'):
+            elif attribute.startswith('name'):
                 output_file.write(f"        self.{attribute} = {attribute}\n")
             else:
-                output_file.write(f"        self.{attribute} = {attribute}\n")
+                output_file.write(f"        self.{attribute} = float({attribute})\n")
         
         output_file.write("\n    def print_species_data(self):\n")
         output_file.write("        \"\"\"\n")
@@ -81,10 +81,10 @@ def generate_python_file(csv_file_path, output_file_path):
         output_file.write("    return species_data_list\n\n")
 
         output_file.write("# Example usage:\n")
-        output_file.write("species_csv = \"test_data/douglas_fir_species_data.csv\"\n")
-        output_file.write(f"species = parse_species_data(species_csv)\n")
-        output_file.write("for tree in species:\n")
-        output_file.write("    tree.print_species_data()\n")
+        output_file.write("#species_csv = \"test_data/douglas_fir_species_data.csv\"\n")
+        output_file.write(f"#species = parse_species_data(species_csv)\n")
+        output_file.write("#for tree in species:\n")
+        output_file.write("    #tree.print_species_data()\n")
 
 # Example usage:
 generate_python_file(csv_file, gen_file)

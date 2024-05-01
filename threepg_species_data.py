@@ -15,75 +15,66 @@ class SpeciesData:
         """
         self.name = name
         self.q_leaf_shape = q_leaf_shape.split('/')
-        self.q_leaf_shape = q_leaf_shape
         self.q_canopy_density = q_canopy_density.split('/')
-        self.q_canopy_density = q_canopy_density
         self.q_deciduous_evergreen = q_deciduous_evergreen.split('/')
-        self.q_deciduous_evergreen = q_deciduous_evergreen
         self.q_leaf_color = q_leaf_color.split('/')
-        self.q_leaf_color = q_leaf_color
         self.q_tree_form = q_tree_form.split('/')
-        self.q_tree_form = q_tree_form
         self.q_tree_roots = q_tree_roots.split('/')
-        self.q_tree_roots = q_tree_roots
         self.q_habitat = q_habitat.split('/')
-        self.q_habitat = q_habitat
         self.q_bark_texture = q_bark_texture.split('/')
-        self.q_bark_texture = q_bark_texture
         self.q_bark_color = q_bark_color.split('/')
-        self.q_bark_color = q_bark_color
-        self.t_min = t_min
-        self.t_opt = t_opt
-        self.t_max = t_max
-        self.df = df
-        self.kf = kf
-        self.fcax_700 = fcax_700
-        self.kd = kd
-        self.soil_water = soil_water
-        self.max_soil_water = max_soil_water
-        self.n_theta = n_theta
-        self.c_theta = c_theta
-        self.lec = lec
-        self.p2 = p2
-        self.p20 = p20
-        self.acx = acx
-        self.sla_1 = sla_1
-        self.sla_0 = sla_0
-        self.t_sla_mid = t_sla_mid
-        self.fn0 = fn0
-        self.nfn = nfn
-        self.tc = tc
-        self.max_age = max_age
-        self.r_age = r_age
-        self.n_age = n_age
-        self.mf = mf
-        self.mr = mr
-        self.ms = ms
-        self.yfx = yfx
-        self.yf0 = yf0
-        self.tyf = tyf
-        self.yr = yr
-        self.nr_min = nr_min
-        self.nr_max = nr_max
-        self.m_0 = m_0
-        self.wsx1000 = wsx1000
-        self.nm = nm
-        self.k = k
-        self.aws = aws
-        self.nws = nws
-        self.ah = ah
-        self.nhb = nhb
-        self.nhc = nhc
-        self.ahl = ahl
-        self.nhlb = nhlb
-        self.nhlc = nhlc
-        self.ak = ak
-        self.nkb = nkb
-        self.nkh = nkh
-        self.av = av
-        self.nvb = nvb
-        self.nvh = nvh
-        self.nvbh = nvbh
+        self.t_min = float(t_min)
+        self.t_opt = float(t_opt)
+        self.t_max = float(t_max)
+        self.df = float(df)
+        self.kf = float(kf)
+        self.fcax_700 = float(fcax_700)
+        self.kd = float(kd)
+        self.soil_water = float(soil_water)
+        self.max_soil_water = float(max_soil_water)
+        self.n_theta = float(n_theta)
+        self.c_theta = float(c_theta)
+        self.lec = float(lec)
+        self.p2 = float(p2)
+        self.p20 = float(p20)
+        self.acx = float(acx)
+        self.sla_1 = float(sla_1)
+        self.sla_0 = float(sla_0)
+        self.t_sla_mid = float(t_sla_mid)
+        self.fn0 = float(fn0)
+        self.nfn = float(nfn)
+        self.tc = float(tc)
+        self.max_age = float(max_age)
+        self.r_age = float(r_age)
+        self.n_age = float(n_age)
+        self.mf = float(mf)
+        self.mr = float(mr)
+        self.ms = float(ms)
+        self.yfx = float(yfx)
+        self.yf0 = float(yf0)
+        self.tyf = float(tyf)
+        self.yr = float(yr)
+        self.nr_min = float(nr_min)
+        self.nr_max = float(nr_max)
+        self.m_0 = float(m_0)
+        self.wsx1000 = float(wsx1000)
+        self.nm = float(nm)
+        self.k = float(k)
+        self.aws = float(aws)
+        self.nws = float(nws)
+        self.ah = float(ah)
+        self.nhb = float(nhb)
+        self.nhc = float(nhc)
+        self.ahl = float(ahl)
+        self.nhlb = float(nhlb)
+        self.nhlc = float(nhlc)
+        self.ak = float(ak)
+        self.nkb = float(nkb)
+        self.nkh = float(nkh)
+        self.av = float(av)
+        self.nvb = float(nvb)
+        self.nvh = float(nvh)
+        self.nvbh = float(nvbh)
 
     def print_species_data(self):
         """
@@ -105,13 +96,14 @@ def parse_species_data(file_path):
 
     for tree_data in species_list:
         species_instance = SpeciesData(*tree_data)
+        # delete later
+        species_instance.print_species_data()
         species_data_list.append(species_instance)
 
     return species_data_list
 
-if __name__ == "__main":
 # Example usage:
-    species_csv = "test_data/douglas_fir_species_data.csv"
-    species = parse_species_data(species_csv)
-    for tree in species:
-        tree.print_species_data()
+#species_csv = "test_data/douglas_fir_species_data.csv"
+#species = parse_species_data(species_csv)
+#for tree in species:
+    #tree.print_species_data()

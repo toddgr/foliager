@@ -20,6 +20,8 @@ from parse_tree_input import parse_csv_file, csv_file_to_string
 from tree_class import Tree, TreeList
 from plot_trees_random import init_trees
 from threepg_species_data import parse_species_data, get_tree_names
+from threepg import threepg
+#from blender_place_trees import gen_trees_in_blender
 
 def ask_nlp(prompt, model="gpt-3.5-turbo"):
     # Ask ChatGPT a question, return the answer.
@@ -56,7 +58,7 @@ def generate_prompt():
 
 if __name__ == '__main__':
     asknlp = False # If we want to generate new data --> usage is limited
-    threepg = True # If we want to use 3PG
+    three_pg = True # If we want to use 3PG
  
     if asknlp: 
         prompt, location = generate_prompt()
@@ -74,25 +76,27 @@ if __name__ == '__main__':
         print(treelist.get_tree_names())
         print(treelist.get_all_tree_info())
     else:
-        if threepg:
+        if three_pg:
             # Douglas Fir Data
             location = 'Portland Oregon'
             coordinates_file = make_valid_filename("douglas fir coordinates")
-            foliage_file = "Test_Data/douglas_fir_species_data.csv"
+            foliage_file = "Test_Data/douglas_birch_species_data.csv"
             foliage_list = parse_species_data(foliage_file) #Name, Growth Rate, Average Lifespan
             treelist = get_tree_names(foliage_list)
-            print("Generating sample Douglas Fir coordinates to CSV...")
-        else:
-        # Use portland data
-            location = 'Portland Oregon'
-            coordinates_file = make_valid_filename(location + " coordinates")
-            foliage_file = "Test_Data/Portland_Oregon_foliage.csv"
-            foliage_list = parse_csv_file(foliage_file) #Name, Growth Rate, Average Lifespan
-            treelist = TreeList(foliage_list)
-            print(treelist.get_tree_names())
-            print(treelist.get_all_tree_info())
+            print("Generating sample coordinates to CSV...")
+        # else:
+        # # Use portland data
+        #     location = 'Portland Oregon'
+        #     coordinates_file = make_valid_filename(location + " coordinates")
+        #     foliage_file = "Test_Data/Portland_Oregon_foliage.csv"
+        #     foliage_list = parse_csv_file(foliage_file) #Name, Growth Rate, Average Lifespan
+        #     treelist = TreeList(foliage_list)
+        #     print(treelist.get_tree_names())
+        #     print(treelist.get_all_tree_info())
 
     # Now to plot these trees on a graph of size (1,1)
-    init_trees(foliage_file, coordinates_file, plot =True)
+    init_trees(foliage_file, coordinates_file, plot =False)
+    #gen_trees_in_blender(coordinates_file) # have to have bpy and stuff for this line 
+    threepg("test_data/douglas_fir_climate_data.csv", foliage_file, "OUTPUT_DATA.csv")
 
     
