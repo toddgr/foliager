@@ -7,6 +7,7 @@ Description: Holds the SpeciesData class, which will be used to manipulate commo
 """
 
 from parse_tree_input import csv_file_to_list
+from threepg_env_data import Environment
 
 class SpeciesData:
     def __init__(self, name, name_scientific, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min=None, t_opt=None, t_max=None, kf=None, fcax_700=None, kd=None, n_theta=None, c_theta=None, p2=None, p20=None, acx=None, sla_1=None, sla_0=None, t_sla_mid=None, fn0=None, nfn=None, tc=None, max_age=None, r_age=None, n_age=None, mf=None, mr=None, ms=None, yfx=None, yf0=None, tyf=None, yr=None, nr_max=None, nr_min=None, m_0=None, wsx1000=None, nm=None, k=None, aws=None, nws=None, ah=None, nhb=None, nhc=None, ahl=None, nhlb=None, nhlc=None, ak=None, nkb=None, nkh=None, av=None, nvb=None, nvh=None, nvbh=None, ):
@@ -96,6 +97,17 @@ def parse_species_data(file_path):
         species_data_list.append(species_instance)
 
     return species_data_list
+
+def parse_env_data(file_path):
+    """ Parses through the environment data for the forest
+        (inlcudes both climate data and stand data) to be 
+        used in 3-PG """
+    # Parse the CSV line into a list
+    env_list = csv_file_to_list(file_path)
+    # Put those values into an Environment class
+    environment = Environment(*env_list)
+
+    return environment
 
 # Example usage:
 #species_csv = "test_data/douglas_fir_species_data.csv"

@@ -7,7 +7,7 @@ Description: My attempt at converting 3-PG to Python so that I can use it in my 
 """
 
 import math # for log
-from threepg_species_data import parse_species_data
+from threepg_species_data import parse_species_data, parse_env_data
 from plot_trees_random import init_trees, init_trees_dont_write_yet
 import csv
 import random
@@ -270,7 +270,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
     d = 0.8
     n = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
-    environment_list = parse_species_data(environment_data_filename)
+    environment = parse_env_data(environment_data_filename)
     height_dbh_list = [['name', 'height', 'dbh']]
     for species in speciesdata_list:
         #print(f"SPECIES: {species.name}, max soil water = {species.max_soil_water}, soil_water = {species.soil_water}")
