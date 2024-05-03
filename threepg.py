@@ -554,7 +554,7 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
         while height_dbh[tree][0] == tree_coordinates[tree][0] and i < len(tree_coordinates):
             
             # assign slightly randomized values to the height and dbh
-            factor = 0.1
+            factor = 0.5
             random_height_offset = random.uniform(-factor, factor)
             new_height = float(height_dbh[tree][1]) + random_height_offset
 
