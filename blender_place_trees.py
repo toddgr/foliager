@@ -50,40 +50,43 @@ def create_forest_floor():
     forest_floor.location = (0, 0, 0)  # center at origin
     
     
-def create_tree(x, y,dbh, height, name, collection_name="Trees"):
+def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, collection_name="Trees"):
     # Path to the OBJ file
-    obj_path = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/default_tree.obj"
+    canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/pyramidal_canopy.obj"
 
     # Import OBJ file
-    bpy.ops.wm.obj_import(filepath=obj_path)
+    bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
     # Get the imported object
-    imported_obj = bpy.context.selected_objects[0]
+    canopy = bpy.context.selected_objects[0]
 
     # Set location of the imported object
-    imported_obj.location = (x, y, 0)  # Example coordinates
+    canopy_height = height-live_crown_length
+    canopy.location = (x, y, canopy_height)  # Example coordinates
     
-    imported_obj.scale = (dbh, height/9, dbh) #x, z, y? for some reason?
-    imported_obj.name = name
+    canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y? for some reason?
+    canopy.name = name
     
-    return imported_obj
+    return canopy
 
 
 def add_trees_to_collection(tree_list, collection_name="Trees"):
-    scene_collection = bpy.context.scene.collection
+    # Check if the collection already exists
+    if collection_name in bpy.data.collections:
+        new_collection = bpy.data.collections[collection_name]
+        bpy.context.scene.collection.children.link(new_collection)
+    else:
+        # Create a new collection for trees
+        new_collection = bpy.data.collections.new(collection_name)
     
-    # Link the new collection to the scene collection
-    scene_collection = bpy.context.scene.collection
-    scene_collection.children.link(new_collection)
+        # Link the new collection to the scene collection
+        bpy.context.scene.collection.children.link(new_collection)
     
-    collection = bpy.data.collections.get(collection_name)
-    
+    # Link tree objects to the new collection and unlink from the scene collection
     for tree in tree_list:
-        collection.objects.link(tree)
-        scene_collection.objects.unlink(tree)
-   
-    pass
-    
+        new_collection.objects.link(tree)
+        bpy.context.scene.collection.objects.unlink(tree)
+
 
 def gen_trees_in_blender(coordinates_filepath):
     # filepaths
@@ -107,7 +110,11 @@ def gen_trees_in_blender(coordinates_filepath):
             height = float(row['height'])
             dbh = float(row['dbh'])
             name = row['name']
-            tree = create_tree(x,y,dbh,height, name)
+            live_crown_length = float(row['lcl'])
+            crown_diameter = float(row['c_diameter'])
+            tree = create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter)
             tree_list.append(tree)
     
-    add_trees_to_collection(tree_list, collection_name)
+    add_trees_to_collection(tree_list)
+    
+gen_trees_in_blender("C:/Users/Grace/Documents/Masters_Project/foliager/OUTPUT_DATA.csv")
