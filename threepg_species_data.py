@@ -1,7 +1,7 @@
 """
 File name: threepg_species_data.py
 Author: Grace Todd
-Date: May 01, 2024
+Date: May 03, 2024
 Description: Holds the SpeciesData class, which will be used to manipulate common parameters
 	for each of the species used in a simulation.
 """
