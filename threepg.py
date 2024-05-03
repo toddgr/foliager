@@ -499,7 +499,6 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             #h = ah * pow(b, nhb) # for data from individual tree data, not used
 
             # live crown length
-            # distance between the top live foliage and the lowest live foliage
             hl = 1.3 + ahl * pow(E, (-nhlb/b)) + nhlc * b # for single tree species
             #hl = ahl * pow(b, nhlb) * pow(hl, nhll) # for data from individual tree data, not used
 
@@ -522,9 +521,10 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
         #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
         print(f"Live crown length: {hl}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
         #plot the trees
-        height = h # mean tree height
-        dbh = math.sqrt((4 * ba) / math.pi) # double check this
-        height_dbh_list.append([species.name, height, dbh ])
+        total_height = h # mean tree height
+        live_crown_length = hl # distance between the top live foliage and the lowest live foliage
+        dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
+        height_dbh_list.append([species.name, total_height, dbh, live_crown_length, crown_diameter])
     return height_dbh_list
             
 # def init_trees():
@@ -546,7 +546,7 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     tree_coordinates = init_trees_dont_write_yet(speciesdata_filename) # returns [name, x, z]
 
     # for each of the 3-PG data entries in the height_dbh
-    tree_output = [['name', 'x', 'z', 'height', 'dbh']]
+    tree_output = [['name', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
     for tree in range(1, len(height_dbh)):
         # while we're talking about the same tree species
         i = 1 # counter for the tree coordinates
@@ -560,8 +560,15 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
 
             random_dbh_offset = random.uniform(-factor, factor)
             new_dbh = float(height_dbh[tree][2]) + random_dbh_offset
+
+            random_lcl_offset = random.uniform(-factor, factor)
+            new_lcl = float(height_dbh[tree][3]) + random_lcl_offset
+
+            random_c_diam_offset = random.uniform(-factor, factor)
+            new_c_diam = float(height_dbh[tree][4]) + random_c_diam_offset
+
             # append it to the tree_coordinate entry
-            tree_output.append([tree_coordinates[i][0], tree_coordinates[i][1], tree_coordinates[i][2], new_height, new_dbh])
+            tree_output.append([tree_coordinates[i][0], tree_coordinates[i][1], tree_coordinates[i][2], new_height, new_dbh, new_lcl, new_c_diam])
             i += 1
 
     with open(outputdata_filename, 'w', newline='') as csvfile:
