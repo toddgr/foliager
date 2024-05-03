@@ -79,7 +79,7 @@ if __name__ == '__main__':
         if three_pg:
             # Douglas Fir Data
             location = 'Portland Oregon'
-            coordinates_file = make_valid_filename("douglas fir coordinates")
+            coordinates_file = make_valid_filename("douglas birch coordinates")
             foliage_file = "Test_Data/douglas_birch_species_data.csv"
             foliage_list = parse_species_data(foliage_file) #Name, Growth Rate, Average Lifespan
             treelist = get_tree_names(foliage_list)
@@ -95,7 +95,9 @@ if __name__ == '__main__':
         #     print(treelist.get_all_tree_info())
 
     # Now to plot these trees on a graph of size (1,1)
-    init_trees(foliage_file, coordinates_file, plot =False)
+    #init_trees(foliage_file, coordinates_file, plot =True)
+
+    print("calculating the dbh and height for trees...")
     #gen_trees_in_blender(coordinates_file) # have to have bpy and stuff for this line 
     threepg("test_data/douglas_fir_climate_data.csv", foliage_file, "OUTPUT_DATA.csv")
 
