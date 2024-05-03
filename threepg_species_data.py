@@ -98,16 +98,6 @@ def parse_species_data(file_path):
 
     return species_data_list
 
-def parse_env_data(file_path):
-    """ Parses through the environment data for the forest
-        (inlcudes both climate data and stand data) to be 
-        used in 3-PG """
-    # Parse the CSV line into a list
-    env_list = csv_file_to_list(file_path)
-    # Put those values into an Environment class
-    environment = Environment(*env_list)
-
-    return environment
 
 # Example usage:
 #species_csv = "test_data/douglas_fir_species_data.csv"

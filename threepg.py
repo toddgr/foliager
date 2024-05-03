@@ -7,7 +7,8 @@ Description: My attempt at converting 3-PG to Python so that I can use it in my 
 """
 
 import math # for log
-from threepg_species_data import parse_species_data, parse_env_data
+from threepg_species_data import parse_species_data
+from parse_tree_input import csv_file_to_list
 from plot_trees_random import init_trees, init_trees_dont_write_yet
 import csv
 import random
@@ -31,12 +32,14 @@ class Month:
     """
         Holds important information for visualization based on data from the site about the current month.
     """
-    def __init__(self, site_tmax, site_tmin, site_rain, site_solar_rad, site_frost_days):
+    def __init__(self, site_tmax, site_tmin, site_rain, site_solar_rad, site_frost_days, site_soil_water, site_max_soil_water):
         self.tmax = site_tmax   # Average maximum temperature for the month
         self.tmin = site_tmin   # Average minimum temperature for the month
         self.rain = site_rain   # Average rainfall for the month
         self.solar_rad = site_solar_rad # Average solar radiation for the month
         self.frost_days = site_frost_days   # Average number of frost days for the month
+        self.soil_water = site_soil_water
+        self.max_soil_water = site_max_soil_water
 
 """
     ==================== SITE DATA ========================
@@ -242,17 +245,37 @@ def read_climate_data(file_path):
                 site_tmin = float(row['tmin']),
                 site_rain = float(row['rain']),
                 site_solar_rad = float(row['solar_rad']),
-                site_frost_days = float(row['frost_days'])
+                site_frost_days = float(row['frost_days']),
+                site_soil_water = float(row['soil_water']),
+                site_max_soil_water = float(row['max_soil_water'])
             ))
+
             init_month_data.append(Month(
                 site_tmax=month_data[i].tmax,
                 site_tmin=month_data[i].tmin,
                 site_rain=month_data[i].rain,
                 site_solar_rad=month_data[i].solar_rad,
                 site_frost_days=month_data[i].frost_days,
+                site_soil_water=month_data[i].soil_water,
+                site_max_soil_water=month_data[i].max_soil_water
             ))
             i = i + 1
     return month_data, init_month_data
+
+def parse_env_data(file_path):
+    """ Parses through the environment data for the forest
+        (inlcudes both climate data and stand data) to be 
+        used in 3-PG """
+    # Parse the CSV line into a list
+    env_list = csv_file_to_list(file_path)
+    # Put those values into an Environment class
+    env_data_list = []
+
+    for month_data in env_list:
+        env_instance = Month(*month_data)
+        env_data_list.append(env_instance)
+
+    return env_data_list
 
 """
     ================= COMPUTE THE OUTPUTS ====================
@@ -324,7 +347,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             fd = pow(E, (-species.kd * d))
 
             # soil water mod
-            base1 = ((1. - species.soil_water)/species.max_soil_water)/species.c_theta
+            base1 = ((1. - month_data[current_month].soil_water)/month_data[current_month].max_soil_water)/species.c_theta
             ftheta = 1./(1. + pow(base1, species.n_theta))
 
             # age mod --> used if denoted in glui
@@ -359,7 +382,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             
             # light absorption --> absorption photosynthetically active radiation (PAR)
             # Often called o/pa
-            e_exp = (-species.lec * l)/gac
+            e_exp = (-species.k * l)/gac
             par = (1. - pow(E, e_exp)) * 2.3 * gac * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
         
             # Computing GPP and NPP
@@ -397,8 +420,14 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
             # litterfall
             current_age = age0 + t/12
-            lf_exp = -(current_age/species.tyf) * math.log(1.0 + species.yfx/species.yf0)
-            yf = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(E, lf_exp))
+            # according to 3-PG manual, page 33:
+                # For deciduous species, the litterfall rates yf0 and yfx may be considered 
+                # to be 0 because all of the foliage is lost at the end of the growing season anyway.
+            if species.q_deciduous_evergreen == ['deciduous'] or species.yf0 == 0 or species.yfx == 0:
+                yf = 0  # otherwise we get a divide by zero
+            else: 
+                lf_exp = -(current_age/species.tyf) * math.log(1.0 + species.yfx/species.yf0)
+                yf = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(E, lf_exp))
 
             # Computing biomass
             # using init_wx and just plain n here because this is designed to be 
