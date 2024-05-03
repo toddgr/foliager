@@ -423,7 +423,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             # according to 3-PG manual, page 33:
                 # For deciduous species, the litterfall rates yf0 and yfx may be considered 
                 # to be 0 because all of the foliage is lost at the end of the growing season anyway.
-            if species.q_deciduous_evergreen == ['deciduous'] or species.yf0 == 0 or species.yfx == 0:
+            if species.q_deciduous_evergreen == ['deciduous'] and (species.yf0 == 0 or species.yfx == 0):
                 yf = 0  # otherwise we get a divide by zero
             else: 
                 lf_exp = -(current_age/species.tyf) * math.log(1.0 + species.yfx/species.yf0)
@@ -499,11 +499,12 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             #h = ah * pow(b, nhb) # for data from individual tree data, not used
 
             # live crown length
+            # distance between the top live foliage and the lowest live foliage
             hl = 1.3 + ahl * pow(E, (-nhlb/b)) + nhlc * b # for single tree species
             #hl = ahl * pow(b, nhlb) * pow(hl, nhll) # for data from individual tree data, not used
 
             # crown diameter
-            k = ak * pow(b, nkb) * pow(h, nkh)
+            crown_diameter = ak * pow(b, nkb) * pow(h, nkh)
 
             # basal area
             ba = (PI * b * b)/40000
@@ -519,7 +520,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
         # some test prints
         print(f"\n======= COMPUTING AT T={t} FOR SPECIES {species.name} =======")
         #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
-        print(f"Live crown length: {hl}\ncrown diameter: {k}\nbasal area: {ba}\nstand volume: {vs}")
+        print(f"Live crown length: {hl}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
         #plot the trees
         height = h # mean tree height
         dbh = math.sqrt((4 * ba) / math.pi) # double check this
@@ -548,7 +549,6 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     tree_output = [['name', 'x', 'z', 'height', 'dbh']]
     for tree in range(1, len(height_dbh)):
         # while we're talking about the same tree species
-        print(f"plotting for {height_dbh[tree][0]}")
         i = 1 # counter for the tree coordinates
 
         while height_dbh[tree][0] == tree_coordinates[tree][0] and i < len(tree_coordinates):
@@ -562,7 +562,6 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
             new_dbh = float(height_dbh[tree][2]) + random_dbh_offset
             # append it to the tree_coordinate entry
             tree_output.append([tree_coordinates[i][0], tree_coordinates[i][1], tree_coordinates[i][2], new_height, new_dbh])
-            print(f"entry: {[tree_coordinates[i][0], tree_coordinates[i][1], tree_coordinates[i][2], new_height, new_dbh]}")
             i += 1
 
     with open(outputdata_filename, 'w', newline='') as csvfile:
