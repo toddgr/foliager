@@ -260,7 +260,7 @@ def read_climate_data(file_path):
     We're basically just assigning and calculating values for all of the globals that we defined above. 
     Now that I think of it... breaking this up might help to optimize the proces. Maybe.
 """
-def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
+def compute(environment_data_filename, speciesdata_filename, outputdata_filename, t):
     """
         Takes in climate data, species data, time in months since beginning of simulation
         Computes the outputs for the 3PG algorithm
@@ -270,11 +270,11 @@ def compute(climatedata_filename, speciesdata_filename, outputdata_filename, t):
     d = 0.8
     n = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
-    standdata_list = parse_species_data(standdata_filename)
+    environment_list = parse_species_data(environment_data_filename)
     height_dbh_list = [['name', 'height', 'dbh']]
     for species in speciesdata_list:
-        print(f"SPECIES: {species.name}, max soil water = {species.max_soil_water}, soil_water = {species.soil_water}")
-        month_data, init_month_data = read_climate_data(climatedata_filename)
+        #print(f"SPECIES: {species.name}, max soil water = {species.max_soil_water}, soil_water = {species.soil_water}")
+        month_data, init_month_data = read_climate_data(environment_data_filename)
         # values of biomass pools that will be used throughout the incremental calculations
         last_wf = init_wf
         last_ws = init_ws
