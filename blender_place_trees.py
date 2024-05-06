@@ -50,24 +50,81 @@ def create_forest_floor():
     forest_floor.location = (0, 0, 0)  # center at origin
     
     
-def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, collection_name="Trees"):
-    # Path to the OBJ file
-    canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/pyramidal_canopy.obj"
+#def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, collection_name="Trees"):
+#    # Create the canopy
+#    canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/canopy_1.obj"
+#    bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
-    # Import OBJ file
+#    # Get the canopy
+#    canopy = bpy.context.selected_objects[0]
+
+#    # Set location of the canopy
+#    canopy_height = height-live_crown_length
+#    canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y
+#    canopy.location = (x, y, live_crown_length)
+#    
+#    # Create the trunk
+#    trunk_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/trunk.obj"
+#    bpy.ops.wm.obj_import(filepath=trunk_filepath)
+
+#    # Get the trunk
+#    trunk = bpy.context.selected_objects[0]
+
+#    # Set location of the imported object
+#    trunk_height = height-live_crown_length
+#    trunk.scale = (dbh, trunk_height, dbh) #x, z, y? for some reason?
+#    trunk.location = (x, y, 0)
+#    
+#    # Merge the trunk and canopy
+#    bpy.context.view_layer.objects.active = trunk
+#    bpy.ops.object.modifier_add(type='BOOLEAN')
+#    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+#    bpy.context.object.modifiers["Boolean"].object = canopy
+#    bpy.ops.object.modifier_apply(modifier="Boolean")
+#    
+#    # Rename the merged object as the tree
+#    tree = trunk
+#    tree.name = name
+#    
+#    return tree
+
+def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, collection_name="Trees"):
+    # Create the canopy
+    canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/canopy_1.obj"
     bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
-    # Get the imported object
+    # Get the canopy
     canopy = bpy.context.selected_objects[0]
 
-    # Set location of the imported object
-    canopy_height = height-live_crown_length
-    canopy.location = (x, y, canopy_height)  # Example coordinates
+    # Set location and scale of the canopy
+    canopy_height = live_crown_length / 3.718 # Temporary solution!!!
+    canopy.location = (x, y, canopy_height)
+    canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y
     
-    canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y? for some reason?
-    canopy.name = name
+    # Create the trunk
+    trunk_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/trunk.obj"
+    bpy.ops.wm.obj_import(filepath=trunk_filepath)
+
+    # Get the trunk
+    trunk = bpy.context.selected_objects[0]
+
+    # Set location and scale of the imported object
+    trunk_height = height - live_crown_length  # Adjusted height calculation
+    trunk.scale = (dbh, trunk_height, dbh) #x, z, y? for some reason?
+    trunk.location = (x, y, 0)  # Adjusted location to match canopy
     
-    return canopy
+    # Merge the trunk and canopy
+    bpy.context.view_layer.objects.active = trunk
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+    bpy.context.object.modifiers["Boolean"].object = canopy
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    # Rename the merged object as the tree
+    tree = trunk
+    tree.name = name
+    
+    return tree
 
 
 def add_trees_to_collection(tree_list, collection_name="Trees"):
@@ -106,7 +163,7 @@ def gen_trees_in_blender(coordinates_filepath):
         reader = csv.DictReader(csvfile)
         for row in reader:
             x = (float(row['x']) * FOREST_FLOOR_SCALE * 2) - FOREST_FLOOR_SCALE
-            y = (float(row['z']) * FOREST_FLOOR_SCALE * 2) - FOREST_FLOOR_SCALE # counterintuitive but temporary -- with newer data files, I'll use y instead
+            y = (float(row['z']) * FOREST_FLOOR_SCALE * 2) - FOREST_FLOOR_SCALE# counterintuitive but temporary -- with newer data files, I'll use y instead
             height = float(row['height'])
             dbh = float(row['dbh'])
             name = row['name']
@@ -116,5 +173,5 @@ def gen_trees_in_blender(coordinates_filepath):
             tree_list.append(tree)
     
     add_trees_to_collection(tree_list)
-    
-gen_trees_in_blender("C:/Users/Grace/Documents/Masters_Project/foliager/OUTPUT_DATA.csv")
+
+gen_trees_in_blender("C:/Users/Grace/Documents/Masters_Project/foliager/OUTPUT_DATA_single.csv")
