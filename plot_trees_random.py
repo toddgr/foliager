@@ -160,7 +160,7 @@ def init_trees_dont_write_yet(foliage_file, threepg=True, plot=False):
         plt.show()
 
     # Prepare rows for output
-    rows = [['name', 'x', 'z']]
+    rows = [['name','x', 'z']]
     for x, z, label in zip(x_values, z_values, tree_name):
         rows.append([label, x, z])
 
