@@ -551,12 +551,10 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     tree = 0
     i = 1
     while tree <= len(height_dbh) - 1:
-        print(f"while {tree} < {len(height_dbh)}:")
         if tree_coordinates[i][0] == height_dbh[tree][0] and i < len(tree_coordinates)-1: #if the names are the same
             #TODO tree form is a list of different values. Eventually, it would be nice to randomly
             # assign a tree form to different varieties of the same tree. 
-            tree_form = height_dbh[tree][1]
-            print(f"tree_form = height_dbh[{tree}][1] = {tree_form}")
+            tree_form = height_dbh[tree][1][0]
 
             # assign slightly randomized values to the height and dbh
             factor = 0.5
