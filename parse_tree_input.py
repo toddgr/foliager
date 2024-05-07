@@ -28,21 +28,6 @@ def parse_tree_file(file_path):
 
     return tree_list
 
-def parse_csv_file(file_path):
-    # Parses a CSV file output from NLP into Tree and TreeList objects
-    # Needs to be updated as more attributes for trees are included
-    trees = []
-
-    with open(file_path, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            name = row['Name']
-            growth_rate = row['Growth Rate']
-            average_lifespan = row['Average Lifespan']
-            tree = Tree(name, growth_rate, average_lifespan)
-            trees.append(tree)
-
-    return trees
 
 def csv_file_to_string(file_path):
     # Reads in the default_tree_chart.csv headers and converts them to a 

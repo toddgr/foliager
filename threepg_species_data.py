@@ -1,16 +1,15 @@
 """
 File name: threepg_species_data.py
 Author: Grace Todd
-Date: May 03, 2024
+Date: May 07, 2024
 Description: Holds the SpeciesData class, which will be used to manipulate common parameters
 	for each of the species used in a simulation.
 """
 
 from parse_tree_input import csv_file_to_list
-from threepg_env_data import Environment
 
 class SpeciesData:
-    def __init__(self, name, name_scientific, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min=None, t_opt=None, t_max=None, kf=None, fcax_700=None, kd=None, n_theta=None, c_theta=None, p2=None, p20=None, acx=None, sla_1=None, sla_0=None, t_sla_mid=None, fn0=None, nfn=None, tc=None, max_age=None, r_age=None, n_age=None, mf=None, mr=None, ms=None, yfx=None, yf0=None, tyf=None, yr=None, nr_max=None, nr_min=None, m_0=None, wsx1000=None, nm=None, k=None, aws=None, nws=None, ah=None, nhb=None, nhc=None, ahl=None, nhlb=None, nhlc=None, ak=None, nkb=None, nkh=None, av=None, nvb=None, nvh=None, nvbh=None, ):
+    def __init__(self, name, name_scientific, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min=0, t_opt=0, t_max=0, kf=0, fcax_700=0, kd=0, n_theta=0, c_theta=0, p2=0, p20=0, acx=0, sla_1=0, sla_0=0, t_sla_mid=0, fn0=0, nfn=0, tc=0, max_age=0, r_age=0, n_age=0, mf=0, mr=0, ms=0, yfx=0, yf0=0, tyf=0, yr=0, nr_max=0, nr_min=0, m_0=0, wsx1000=0, nm=0, k=0, aws=0, nws=0, ah=0, nhb=0, nhc=0, ahl=0, nhlb=0, nhlc=0, ak=0, nkb=0, nkh=0, av=0, nvb=0, nvh=0, nvbh=0, ):
         """
         Initializes the SpeciesData class with the provided attributes.
         """
@@ -97,7 +96,6 @@ def parse_species_data(file_path):
         species_data_list.append(species_instance)
 
     return species_data_list
-
 
 # Example usage:
 #species_csv = "test_data/douglas_fir_species_data.csv"

@@ -9,7 +9,7 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from tree_class import TreeList
-from parse_tree_input import parse_csv_file
+from parse_csv_file import parse_csv_file
 from threepg_species_data import SpeciesData, get_tree_names, parse_species_data
 
 def init_trees(foliage_file, output_csv_file, threepg=True, plot=False):

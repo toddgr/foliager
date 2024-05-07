@@ -1,0 +1,5 @@
+#name,name_scientific,q_leaf_shape,q_canopy_density,q_deciduous_evergreen,                       q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color
+Oak,Quercus,elliptical,dense,deciduous,green,round,deep,temperate,ridges,brown
+Pine,Pinus,linear,medium,evergreen,green,pyramidal,shallow,temperate,scales,gray
+Juniper,Juniperus,lancolate,thin,evergreen,green,irregular,shallow,arid,strips,red
+Maple,Acer,truncate,medium,deciduous,green,oval,shallow,temperate,smooth,brown
