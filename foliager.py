@@ -8,7 +8,11 @@ Description: Uses ChatGPT to derive a list of foliage from an area specified by 
 """
 
 from openai import OpenAI
-client = OpenAI(api_key='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')
+# Open the secret key
+with open('parameters/secret_key.txt', 'r') as file:
+    api_key = file.read()
+    
+client = OpenAI(api_key=api_key)
 
 import os
 import pandas as pd

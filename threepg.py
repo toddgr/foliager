@@ -539,7 +539,7 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
 
     # TODO: convert this to its own function to be used in foliager main
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 110)
     print(height_dbh)
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
