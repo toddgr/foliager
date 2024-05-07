@@ -1,10 +1,9 @@
 # default_tree_chart.csv
-# Determines what information is gathered about each tree species.
+# Determines what information is gathered about each tree species from GPT.
 # Tree and TreeList classes are automatically generated with these values
 # Make sure that there are no spaces between the attributes
-#
-Name,Growth Rate,Average Lifespan
 
+Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
 
 
 

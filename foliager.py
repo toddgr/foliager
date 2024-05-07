@@ -11,7 +11,7 @@ from openai import OpenAI
 # Open the secret key
 with open('parameters/secret_key.txt', 'r') as file:
     api_key = file.read()
-    
+
 client = OpenAI(api_key=api_key)
 
 import os
@@ -61,7 +61,7 @@ def generate_prompt():
     return prompt, location
 
 if __name__ == '__main__':
-    asknlp = False # If we want to generate new data --> usage is limited
+    asknlp = True # If we want to generate new data --> usage is limited
     three_pg = True # If we want to use 3PG
  
     if asknlp: 
@@ -71,7 +71,8 @@ if __name__ == '__main__':
         # Write the NLP response to a csv file
         foliage_file = make_valid_filename(location)
         with open(foliage_file, 'w') as file:
-            file.write("Name,Growth Rate,Average Lifespan\n")
+            file.write("#name,name_scientific,q_leaf_shape,q_canopy_density,q_deciduous_evergreen,\
+                       q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color\n")
             file.write(response)
             print("Writing to file ", foliage_file)
             # Now to parse input into Tree and TreeList objects
@@ -101,7 +102,6 @@ if __name__ == '__main__':
     # Now to plot these trees on a graph of size (1,1)
     #init_trees(foliage_file, coordinates_file, plot =True)
 
-    print("calculating the dbh and height for trees...")
     #gen_trees_in_blender(coordinates_file) # have to have bpy and stuff for this line 
     threepg("test_data/douglas_fir_climate_data.csv", foliage_file, "OUTPUT_DATA.csv")
 
