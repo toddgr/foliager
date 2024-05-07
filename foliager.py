@@ -72,8 +72,7 @@ if __name__ == '__main__':
         # Write the NLP response to a csv file
         foliage_file = make_valid_filename(location)
         with open(foliage_file, 'w') as file:
-            file.write("#name,name_scientific,q_leaf_shape,q_canopy_density,q_deciduous_evergreen,\
-                       q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color\n")
+            file.write("#name,name_scientific,q_leaf_shape,q_canopy_density,q_deciduous_evergreen,q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color\n")
             file.write(response)
             print("Writing to file ", foliage_file)
             # Now to parse input into Tree and TreeList objects
