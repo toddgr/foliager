@@ -80,6 +80,19 @@ class SpeciesData:
         for attr, value in vars(self).items():
             print(f"{attr}: {value}")
 
+
+    def get_species_info(self):
+        """
+        Writes all attributes of the SpeciesData instance as a list.
+        """
+        tree_info = ""
+        for attr, value in vars(self).items():
+            tree_info += str(value) + ","
+        
+        tree_info += ""
+
+        return tree_info
+
 def get_tree_names(species_data_list):
 	# returns a list of the tree names found in the species data CSV.
 	tree_names = []

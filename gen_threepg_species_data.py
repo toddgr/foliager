@@ -68,6 +68,16 @@ def generate_python_file(csv_file_path, output_file_path):
         output_file.write("        for attr, value in vars(self).items():\n")
         output_file.write("            print(f\"{attr}: {value}\")\n\n")
 
+        output_file.write("""\n    def get_species_info(self):
+        \"\"\"
+        Writes all attributes of the SpeciesData instance as a list.
+        \"\"\"
+        tree_info = \"\"
+        for attr, value in vars(self).items():
+            tree_info += str(value) + \",\"
+        
+        tree_info += \"\"\n
+        return tree_info\n\n""")
         output_file.write(get_tree_names_function())
 
         output_file.write("def parse_species_data(file_path):\n")

@@ -22,6 +22,7 @@ from plot_trees_random import init_trees
 from threepg_species_data import parse_species_data, get_tree_names
 from parse_csv_file import *
 from threepg import threepg
+from param_estimator import estimate_tree_list
 #from blender_place_trees import gen_trees_in_blender
 
 def ask_nlp(prompt, model="gpt-3.5-turbo"):
@@ -60,6 +61,9 @@ def generate_prompt():
 if __name__ == '__main__':
     asknlp = False # If we want to generate new data --> usage is limited
     three_pg = True # If we want to use 3PG
+    climate_data_filepath = "test_data/douglas_fir_climate_data.csv"
+    output_filepath = "OUTPUT_DATA.csv"
+    knowledge_base = "test_data/species_data_kb.csv"
  
     if asknlp: 
         prompt, location = generate_prompt()
@@ -86,7 +90,8 @@ if __name__ == '__main__':
     # Now to plot these trees on a graph of size (1,1)
     #init_trees(foliage_file, coordinates_file, plot =True)
 
+    estimate_tree_list(treelist, knowledge_base)
     #gen_trees_in_blender(coordinates_file) # have to have bpy and stuff for this line 
-    threepg("test_data/douglas_fir_climate_data.csv", foliage_file, "OUTPUT_DATA.csv")
+    threepg(climate_data_filepath, foliage_file, output_filepath)
 
     

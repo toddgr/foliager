@@ -7,6 +7,7 @@ Description: A parameter estimation prototype for generating realistic
 """
 
 from threepg_species_data import SpeciesData, parse_species_data, csv_file_to_list
+import csv
 
 knowledge_base_filepath = "test_data/species_data_kb.csv"
 
@@ -227,21 +228,26 @@ def estimate_parameters(tree, knowledge_base):
 
     print("\n\n")
     complete_tree.print_species_data()
+    print(complete_tree.get_species_info())
+    return complete_tree.get_species_info()
 
-def estimate_tree_list(tree_list, knowledge_base=None):
+def estimate_tree_list(tree_list, knowledge_base, io_filepath):
     """ Input: Knowledge Base, general information for a list of trees
         Output: Complete tree information for the list of trees """
-    
-    print("--- TREE LIST ---\n")
-    for tree in tree_list:
-        #print(tree.name, ", ", tree.q_habitat)
-        estimate_parameters(tree,knowledge_base)
+    with open(io_filepath, 'w') as file:
+        file.write("# name,name_scientific,q_leaf_shape,q_canopy_density,d_deciduous_evergreen,q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color,t_min,t_opt,t_max,kf,fcax_700,kd,n_theta,c_theta,p2,p20,acx,sla_1,sla_0,t_sla_mid,fn0,nfn,tc,max_age,r_age,n_age,mf,mr,ms,yfx,yf0,tyf,yr,nr_max,nr_min,m_0,wsx1000,nm,k,aws,nws,ah,nhb,nhc,ahl,nhlb,nhlc,ak,nkb,nkh,av,nvb,nvh,nvbh\n")
+        for tree in tree_list:
+            #print(tree.name, ", ", tree.q_habitat)
+            tree_info = estimate_parameters(tree, knowledge_base)
+            file.write(tree_info)
 
-    pass
+
+
 
 # Example usage
 if __name__ == "__main__":
     # Define a sample tree. All of these values are common knowledge and can be determined by the nlp
+    io_file = "douglas_fir_coordinates_foliage.csv"
     sample_tree = SpeciesData("Imaginary Tree","T. Madeupicus","elliptical","dense","deciduous","green","oval","deep","temperate","furrows/ridges","gray/brown")
     kb = parse_species_data(knowledge_base_filepath)
-    estimate_tree_list([sample_tree], kb)
+    estimate_tree_list([sample_tree], kb, io_file)
