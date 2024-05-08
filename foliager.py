@@ -15,7 +15,6 @@ with open('parameters/secret_key.txt', 'r') as file:
 client = OpenAI(api_key=api_key)
 
 import re
-
 from parse_tree_input import  csv_file_to_string
 
 from tree_class import Tree, TreeList

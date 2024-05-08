@@ -6,7 +6,7 @@ Description: A parameter estimation prototype for generating realistic
             tree data for trees that aren't in the knowledge base
 """
 
-from threepg_species_data import SpeciesData, parse_species_data
+from threepg_species_data import SpeciesData, parse_species_data, csv_file_to_list
 
 knowledge_base_filepath = "test_data/species_data_kb.csv"
 
@@ -44,9 +44,29 @@ def find_similarities(tree, knowledge_base):
         if tree.q_deciduous_evergreen == kb_tree.q_deciduous_evergreen:
             points += 1
 
+        # to be used when more leaf colors than "green"
+        #if tree.q_leaf_color == kb_tree.q_leaf_color:
+            #points +=1
+
+        # might need to change this --- compares items in a list to items in a list
+        if tree.q_tree_form == kb_tree.q_tree_form:
+            points += 1
+
         # root attributes
+        if tree.q_tree_roots == kb_tree.q_tree_roots:
+            points += 1        
 
         # habitat attributes
+        # might need to change this --- compares items in a list to items in a list
+        if tree.q_habitat == kb_tree.q_habitat:
+            points += 1
+
+        # bark attributes
+        if tree.q_bark_texture == kb_tree.q_bark_texture:
+            points += 1
+
+        if tree.q_bark_color == kb_tree.q_bark_color:
+            points += 1
 
         # Check if the tree has earned any points
         if points > 0:
@@ -58,8 +78,116 @@ def calculate_parameter_values(tree, point_dict):
     """ This function will take into account the different point values assigned to each kb tree, and 
         use those point values to calculate/estimate the values for each of the tree parameters.
         
-        Different attributes will be influenced by different similarities"""
-    pass
+        Different attributes will be influenced by different similarities
+        Leaf similarity:
+        k, acx, sla_1, sla_0, t_sla_mid,yfx, yf0, tyf
+
+        Canopy similarity:
+        tc, mf, p2, p20, ms, wsx1000, nm, mf
+
+        Root/wood/bark similarity:
+        mr, ms, yr, nr_min, nr_max, m_0, ah,nhb, nhc, ahl, nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh
+
+        Habitat similarity:
+        t_min, t_opt, t_max, kd, n_theta, c_theta
+
+        General similarity:
+        fcax_700, fn0, nfn, r_age, n_age, max_age
+        """
+
+    # for now, I'm just going to assign the exact parameters for the most similar tree
+    # I'll reconfigure later
+
+    most_similar_tree = max(point_dict, key=point_dict.get)
+    tree = calculate_leaf_similarity(tree, most_similar_tree)
+    tree = calculate_canopy_similarity(tree, most_similar_tree)
+    tree = calculate_wood_similarity(tree, most_similar_tree)
+    tree = calculate_habitat_similarity(tree, most_similar_tree)
+    tree = calculate_general_similarity(tree, most_similar_tree)
+    
+    return tree
+
+def calculate_leaf_similarity(tree, kb_tree):
+    """ Calculate the parameters associated with similar leaf styles
+        k, acx, sla_1, sla_0, t_sla_mid,yfx, yf0, tyf
+    """
+    tree.k = kb_tree.k
+    tree.acx = kb_tree.acx
+    tree.sla_1 = kb_tree.sla_1
+    tree.sla_0 = kb_tree.sla_0
+    tree.t_sla_mid = kb_tree.t_sla_mid
+    tree.yfx = kb_tree.yfx
+    tree.yf0 = kb_tree.yf0
+    tree.tyf = kb_tree.tyf
+    
+    return tree
+
+def calculate_canopy_similarity(tree, kb_tree):
+    """ Calculate the parameters associated with similar canopy styles
+        tc, mf, p2, p20, ms, wsx1000, nm, mf
+    """
+    tree.tc = kb_tree.tc
+    tree.mf = kb_tree.mf
+    tree.p2 = kb_tree.p2
+    tree.p20 = kb_tree.p20
+    tree.wsx1000 = kb_tree.wsx1000
+    tree.nm = kb_tree.nm
+    tree.mf = kb_tree.mf
+
+    return tree
+
+def calculate_wood_similarity(tree, kb_tree):
+    """ Calculate the parameters associated with similar wood styles
+    mr, ms, yr, nr_min, nr_max, m_0, ah,nhb, nhc, ahl, nhlb, nhlc, 
+    ak, nkb, nkh, av, nvb, nvh, nvbh
+    """
+    tree.mr = kb_tree.mr
+    tree.ms = kb_tree.ms
+    tree.yr = kb_tree.yr
+    tree.nr_min = kb_tree.nr_min
+    tree.nr_man = kb_tree.nr_max
+    tree.m_0 = kb_tree.m_0
+    tree.ah = kb_tree.ah
+    tree.nhb = kb_tree.nhb
+    tree.nhc = kb_tree.nhc
+    tree.ahl = kb_tree.ahl
+    tree.nhlb = kb_tree.nhlb
+    tree.nhlc = kb_tree.nhlc
+    tree.ak = kb_tree.ak
+    tree.nkb = kb_tree.nkb
+    tree.nkh = kb_tree.nkh
+    tree.av = kb_tree.av
+    tree.nvb = kb_tree.nvb
+    tree.nvh = kb_tree.nvh
+    tree.nvbh = kb_tree.nvbh
+
+    return tree
+
+def calculate_habitat_similarity(tree, kb_tree):
+    """ Calculate the parameters associates with similar habitats
+    t_min, t_opt, t_max, kd, n_theta, c_theta
+    """
+    tree.t_opt = kb_tree.t_opt
+    tree.t_min = kb_tree.t_min
+    tree.t_max = kb_tree.t_max
+    tree.kd = kb_tree.kd
+    tree.n_theta = kb_tree.n_theta
+    tree.c_theta = kb_tree.c_theta
+
+    return tree
+
+def calculate_general_similarity(tree, kb_tree):
+    """ Calculate the parameters associated with general similarities
+    fcax_700, fn0, nfn, r_age, n_age, max_age
+    """
+    tree.fcax_700 = kb_tree.fcax_700
+    tree.fn0 = kb_tree.fn0
+    tree.nfn = kb_tree.nfn
+    tree.r_age = kb_tree.r_age
+    tree.n_age = kb_tree.n_age
+    tree.max_age = kb_tree.max_age
+
+    return tree
 
 
 def estimate_parameters(tree, knowledge_base):
@@ -89,31 +217,16 @@ def estimate_parameters(tree, knowledge_base):
     # Find similar canopy density/leaf shape in the knowledge base
     # This is where the reward function would be really good; if a tree fulfills more than one of these, add a reward point
         # And then have a dictionary for them instead 
-    similar_canopies = find_similarities(tree, knowledge_base)
+    similar_trees = find_similarities(tree, knowledge_base)
+    complete_tree = calculate_parameter_values(tree, similar_trees)
     
     print(f"\nSimilar leaves/canopies for {tree.name}:")
     # Print tree name and corresponding point value
-    for tree, points in similar_canopies.items():
+    for tree, points in similar_trees.items():
         print(f"{tree.name}: {points}")
 
-
-    # ------ CALCULATE THE PARAMETER VALUES -------
-    # Calculate average values for parameters
-    # In the future, this will be replaced with a reward functionality
-    habitats_count = len(similar_habitats)
-    if habitats_count > 0:
-        # Initialize parameter sums
-        parameter_sums = [0] * 8  # Initialize with 8 parameters
-
-        # Sum up parameter values
-        for similar_tree in similar_habitats:
-            for i in range(8):  # Iterate through parameter values (from index 1 to 8)
-                parameter_sums[i] += float(getattr(similar_tree, ['df', 'kf', 't_min', 't_max', 't_opt', 'kd', 'n_theta', 'c_theta'][i]))
-
-        # Calculate average parameter values
-        for i in range(8):
-            setattr(tree, ['df', 'kf', 't_min', 't_max', 't_opt', 'kd', 'n_theta', 'c_theta'][i], parameter_sums[i] / habitats_count)
-
+    print("\n\n")
+    complete_tree.print_species_data()
 
 def estimate_tree_list(tree_list, knowledge_base=None):
     """ Input: Knowledge Base, general information for a list of trees
@@ -129,6 +242,6 @@ def estimate_tree_list(tree_list, knowledge_base=None):
 # Example usage
 if __name__ == "__main__":
     # Define a sample tree. All of these values are common knowledge and can be determined by the nlp
-    sample_tree = SpeciesData("Imaginary Tree","elliptical","dense","deciduous","green","oval","deep","temperate","furrows/ridges","gray/brown")
+    sample_tree = SpeciesData("Imaginary Tree","T. Madeupicus","elliptical","dense","deciduous","green","oval","deep","temperate","furrows/ridges","gray/brown")
     kb = parse_species_data(knowledge_base_filepath)
     estimate_tree_list([sample_tree], kb)

@@ -1,17 +1,15 @@
 """
 File name: threepg_species_data.py
 Author: Grace Todd
-Date: May 03, 2024
+Date: May 08, 2024
 Description: Holds the SpeciesData class, which will be used to manipulate common parameters
 	for each of the species used in a simulation.
 """
 
-from parse_tree_input import csv_file_to_list
 import csv
-from threepg_env_data import Environment
 
 class SpeciesData:
-    def __init__(self, name, name_scientific, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min=None, t_opt=None, t_max=None, kf=None, fcax_700=None, kd=None, n_theta=None, c_theta=None, p2=None, p20=None, acx=None, sla_1=None, sla_0=None, t_sla_mid=None, fn0=None, nfn=None, tc=None, max_age=None, r_age=None, n_age=None, mf=None, mr=None, ms=None, yfx=None, yf0=None, tyf=None, yr=None, nr_max=None, nr_min=None, m_0=None, wsx1000=None, nm=None, k=None, aws=None, nws=None, ah=None, nhb=None, nhc=None, ahl=None, nhlb=None, nhlc=None, ak=None, nkb=None, nkh=None, av=None, nvb=None, nvh=None, nvbh=None, ):
+    def __init__(self, name, name_scientific, q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, q_tree_roots, q_habitat, q_bark_texture, q_bark_color, t_min=0, t_opt=0, t_max=0, kf=0, fcax_700=0, kd=0, n_theta=0, c_theta=0, p2=0, p20=0, acx=0, sla_1=0, sla_0=0, t_sla_mid=0, fn0=0, nfn=0, tc=0, max_age=0, r_age=0, n_age=0, mf=0, mr=0, ms=0, yfx=0, yf0=0, tyf=0, yr=0, nr_max=0, nr_min=0, m_0=0, wsx1000=0, nm=0, k=0, aws=0, nws=0, ah=0, nhb=0, nhc=0, ahl=0, nhlb=0, nhlc=0, ak=0, nkb=0, nkh=0, av=0, nvb=0, nvh=0, nvbh=0, ):
         """
         Initializes the SpeciesData class with the provided attributes.
         """
@@ -100,6 +98,49 @@ def parse_species_data(file_path):
     return species_data_list
 
 
+def parse_csv_file(file_path):
+    # Parses a CSV file output from NLP into Tree and TreeList objects # Needs to be updated as more attributes for trees are included
+    # Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),
+    #canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,
+    #leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),
+    #tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/
+    #mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),
+    #bark_color_(gray/white/red/brown)
+    trees = []
+    # read in the tree params
+    tree_params = csv_file_to_list(file_path)
+    print(f"tree_params: {tree_params}")
+
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            # read in the tree_params and assign the value at row[param] for param in tree_params
+            name = row['Common_name']
+            name_scientific = row['scientific_name']
+            leaf_shape = row['leaf_shape_(oval/truncate/elliptical/lancolate/linear/other)']
+            canopy_density = row['canopy_density_(very_thin/thin/medium/dense/very_dense)']
+            deciduous_evergreen = row['deciduous_or_evergreen']
+            leaf_color = row['leaf_color_(green)']
+            tree_form= row['tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular)']
+            tree_roots = row['tree_roots_(deep/shallow)']
+            habitat = row['habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine)']
+            bark_texture = row['bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips)']
+            bark_color = row['bark_color_(gray/white/red/brown)']
+            tree = SpeciesData(name, name_scientific, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color)
+            trees.append(tree)
+
+    return trees
+
+def csv_file_to_list(file_path):
+    attribute_list = []
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            # Exclude lines starting with a comment character (e.g., #)
+            if not row or row[0].startswith("#"):
+                continue
+            attribute_list.append(row)
+    return attribute_list
 # Example usage:
 #species_csv = "test_data/douglas_fir_species_data.csv"
 #species = parse_species_data(species_csv)

@@ -3,8 +3,7 @@ from threepg_species_data import SpeciesData
 import csv
 
 def parse_csv_file(file_path):
-    # Parses a CSV file output from NLP into Tree and TreeList objects
-    # Needs to be updated as more attributes for trees are included
+    # Parses a CSV file output from NLP into Tree and TreeList objects # Needs to be updated as more attributes for trees are included
     # Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),
     #canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,
     #leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),
