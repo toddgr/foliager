@@ -14,9 +14,6 @@ with open('parameters/secret_key.txt', 'r') as file:
 
 client = OpenAI(api_key=api_key)
 
-import os
-import pandas as pd
-import time
 import re
 
 from parse_tree_input import  csv_file_to_string
