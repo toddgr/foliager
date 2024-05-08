@@ -44,16 +44,6 @@ def csv_file_to_string(file_path):
 
     return result_string
 
-def csv_file_to_list(file_path):
-    attribute_list = []
-    with open(file_path, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            # Exclude lines starting with a comment character (e.g., #)
-            if not row or row[0].startswith("#"):
-                continue
-            attribute_list.append(row)
-    return attribute_list
 
 def csv_file_to_float_list(file_path):
     # specifically for reading CSVs that contain floats, not strings
