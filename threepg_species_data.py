@@ -87,7 +87,14 @@ class SpeciesData:
         """
         tree_info = ""
         for attr, value in vars(self).items():
-            tree_info += str(value) + ","
+            str_value = str(value)
+            if '[' in str_value or ']' in str_value:
+            # if the value is a list of things
+                parts = [part.strip("[] '") for part in str_value.split(",")]
+                result = "/".join(parts)
+                tree_info += result + ","
+            else:
+                tree_info += str_value + ","
         
         tree_info += ""
 
