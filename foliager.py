@@ -72,7 +72,6 @@ if __name__ == '__main__':
         # Write the NLP response to a csv file
         foliage_file = make_valid_filename(location)
         with open(foliage_file, 'w') as file:
-            file.write("#name,name_scientific,q_leaf_shape,q_canopy_density,q_deciduous_evergreen,q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color\n")
             file.write(response)
             print("Writing to file ", foliage_file)
             # Now to parse input into Tree and TreeList objects
@@ -82,16 +81,17 @@ if __name__ == '__main__':
         print(treelist.get_all_tree_info())
     else:
         # use last NLP prompt
-        foliage_file = "prineville_oregon_foliage.csv"
+        foliage_file = "douglas_fir_coordinates_foliage.csv"
         foliage_list = parse_species_data(foliage_file)
-        treelist = get_tree_names(foliage_list)
+        print(get_tree_names(foliage_list))
         print("Generating sample coordinates to CSV...")
 
     # Now to plot these trees on a graph of size (1,1)
     #init_trees(foliage_file, coordinates_file, plot =True)
 
-    estimate_tree_list(treelist, knowledge_base)
+    param_est_output = "douglas_fir_coordinates_foliage2.csv"
+    estimate_tree_list(foliage_list, knowledge_base, param_est_output)
     #gen_trees_in_blender(coordinates_file) # have to have bpy and stuff for this line 
-    threepg(climate_data_filepath, foliage_file, output_filepath)
+    threepg(climate_data_filepath, param_est_output, output_filepath)
 
     

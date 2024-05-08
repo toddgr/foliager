@@ -338,8 +338,9 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
             # C02 mod
             fc = 1.
+            print(f"fcax:{species.fcax_700}")
             fcax = species.fcax_700/(2. - species.fcax_700) # we're not exactly sure that this does
-            fc = fcax * co2/(350. * (fcax - 1.) + co2)
+            fc = fcax * co2/(350. * (fcax - 1.) + co2) #TODO fix this later
 
             # phys mod stuff --> made from a combo of fd, ftheta, and age mod that can be changed in glui
             # TODO change this so that it can't be modified from the GLUI

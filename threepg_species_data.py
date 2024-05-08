@@ -86,17 +86,21 @@ class SpeciesData:
         Writes all attributes of the SpeciesData instance as a list.
         """
         tree_info = ""
-        for attr, value in vars(self).items():
+        attributes = vars(self)
+        num_attributes = len(attributes)
+        for i, (attr, value) in enumerate(attributes.items()):
             str_value = str(value)
             if '[' in str_value or ']' in str_value:
-            # if the value is a list of things
+                # if the value is a list of things
                 parts = [part.strip("[] '") for part in str_value.split(",")]
                 result = "/".join(parts)
-                tree_info += result + ","
+                tree_info += result
             else:
-                tree_info += str_value + ","
-        
-        tree_info += ""
+                tree_info += str_value
+
+            # Add a comma if it's not the last attribute
+            if i < num_attributes - 1:
+                tree_info += ","
 
         return tree_info
 
@@ -110,8 +114,9 @@ def get_tree_names(species_data_list):
 def parse_species_data(file_path):
     species_list = csv_file_to_list(file_path)
     species_data_list = []
-
     for tree_data in species_list:
+        print(tree_data)
+        print(f"length of tree_data: {len(tree_data)}")
         species_instance = SpeciesData(*tree_data)
         species_data_list.append(species_instance)
 
