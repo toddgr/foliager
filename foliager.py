@@ -53,7 +53,7 @@ def generate_prompt():
     location = input("Enter the climate, city, or area:")
     prompt += location + " with the following attributes:" + attributes
     prompt += attributes
-    print(prompt)
+    #print(prompt)
     print("Generating foliage list for ", location, "...")
 
     return prompt, location
@@ -61,17 +61,17 @@ def generate_prompt():
 if __name__ == '__main__':
     asknlp = False # If we want to generate new data --> usage is limited
     three_pg = True # If we want to use 3PG
-    climate_data_filepath = "test_data/douglas_fir_climate_data.csv"
-    param_est_output = "param_est_output.csv"
-    threepg_output_filepath = "OUTPUT_DATA.csv"
+    climate_data_filepath = "test_data/douglas_fir_climate_data.csv" #temp -- need a climate datat generator/fetcher
+    param_est_output = "test_data/param_est_output.csv"
+    threepg_output_filepath = "test_data/OUTPUT_DATA.csv"
     knowledge_base = "test_data/species_data_kb.csv"
  
     if asknlp: 
         prompt, location = generate_prompt()
         response = ask_nlp(prompt) #commented out to save query time
-        print(response)
+        #print(response)
         # Write the NLP response to a csv file
-        nlp_response_filepath = make_valid_filename(location)
+        nlp_response_filepath = "test_data/" + make_valid_filename(location)
         with open(nlp_response_filepath, 'w') as file:
             file.write("Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)\n")
     #tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         # print(treelist.get_all_tree_info())
     else:
         # use last NLP prompt
-        nlp_response_filepath = "portland_oregon_foliage.csv"
+        nlp_response_filepath = "test_data/portland_oregon_foliage.csv"
         print(f"===== NLP NOT USED. =====\n Parsing tree data from {nlp_response_filepath}...")
         foliage_list = parse_csv_file(nlp_response_filepath)
         # print(get_tree_names(foliage_list))
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     estimate_tree_list(foliage_list, knowledge_base, param_est_output)
     #gen_trees_in_blender(coordinates_file) # have to have bpy and stuff for this line 
 
-    print("\n\n ===== CALCULATING 3-PG PARAMETERS =====")
+    print("\n\n ===== CALCULATING 3-PG PARAMETERS NOW =====")
     threepg(climate_data_filepath, param_est_output, threepg_output_filepath)
 
     

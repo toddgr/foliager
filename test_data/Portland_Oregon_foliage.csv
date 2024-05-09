@@ -1,11 +1,6 @@
-Name,Growth Rate,Average Lifespan
-Douglas Fir,Medium,500 years
-Western Red Cedar,Medium,500 years
-Bigleaf Maple,Medium,100 years
-Oregon White Oak,Slow,200 years
-Pacific Dogwood,Medium,80 years
-Red Alder,Medium,60 years
-Black Cottonwood,Medium,50 years
-Western Hemlock,Medium,800 years
-Sitka Spruce,Medium,700 years
-Pacific Madrone,Slow,200 years
+Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
+Maple,Acer,truncate,medium,deciduous,green,round,shallow,temperate,smooth,gray
+Douglas Fir,Pseudotsuga menziesii,linear,dense,evergreen,green,pyramidal,deep,temperate,ridges,gray
+Oregon Grape,Mahonia aquifolium,elliptical,medium,evergreen,green,spreading,shallow,temperate,scales,red
+Western Red Cedar,Thuja plicata,lancolate,very dense,evergreen,green,pyramidal,shallow,temperate,strips,red
+Bigleaf Maple,Acer macrophyllum,truncate,medium,deciduous,green,round,shallow,temperate,smooth,brown

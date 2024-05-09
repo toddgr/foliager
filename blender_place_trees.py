@@ -1,7 +1,7 @@
 """
 File name: blender_place_trees.py
 Author: Grace Todd
-Date: April 30, 2024
+Date: May 9, 2024
 Description: This file aims to test out different scripts for the Blender API, so that I can hopefully 
             Use Blender to generate the different tree assets and host the forest
             Because I think that would be really cool
@@ -13,6 +13,7 @@ import csv
 import sys
 
 sys.path.append('C:/Users/Grace/Documents/Masters_Project/foliager/')
+input_filepath ="C:/Users/Grace/Documents/Masters_Project/foliager/test_data/OUTPUT_DATA.csv"
 
 #import foliager
 
@@ -48,59 +49,85 @@ def create_forest_floor():
 
     # Set the location of the forest floor
     forest_floor.location = (0, 0, 0)  # center at origin
-    
-    
-#def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, collection_name="Trees"):
-#    # Create the canopy
-#    canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/canopy_1.obj"
-#    bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
-#    # Get the canopy
-#    canopy = bpy.context.selected_objects[0]
+def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form, collection_name="Trees"):
+# Check if a canopy object already exists
+    if tree_form == '[\'pyramidal\']':
+        p_canopy_objects = [obj for obj in bpy.data.objects if obj.name.startswith("Pyramidal_Canopy")]
+        if p_canopy_objects:
+            canopy = p_canopy_objects[0]  # Reuse the existing canopy object
+        else:
+            # Create the canopy
+            canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/pyramidal.obj"
+            bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
-#    # Set location of the canopy
-#    canopy_height = height-live_crown_length
-#    canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y
-#    canopy.location = (x, y, live_crown_length)
-#    
-#    # Create the trunk
-#    trunk_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/trunk.obj"
-#    bpy.ops.wm.obj_import(filepath=trunk_filepath)
+            # Get the canopy
+            canopy = bpy.context.selected_objects[0]
+            canopy.name = "Pyramidal_Canopy"  # Rename the canopy object
+            # remove the canopy object from the scene
+            # Hide the object in the viewport
+            #canopy.hide_set(True)
+            #canopy.hide_viewport = True
 
-#    # Get the trunk
-#    trunk = bpy.context.selected_objects[0]
+            # Hide the object in render
+            #canopy.hide_render = True
+            
+    elif tree_form == '[\'round\']':
+        r_canopy_objects = [obj for obj in bpy.data.objects if obj.name.startswith("Round_Canopy")]
+        if r_canopy_objects:
+            canopy = r_canopy_objects[0]  # Reuse the existing canopy object
+        else:
+            # Create the canopy
+            canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/oval.obj"
+            bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
-#    # Set location of the imported object
-#    trunk_height = height-live_crown_length
-#    trunk.scale = (dbh, trunk_height, dbh) #x, z, y? for some reason?
-#    trunk.location = (x, y, 0)
-#    
-#    # Merge the trunk and canopy
-#    bpy.context.view_layer.objects.active = trunk
-#    bpy.ops.object.modifier_add(type='BOOLEAN')
-#    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
-#    bpy.context.object.modifiers["Boolean"].object = canopy
-#    bpy.ops.object.modifier_apply(modifier="Boolean")
-#    
-#    # Rename the merged object as the tree
-#    tree = trunk
-#    tree.name = name
-#    
-#    return tree
+            # Get the canopy
+            canopy = bpy.context.selected_objects[0]
+            canopy.name = "Round_Canopy"  # Rename the canopy object
+            
+            # remove the canopy object from the scene
+            # Hide the object in the viewport
+            #canopy.hide_set(True)
+            #canopy.hide_viewport = True
 
-def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, collection_name="Trees"):
-    # Create the canopy
-    canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/canopy_1.obj"
-    bpy.ops.wm.obj_import(filepath=canopy_filepath)
+            # Hide the object in render
+            #canopy.hide_render = True
+            
+    else: 
+        o_canopy_objects = [obj for obj in bpy.data.objects if obj.name.startswith("Other_Canopy")]
+        if o_canopy_objects:
+            canopy = o_canopy_objects[0]  # Reuse the existing canopy object
+        else:
+            # Create the canopy
+            canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/oval.obj"
+            bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
-    # Get the canopy
-    canopy = bpy.context.selected_objects[0]
+            # Get the canopy
+            canopy = bpy.context.selected_objects[0]
+            canopy.name = "Other_Canopy"  # Rename the canopy object
+
+            # remove the canopy object from the scene
+            # Hide the object in the viewport
+            #canopy.hide_set(True)
+            #canopy.hide_viewport = True
+
+            # Hide the object in render
+            #canopy.hide_render = True
+        
+    # Shade smooth
+    bpy.context.view_layer.objects.active = canopy
+    bpy.ops.object.shade_smooth()
 
     # Set location and scale of the canopy
-    canopy_height = live_crown_length / 3.718 # Temporary solution!!!
+    canopy_height = height /3.3# Temporary solution!!!
     canopy.location = (x, y, canopy_height)
     canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y
+
+    canopy.name = name + '_canopy'
     
+    return canopy
+
+def create_trunk(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form, collection_name="Trees"):
     # Create the trunk
     trunk_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/trunk.obj"
     bpy.ops.wm.obj_import(filepath=trunk_filepath)
@@ -110,21 +137,40 @@ def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, coll
 
     # Set location and scale of the imported object
     trunk_height = height - live_crown_length  # Adjusted height calculation
-    trunk.scale = (dbh, trunk_height, dbh) #x, z, y? for some reason?
+    trunk.scale = (dbh, height, dbh) #x, z, y? for some reason?
     trunk.location = (x, y, 0)  # Adjusted location to match canopy
     
-    # Merge the trunk and canopy
-    bpy.context.view_layer.objects.active = trunk
-    bpy.ops.object.modifier_add(type='BOOLEAN')
-    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
-    bpy.context.object.modifiers["Boolean"].object = canopy
-    bpy.ops.object.modifier_apply(modifier="Boolean")
+    trunk.name = name + '_trunk'
     
-    # Rename the merged object as the tree
-    tree = trunk
-    tree.name = name
-    
-    return tree
+    return trunk
+
+#def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form, collection_name="Trees"):
+#    
+#    # Create the trunk
+#    trunk_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/trunk.obj"
+#    bpy.ops.wm.obj_import(filepath=trunk_filepath)
+
+#    # Get the trunk
+#    trunk = bpy.context.selected_objects[0]
+
+#    # Set location and scale of the imported object
+#    trunk_height = height - live_crown_length  # Adjusted height calculation
+#    trunk.scale = (dbh, height, dbh) #x, z, y? for some reason?
+#    trunk.location = (x, y, 0)  # Adjusted location to match canopy
+
+#    # Merge the trunk and canopy
+#    bpy.context.view_layer.objects.active = trunk
+#    bpy.ops.object.modifier_add(type='BOOLEAN')
+#    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+#    bpy.context.object.modifiers["Boolean"].object = canopy
+#    bpy.ops.object.modifier_apply(modifier="Boolean")
+
+#    # Rename the merged object as the tree
+#    tree = trunk
+#    trunk.name = name + '_trunk'
+
+#    return trunk
+
 
 
 def add_trees_to_collection(tree_list, collection_name="Trees"):
@@ -146,8 +192,6 @@ def add_trees_to_collection(tree_list, collection_name="Trees"):
 
 
 def gen_trees_in_blender(coordinates_filepath):
-    # filepaths
-    #coordinates_filepath = "C:/Users/Grace/Documents/Masters_Project/douglas_fir_plot_data.csv"
     
     create_forest_floor()
     
@@ -169,9 +213,12 @@ def gen_trees_in_blender(coordinates_filepath):
             name = row['name']
             live_crown_length = float(row['lcl'])
             crown_diameter = float(row['c_diameter'])
-            tree = create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter)
-            tree_list.append(tree)
+            tree_form = row['q_tree_form']
+            canopy = create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form)
+            trunk = create_trunk(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
+            #tree = create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
+            #tree_list.append(tree)
     
-    add_trees_to_collection(tree_list)
+    #add_trees_to_collection(tree_list)
 
-gen_trees_in_blender("C:/Users/Grace/Documents/Masters_Project/foliager/OUTPUT_DATA_single.csv")
+gen_trees_in_blender(input_filepath)
