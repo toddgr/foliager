@@ -224,7 +224,7 @@ def read_climate_data_original(filename):
                 site_solar_rad=month_data[i].site_solar_rad,
                 site_frost_days=month_data[i].site_frost_days
             ))
-            print(i)
+            # print(i)
             i += 1
 
     return month_data, init_month_data
@@ -337,8 +337,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             fn = 1. - (1. - species.fn0) * pow((1. - fr), species.nfn)
 
             # C02 mod
-            fc = 1.
-            print(f"fcax:{species.fcax_700}")
+            fc = 1
             fcax = species.fcax_700/(2. - species.fcax_700) # we're not exactly sure that this does
             fc = fcax * co2/(350. * (fcax - 1.) + co2) #TODO fix this later
 
@@ -518,7 +517,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
         wr = last_wr
 
         # some test prints
-        print(f"\n======= COMPUTING AT T={t} FOR SPECIES {species.name} =======")
+        print(f"\n=== t={t} for {species.name} ===")
         #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
         print(f"Live crown length: {hl}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
         #plot the trees
@@ -540,11 +539,13 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
 
     # TODO: convert this to its own function to be used in foliager main
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 110)
-    print(height_dbh)
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 1)
+    # print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
-    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename) # returns [name, x, z]
+    
+    print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
+    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=True) # returns [name, x, z]
 
     # for each of the 3-PG data entries in the height_dbh
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
@@ -582,5 +583,8 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     with open(outputdata_filename, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
         csv_writer.writerows(tree_output)
+
+    print("\n===== CALCULATIONS FINISHED ===== ")
+    print(f"Data for use in Blender outputted to: {outputdata_filename}")
 
     #return outputdata_filename

@@ -115,8 +115,8 @@ def parse_species_data(file_path):
     species_list = csv_file_to_list(file_path)
     species_data_list = []
     for tree_data in species_list:
-        print(tree_data)
-        print(f"length of tree_data: {len(tree_data)}")
+        # print(tree_data)
+        # print(f"length of tree_data: {len(tree_data)}")
         species_instance = SpeciesData(*tree_data)
         species_data_list.append(species_instance)
 

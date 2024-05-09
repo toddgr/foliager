@@ -206,16 +206,16 @@ def estimate_parameters(tree, knowledge_base):
     # Check if the tree is already in the knowledge base
     for kb_tree in knowledge_base:
         if tree.name == kb_tree.name:
-            print(tree.name, " is already in the database.")
-            return
+            print(f"\n{tree.name} is already in the database.")
+            return kb_tree.get_species_info()
 
     #------ CHECK THE KNOWLEDGE BASE FOR SIMILARITIES -----
     # Find similar habitats in the knowledge base
     similar_habitats = [kb_tree for kb_tree in knowledge_base if tree.q_habitat == kb_tree.q_habitat]
     
-    print("Similar habitats for", tree.name, ":")
-    for t in similar_habitats:
-        print(t.name)
+    # print("Similar habitats for", tree.name, ":")
+    # for t in similar_habitats:
+    #     print(t.name)
 
     # Find similar canopy density/leaf shape in the knowledge base
     # This is where the reward function would be really good; if a tree fulfills more than one of these, add a reward point
@@ -223,14 +223,14 @@ def estimate_parameters(tree, knowledge_base):
     similar_trees = find_similarities(tree, knowledge_base)
     complete_tree = calculate_parameter_values(tree, similar_trees)
     
-    print(f"\nSimilar leaves/canopies for {tree.name}:")
-    # Print tree name and corresponding point value
-    for tree, points in similar_trees.items():
-        print(f"{tree.name}: {points}")
+    # print(f"\nSimilar leaves/canopies for {tree.name}:")
+    # # Print tree name and corresponding point value
+    # for tree, points in similar_trees.items():
+    #     print(f"{tree.name}: {points}")
 
-    print("\n\n")
-    complete_tree.print_species_data()
-    print(complete_tree.get_species_info())
+    # print("\n\n")
+    #complete_tree.print_species_data()
+    # print(complete_tree.get_species_info())
     return complete_tree.get_species_info()
 
 def estimate_tree_list(tree_list, knowledge_base, io_filepath):
@@ -239,9 +239,10 @@ def estimate_tree_list(tree_list, knowledge_base, io_filepath):
     with open(io_filepath, 'w') as file:
         file.write("# name,name_scientific,q_leaf_shape,q_canopy_density,d_deciduous_evergreen,q_leaf_color,q_tree_form,q_tree_roots,q_habitat,q_bark_texture,q_bark_color,t_min,t_opt,t_max,kf,fcax_700,kd,n_theta,c_theta,p2,p20,acx,sla_1,sla_0,t_sla_mid,fn0,nfn,tc,max_age,r_age,n_age,mf,mr,ms,yfx,yf0,tyf,yr,nr_max,nr_min,m_0,wsx1000,nm,k,aws,nws,ah,nhb,nhc,ahl,nhlb,nhlc,ak,nkb,nkh,av,nvb,nvh,nvbh\n")
         for tree in tree_list:
-            print(tree.name, ", ", tree.q_habitat)
+            # print(tree.name, ", ", tree.q_habitat)
             tree_info = estimate_parameters(tree, knowledge_base)
             file.write(tree_info)
+            file.write("\n")
 
 
 

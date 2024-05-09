@@ -13,7 +13,7 @@ def parse_csv_file(file_path):
     trees = []
     # read in the tree params
     tree_params = csv_file_to_list(file_path)
-    print(f"tree_params: {tree_params}")
+    #print(f"tree_params: {tree_params}")
 
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
