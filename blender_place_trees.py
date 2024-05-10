@@ -115,8 +115,8 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
             #canopy.hide_render = True
         
     # Shade smooth
-    bpy.context.view_layer.objects.active = canopy
-    bpy.ops.object.shade_smooth()
+    # bpy.context.view_layer.objects.active = canopy
+    # bpy.ops.object.shade_smooth()
 
     # Set location and scale of the canopy
     canopy_height = height /3.3# Temporary solution!!!

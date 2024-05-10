@@ -100,7 +100,7 @@ init_wf = 7.
 init_wr = 9.
 init_ws = 20.
 
-init_b = 18 # initial dbh
+init_b = 9 # initial dbh-- was 18
 init_sw = 200   # initiial available soil water
 
 #irr = MYSTERY # irrigation (mm/month).
@@ -309,7 +309,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
         # setting initial b from user input initial b so that it can be used to compute WF
         # Fix this so no user input?
-        b = init_b
+        b = 18
 
         for inc_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
             current_month = (start_month + inc_t) % 12
@@ -401,17 +401,21 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             ap = species.p2/(pow(2., np)) # equation A29
 
             # computing pfs
+            b = 18
             pfs = ap * pow(b, np)
+            #print(f"pfs:{pfs}, ap:{ap}, b:{b}, np:{np}\npfs = ap * pow(b, np)")
 
             # getting remaining partitioning ratios
             nf = (pfs * (1. - nr))/(1. + pfs)
             ns = (1. - nr)/(1. + pfs)
+            #print(f"nr:{nr}, pfs:{pfs}")
 
             # mortality
             # max individual tree stem mass (wsx)
             wsx = species.wsx1000 * pow((1000.0/n), species.nm)
 
-            # seeing if we nee to thin
+            # print("last_ws:", last_ws)
+            # seeing if we need to thin
             while last_ws / n > wsx:
                 # need to thin
                 n -= 1  # decreasing n
@@ -440,10 +444,17 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             curr_ws = last_ws
             curr_wr = last_wr
 
+            #print(f"curr_ws (part 1): {curr_ws}")
+
             # incrementing the current using last month's values
             curr_wf += (nf * npp) - (yf * last_wf) - (species.mf * (last_wf / n) * delta_n)
             curr_wr += (nr * npp) - (species.yr * last_wr) - (species.mr * (last_wr / n) * delta_n)
+            
+            
+            #print(f"the complexificaiton may begin.\nns:{ns}, npp:{npp}, species.yr:{species.yr}, last_wr:{last_wr},species.mr:{species.mr},n:{n}, delta_n:{delta_n}")
             curr_ws += (ns * npp) - (species.ms * (last_ws / n) * delta_n)
+
+            #print(f"curr_ws (part 2): {curr_ws}")
 
             # making the current into last month's for the next month
             last_wf = curr_wf
@@ -539,7 +550,7 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
 
     # TODO: convert this to its own function to be used in foliager main
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 1)
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
     # print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
@@ -549,38 +560,6 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     
     # for each of the 3-PG data entries in the height_dbh
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
-
-    # tree = 0
-    # i = 1
-    # while tree <= len(height_dbh) - 1:
-    #     print(f"Getting specific tree data for a {tree_coordinates[i][0]}")
-    #     if tree_coordinates[i][0] == height_dbh[tree][0] and i < len(tree_coordinates)-1: #if the names are the same
-    #         #TODO tree form is a list of different values. Eventually, it would be nice to randomly
-    #         # assign a tree form to different varieties of the same tree. 
-    #         tree_form = height_dbh[tree][1][0]
-
-    #         # assign slightly randomized values to the height and dbh
-    #         factor = 0.5
-    #         random_height_offset = random.uniform(-factor, factor)
-    #         new_height = float(height_dbh[tree][2]) + random_height_offset
-
-    #         random_dbh_offset = random.uniform(-factor, factor)
-    #         new_dbh = float(height_dbh[tree][3]) + random_dbh_offset
-
-    #         random_lcl_offset = random.uniform(-factor, factor)
-    #         new_lcl = float(height_dbh[tree][4]) + random_lcl_offset
-
-    #         random_c_diam_offset = random.uniform(-factor, factor)
-    #         new_c_diam = float(height_dbh[tree][5]) + random_c_diam_offset
-
-    #         # append it to the tree_coordinate entry
-    #         # [name, q_tree_form, , z, height, dbh, lcl, c_diameter]
-    #         print(f"appending to tree_output:\n {tree_coordinates[i][0]}{tree_form}{ tree_coordinates[i][1]}{ tree_coordinates[i][2]}{new_height}{new_dbh}{new_lcl}{new_c_diam}")
-    #         tree_output.append([tree_coordinates[i][0], tree_form, tree_coordinates[i][1], tree_coordinates[i][2], new_height, new_dbh, new_lcl, new_c_diam])
-    #     else:
-    #         tree += 1
-    #         continue
-    #     i += 1
 
     for tree in tree_coordinates[1:]:
         tree_name = tree[0]
@@ -592,17 +571,20 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
                 tree_form = tree_3pg[1]
 
                 # assign slightly randomized values to the height and dbh
-                factor = 0.5
-                random_height_offset = random.uniform(-factor, factor)
+                factor_height = float(tree_3pg[2]) / 4
+                random_height_offset = random.uniform(-factor_height, factor_height)
                 new_height = float(tree_3pg[2]) + random_height_offset
 
-                random_dbh_offset = random.uniform(-factor, factor)
+                factor_dbh = float(tree_3pg[3]) / 4
+                random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
                 new_dbh = float(tree_3pg[3]) + random_dbh_offset
 
-                random_lcl_offset = random.uniform(-factor, factor)
+                factor_lcl = float(tree_3pg[4]) / 4
+                random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
                 new_lcl = float(tree_3pg[4]) + random_lcl_offset
 
-                random_c_diam_offset = random.uniform(-factor, factor)
+                factor_c_diam = float(tree_3pg[5]) / 4
+                random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
                 new_c_diam = float(tree_3pg[5]) + random_c_diam_offset
 
                 # append it to the tree_coordinate entry
