@@ -66,11 +66,11 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
             canopy.name = "Pyramidal_Canopy"  # Rename the canopy object
             # remove the canopy object from the scene
             # Hide the object in the viewport
-            #canopy.hide_set(True)
-            #canopy.hide_viewport = True
+            canopy.hide_set(True)
+            canopy.hide_viewport = True
 
             # Hide the object in render
-            #canopy.hide_render = True
+            canopy.hide_render = True
             
     elif tree_form == '[\'round\']':
         r_canopy_objects = [obj for obj in bpy.data.objects if obj.name.startswith("Round_Canopy")]
@@ -87,11 +87,11 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
             
             # remove the canopy object from the scene
             # Hide the object in the viewport
-            #canopy.hide_set(True)
-            #canopy.hide_viewport = True
+            canopy.hide_set(True)
+            canopy.hide_viewport = True
 
             # Hide the object in render
-            #canopy.hide_render = True
+            canopy.hide_render = True
             
     else: 
         o_canopy_objects = [obj for obj in bpy.data.objects if obj.name.startswith("Other_Canopy")]
@@ -108,11 +108,11 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
 
             # remove the canopy object from the scene
             # Hide the object in the viewport
-            #canopy.hide_set(True)
-            #canopy.hide_viewport = True
+            canopy.hide_set(True)
+            canopy.hide_viewport = True
 
             # Hide the object in render
-            #canopy.hide_render = True
+            canopy.hide_render = True
         
     # Shade smooth
     # bpy.context.view_layer.objects.active = canopy
@@ -123,7 +123,7 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
     canopy.location = (x, y, canopy_height)
     canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y
 
-    canopy.name = name + '_canopy'
+    #canopy.name = name + '_canopy'
     
     return canopy
 
@@ -144,33 +144,21 @@ def create_trunk(name, x, y, height, dbh, live_crown_length, crown_diameter, tre
     
     return trunk
 
-#def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form, collection_name="Trees"):
-#    
-#    # Create the trunk
-#    trunk_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/trunk.obj"
-#    bpy.ops.wm.obj_import(filepath=trunk_filepath)
-
-#    # Get the trunk
-#    trunk = bpy.context.selected_objects[0]
-
-#    # Set location and scale of the imported object
-#    trunk_height = height - live_crown_length  # Adjusted height calculation
-#    trunk.scale = (dbh, height, dbh) #x, z, y? for some reason?
-#    trunk.location = (x, y, 0)  # Adjusted location to match canopy
-
-#    # Merge the trunk and canopy
-#    bpy.context.view_layer.objects.active = trunk
-#    bpy.ops.object.modifier_add(type='BOOLEAN')
-#    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
-#    bpy.context.object.modifiers["Boolean"].object = canopy
-#    bpy.ops.object.modifier_apply(modifier="Boolean")
-
-#    # Rename the merged object as the tree
-#    tree = trunk
-#    trunk.name = name + '_trunk'
-
-#    return trunk
-
+def create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form, collection_name="Trees"):
+    trunk = create_trunk(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form)
+    canopy = create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form)
+    
+    # Merge the trunk and canopy
+    bpy.context.view_layer.objects.active = trunk
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+    bpy.context.object.modifiers["Boolean"].object = canopy
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    tree = trunk
+    tree.name = name
+    
+    return tree
 
 
 def add_trees_to_collection(tree_list, collection_name="Trees"):
@@ -214,11 +202,12 @@ def gen_trees_in_blender(coordinates_filepath):
             live_crown_length = float(row['lcl'])
             crown_diameter = float(row['c_diameter'])
             tree_form = row['q_tree_form']
-            canopy = create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form)
-            trunk = create_trunk(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
-            #tree = create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
-            #tree_list.append(tree)
+#            canopy = create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form)
+#            trunk = create_trunk(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
+            tree = create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
+            tree_list.append(tree)
     
-    #add_trees_to_collection(tree_list)
+    add_trees_to_collection(tree_list)
 
+ 
 gen_trees_in_blender(input_filepath)

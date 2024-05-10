@@ -90,7 +90,6 @@ if __name__ == '__main__':
         print(tree.name)
 
     estimate_tree_list(foliage_list, knowledge_base, param_est_output)
-    #gen_trees_in_blender(coordinates_file) # have to have bpy and stuff for this line 
 
     print("\n\n ===== CALCULATING 3-PG PARAMETERS NOW =====")
     threepg(climate_data_filepath, param_est_output, threepg_output_filepath)
