@@ -1,5 +1,5 @@
 import unittest
-from tree_class import Tree, TreeList
+from junk_drawer.tree_class import Tree, TreeList
 from parse_tree_input import parse_tree_file
 
 class TestParseTreeFile(unittest.TestCase):

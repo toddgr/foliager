@@ -1,0 +1,6 @@
+Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
+Banana tree,Musa acuminata,elliptical,medium,evergreen,green,round,shallow,tropical,smooth,brown
+Palm tree,Arecaceae,linear,dense,evergreen,green,spreading,shallow,tropical,smooth,brown
+Fern tree,Cyatheales,other,medium,evergreen,green,pyramidal,shallow,tropical,smooth,brown
+Rubber tree,Ficus elastica,elliptical,dense,evergreen,green,oval,shallow,tropical,smooth,brown
+Bamboo,Bambusoideae,linear,very dense,evergreen,green,columnar,deep,tropical,smooth,brown

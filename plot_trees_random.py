@@ -8,7 +8,7 @@ Description: Initializes the coordinates for generated trees using scatter plot 
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
-from tree_class import TreeList
+from junk_drawer.tree_class import TreeList
 from parse_csv_file import parse_csv_file
 from threepg_species_data import SpeciesData, get_tree_names, parse_species_data
 

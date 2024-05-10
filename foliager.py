@@ -19,7 +19,6 @@ initial_attributes = "Common_name,scientific_name,leaf_shape_(oval/truncate/elli
 import re
 from parse_tree_input import  csv_file_to_string
 
-from tree_class import Tree, TreeList
 from plot_trees_random import init_trees
 from threepg_species_data import parse_species_data, get_tree_names
 from parse_csv_file import *

@@ -1,5 +1,5 @@
 import unittest
-from tree_class import Tree
+from junk_drawer.tree_class import Tree
 
 class TestTreeClassGenerator(unittest.TestCase):
     def test_tree_class_instantiated(self):
