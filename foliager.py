@@ -58,7 +58,7 @@ def generate_prompt():
     return prompt, location
 
 if __name__ == '__main__':
-    asknlp = True       # If we want to generate new data --> usage is limited
+    asknlp = False       # If we want to generate new data --> usage is limited
 
     climate_data_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
     param_est_output = "test_data/param_est_output.csv"                 # in-between file for parameter estimation
