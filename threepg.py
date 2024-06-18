@@ -12,6 +12,7 @@ from parse_tree_input import csv_file_to_list
 from plot_trees_random import init_trees, init_trees_dont_write_yet
 import csv
 import random
+import itertools
 
 # So I'm going to start out by using Allison's implementation of a tree struct for the sake of visualization. 
 # In the future, though, I'll integrate this with my own tree_class. I jsut don't know how different they will
@@ -494,6 +495,18 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 #     # recreate it here
 #     pass
 
+def create_tree_key(tree_count, spawn_count=0):
+    """ Creates a unique dictionary key based on what tree we're iterating through"""
+    
+    # Generate all combinations of three letters from 'a' to 'z'
+    three_letter_strings = [''.join(letters) for letters in itertools.product('abcdefghijklmnopqrstuvwxyz', repeat=3)]
+
+    if spawn_count == 0:
+        return three_letter_strings[tree_count]
+    else:
+        return three_letter_strings[tree_count] + str(spawn_count)
+
+
 def create_tree_list(tree_coordinates, tree_species,t):
     """ Creates the list/dict of tree information for every single tree in the forest. 
         Taking it out of the 3PG function for better readability and also to isolate the 
@@ -519,42 +532,49 @@ def create_tree_list(tree_coordinates, tree_species,t):
     """
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
     tree_dict = {'start':[['t', 'dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
-
+    key_counter = -1
+    
     for tree in tree_coordinates[1:]: # for each tree in the forest
-        name = tree[0]
-        found = False
-        for species in tree_species: # for each species of tree
-            #t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
-            species_name = species[1]
-            if name == species_name:
-                tree_form = species[2]
+        key_counter += 1
+        tree_key = create_tree_key(key_counter)
+        tree_dict[tree_key] = []
+        for inc_t in range(t+1): # for each time increment
+            name = tree[0]
+            found = False
+            for species in tree_species: # for each species of tree
+                #t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
+                species_name = species[1]
+                if name == species_name:
+                    tree_form = species[2]
 
-                # assign slightly randomized values to the height and dbh
-                factor_height = float(species[3]) / 4
-                random_height_offset = random.uniform(-factor_height, factor_height)
-                new_height = float(species[3]) + random_height_offset
+                    # assign slightly randomized values to the height and dbh
+                    factor_height = float(species[3]) / 4
+                    random_height_offset = random.uniform(-factor_height, factor_height)
+                    new_height = float(species[3]) + random_height_offset
 
-                factor_dbh = float(species[4]) / 4
-                random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
-                new_dbh = float(species[4]) + random_dbh_offset
+                    factor_dbh = float(species[4]) / 4
+                    random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
+                    new_dbh = float(species[4]) + random_dbh_offset
 
-                factor_lcl = float(species[5]) / 4
-                random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
-                new_lcl = float(species[5]) + random_lcl_offset
+                    factor_lcl = float(species[5]) / 4
+                    random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
+                    new_lcl = float(species[5]) + random_lcl_offset
 
-                factor_c_diam = float(species[6]) / 4
-                random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
-                new_c_diam = float(species[6]) + random_c_diam_offset
+                    factor_c_diam = float(species[6]) / 4
+                    random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
+                    new_c_diam = float(species[6]) + random_c_diam_offset
 
-                # append it to the tree_coordinate entry
-                # [name, q_tree_form, , z, height, dbh, lcl, c_diameter]
-                tree_output.append([name, t, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
+                    # append it to the tree_coordinate entry
+                    # [name, q_tree_form, , z, height, dbh, lcl, c_diameter]
+                    tree_output.append([name, inc_t, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
+                    tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
 
-                found = True
-                break
+                    found = True
+                    break
         if not found:
             print(f"Uh oh! Tree data for {name} could not be found.")
-
+    print("======tree dict=========")
+    print(tree_dict)
     return tree_output
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
