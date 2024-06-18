@@ -1,0 +1,6 @@
+Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
+Aspen,Populus tremuloides,oval,medium,deciduous,green,pyramidal,shallow,temperate,smooth,white
+Blue Spruce,Picea pungens,linear,dense,evergreen,green,pyramidal,shallow,temperate,ridges,gray
+Cottonwood,Populus deltoides,ovate,medium,deciduous,green,pyramidal,deep,temperate,furrows,gray
+Maple,Acer,truncate,medium,deciduous,green,round,shallow,temperate,smooth,brown
+Oak,Quercus,elliptical,dense,deciduous,green,spreading,deep,temperate,ridges,brown

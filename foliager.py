@@ -48,7 +48,7 @@ def make_valid_filename(input_string):
 
 def generate_prompt():
     attributes = csv_file_to_string("parameters/default_tree_chart.csv")
-    prompt = "Output an unnumbered list of foliage types in CSV format that can be found in "
+    prompt = "Output an unnumbered list of tree types in CSV format that can be found in "
     location = input("Enter the climate, city, or area:")
     prompt += location + " with the following attributes:" + attributes
     prompt += attributes
@@ -58,7 +58,7 @@ def generate_prompt():
     return prompt, location
 
 if __name__ == '__main__':
-    asknlp = False       # If we want to generate new data --> usage is limited
+    asknlp = True       # If we want to generate new data --> usage is limited
 
     climate_data_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
     param_est_output = "test_data/param_est_output.csv"                 # in-between file for parameter estimation

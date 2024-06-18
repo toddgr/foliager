@@ -110,7 +110,7 @@ def init_trees_dont_write_yet_original(foliage_file, threepg=True, plot=False):
         rows.append([x, z, label])
     return rows
 
-def init_trees_dont_write_yet(foliage_file, threepg=True, plot=False):
+def init_trees_dont_write_yet(foliage_file, threepg=True, plot=False, num_trees=50):
     """
         Takes in a tree_chart csv, outputs a series of random tree placements to a CSV (name,x,y)
         Can use 3pg, can create a scatter plot visualization
@@ -119,7 +119,6 @@ def init_trees_dont_write_yet(foliage_file, threepg=True, plot=False):
     """
     # Generate random data for the x and z coordinates
     np.random.seed(42)
-    num_trees = 50
     x_values = np.random.rand(num_trees)
     z_values = np.random.rand(num_trees)
     if threepg: 
