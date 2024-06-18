@@ -493,6 +493,24 @@ def create_tree_list(tree_coordinates, height_dbh):
     """ Creates the list/dict of tree information for every single tree in the forest. 
         Taking it out of the 3PG function for better readability and also to isolate the 
         data structure so I can mess with it a little bit.
+
+        the old structure of this: 
+        ['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']
+        in list/array form
+
+        The new structure will be a dict with the structure:
+        { tree1 :
+            [[t, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter],
+            [t, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter],
+            [t, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter]
+            ]
+        }
+
+        This is so that we can access multiple instances of the same tree at different time values, and 
+        also to make it easier to spawn/kill off trees in an organized way.
+
+        Then, once ALL of the data has been written for all the trees at all the times, then we can write
+        it in CSV form, where each tree for each line is written in chronological order.
     """
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
 
@@ -533,6 +551,21 @@ def create_tree_list(tree_coordinates, height_dbh):
 
     return tree_output
 
+def tree_dict_to_csv(tree_dict, output_csv_filepath):
+    """ Takes in the dictionary of tree data, outputs it as a csv
+        Example format:
+        Tree name, 0, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
+        Tree name, 1, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
+        ...
+        Tree name2, 0, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
+        Tree name2, 1, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
+        ..."""
+    
+    with open(output_csv_filepath, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerows(tree_dict)
+    pass
+
 
 def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv"):
 
@@ -549,9 +582,7 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     tree_output = create_tree_list(tree_coordinates, height_dbh)
     # for each of the 3-PG data entries in the height_dbh
 
-    with open(outputdata_filename, 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerows(tree_output)
+    tree_dict_to_csv(tree_output, outputdata_filename)
 
     print("\n===== CALCULATIONS FINISHED ===== ")
     print(f"Data for use in Blender outputted to: {outputdata_filename}")
