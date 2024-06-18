@@ -469,6 +469,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             total_height = h # mean tree height
             live_crown_length = hl # distance between the top live foliage and the lowest live foliage
             dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing trees
+            # TODO: approximate masting cycle here
             height_dbh_list.append([inc_t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
 
         # setting final biomass values
@@ -531,44 +532,50 @@ def create_tree_list(tree_coordinates, tree_species,t):
         it in CSV form, where each tree for each line is written in chronological order.
     """
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
-    tree_dict = {'tree_key':[['t', 'is_dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
+    tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle']]}
     key_counter = -1
-    
+    is_dead = False
+    # TODO: create a parameter estimation for this
+    masting_cycle = 5 * 12 # in years -- so 5 years
+
     for tree in tree_coordinates[1:]: # for each tree in the forest
         key_counter += 1
         tree_key = create_tree_key(key_counter)
         tree_dict[tree_key] = []
-        for inc_t in range(t+1): # for each time increment
-            name = tree[0]
-            found = False
-            for species in tree_species: # for each species of tree
-                #t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
-                species_name = species[1]
-                if name == species_name:
-                    tree_form = species[2]
+        name = tree[0]
+        found = False
+        inc_t = 0
+        for species in tree_species: # for each species of tree
+            #t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
+            species_name = species[1]
+            if name == species_name:
+                tree_form = species[2]
 
-                    # assign slightly randomized values to the height and dbh
+                if inc_t == 0:
+                    # Randomized offsets -- different for each tree
                     factor_height = float(species[3]) / 4
                     random_height_offset = random.uniform(-factor_height, factor_height)
-                    new_height = float(species[3]) + random_height_offset
 
                     factor_dbh = float(species[4]) / 4
                     random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
-                    new_dbh = float(species[4]) + random_dbh_offset
-
+                    
                     factor_lcl = float(species[5]) / 4
                     random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
-                    new_lcl = float(species[5]) + random_lcl_offset
-
+                    
                     factor_c_diam = float(species[6]) / 4
                     random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
+                
+                if inc_t == species[0]: # if it's the correct t value we're looking for
+                    # assign slightly randomized values to the height and dbh
+                    new_height = float(species[3]) + random_height_offset
+                    new_dbh = float(species[4]) + random_dbh_offset
+                    new_lcl = float(species[5]) + random_lcl_offset
                     new_c_diam = float(species[6]) + random_c_diam_offset
-
                     # append it to the tree_coordinate entry
-                    tree_dict[tree_key].append([inc_t, False, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
+                    tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle])
 
-                    found = True
-                    break
+                inc_t +=1
+                found = True
 
         if not found:
             print(f"Uh oh! Tree data for {name} could not be found.")
@@ -584,10 +591,6 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
         Tree name2, 0, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
         Tree name2, 1, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
         ..."""
-    
-    # with open(output_csv_filepath, 'w', newline='') as csvfile:
-    #     csv_writer = csv.writer(csvfile)
-    #     csv_writer.writerows(tree_dict)
 
     with open(output_csv_filepath, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
@@ -600,9 +603,8 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
     pass
 
 
-def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=10):
+def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=12):
 
-    # TODO: convert this to its own function to be used in foliager main
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
     height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
     print(f"height_dbh: {height_dbh}")
