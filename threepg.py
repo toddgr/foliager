@@ -496,34 +496,22 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 #     # recreate it here
 #     pass
 
-def create_tree_key(tree_count, spawn_count=0):
+def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
     """ Creates a unique dictionary key based on what tree we're iterating through"""
     
     # Generate all combinations of three letters from 'a' to 'z'
     three_letter_strings = [''.join(letters) for letters in itertools.product('abcdefghijklmnopqrstuvwxyz', repeat=3)]
 
-    if spawn_count == 0:
+    if tree_key is None: # original tree
         return three_letter_strings[tree_count]
     else:
-        return three_letter_strings[tree_count] + str(spawn_count)
+        return tree_key + str(spawn_count)
 
 
 def create_tree_list(tree_coordinates, tree_species,t):
     """ Creates the list/dict of tree information for every single tree in the forest. 
         Taking it out of the 3PG function for better readability and also to isolate the 
         data structure so I can mess with it a little bit.
-
-        the old structure of this: 
-        ['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']
-        in list/array form
-
-        The new structure will be a dict with the structure:
-        { tree1 :
-            [[t, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter],
-            [t, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter],
-            [t, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter]
-            ]
-        }
 
         This is so that we can access multiple instances of the same tree at different time values, and 
         also to make it easier to spawn/kill off trees in an organized way.
