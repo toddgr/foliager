@@ -531,7 +531,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
         it in CSV form, where each tree for each line is written in chronological order.
     """
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
-    tree_dict = {'tree_key':[['t', 'dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
+    tree_dict = {'tree_key':[['t', 'is_dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
     key_counter = -1
     
     for tree in tree_coordinates[1:]: # for each tree in the forest
