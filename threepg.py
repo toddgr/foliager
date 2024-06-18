@@ -117,63 +117,6 @@ physmod_method = 0 # this denotes the method used to calculate physmod. 0 = comb
 agemod_method = 0 # 0 = agemod not used, 1 = agemod used
 display_mode = 0 # cones vs textures. Probably won't use this but I'll keep for ref, for now.
 
-
-"""
-    ==================== SPECIES DATA ========================
-    Original -- This data is all from Forrester et al. in press, and featured on the 3PDGmix.Data
-    Excel sheet. The data is refered to as 
-    Since this program deals specifically with Douglas Firs, this data will not change. 
-
-    So... these are the parameters that I either need to a) force the NLP to find data on,
-    or b) generalize for the purposes of the program. Also double check that these have constant values
-    and aren't computed based on something. I want to give the NLP as few things to look for as possible.
-
-    Eventually, maybe I can automate this so that it reads in these values from a generated CSV, which then assigns it values in the program.
-"""
-
-
-
-# lec = douglasfir.lec # a light extinction coefficient
-
-# p2 = douglasfir.p2 # diameter at breast height at 2cm, used in partitioning ratios
-# p20 = douglasfir.p20 # diameter at breast height at 20cm, used in partitioning ratios
-
-# acx = douglasfir.acx # species-specific max potential canopy quantum efficiency
-
-# sla_1 = douglasfir.sla_1 # SLA in older stands
-# sla_0 = douglasfir.sla_0 # SLA in younger stands
-# t_sla_mid = douglasfir.t_sla_mid # age where SLA = 0.5(sla_0-sla_1)
-
-# fn0 = douglasfir.fn0 # value of fN when FR = 0
-# nfn = douglasfir.nfn # power of (1-FR) in fN
-
-# tc = douglasfir.tc # age when canopy closes
-
-# max_age = douglasfir.max_age # Max stand age, used in age mod
-# r_age = douglasfir.r_age # relative age to give fage = 0.5
-# n_age = douglasfir.n_age # power of relative age in f_age function
-
-# # Mean fractions of biomass per tree that is lost when a tree dies -- per pool
-# mf = douglasfir.mf
-# mr = douglasfir.mr
-# ms = douglasfir.ms
-
-# # Biomass
-# yfx = douglasfir.yfx
-# yf0 = douglasfir.yf0
-# tyf = douglasfir.tyf
-# yr = douglasfir.yr # average monthly root turnover rate (1/month)
-# nr_min = douglasfir.nr_min # minimum root partitioning ratio
-# nr_max = douglasfir.nr_max # maximum root partitioning ratio
-# m_0 = douglasfir.m_0 # m on sites of poor fertility, eg. FR=0
-
-# # for mortality
-# wsx1000 = douglasfir.wsx1000 # value of wsx when n = 1000
-# nm = douglasfir.nm # exponent of self-thinning rule
-
-"""
-    ================ MISC ===============
-"""
 cr = 0.47 # conversion ratio for making GPP into NPP
 
 """
@@ -546,19 +489,11 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 #     # recreate it here
 #     pass
 
-def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv"):
-
-    # TODO: convert this to its own function to be used in foliager main
-    #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
-    # print(f"height_dbh: {height_dbh}")
-    # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
-    # We'll need to randomize the actual height and dbh for each individual tree
-    
-    print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
-    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=True) # returns [name, x, z]
-    
-    # for each of the 3-PG data entries in the height_dbh
+def create_tree_list(tree_coordinates, height_dbh):
+    """ Creates the list/dict of tree information for every single tree in the forest. 
+        Taking it out of the 3PG function for better readability and also to isolate the 
+        data structure so I can mess with it a little bit.
+    """
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
 
     for tree in tree_coordinates[1:]:
@@ -595,6 +530,24 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
                 break
         if not found:
             print(f"Uh oh! Tree data for {tree_name} could not be found.")
+
+    return tree_output
+
+
+def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv"):
+
+    # TODO: convert this to its own function to be used in foliager main
+    #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
+    # print(f"height_dbh: {height_dbh}")
+    # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
+    # We'll need to randomize the actual height and dbh for each individual tree
+    
+    print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
+    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=True) # returns [name, x, z]
+    
+    tree_output = create_tree_list(tree_coordinates, height_dbh)
+    # for each of the 3-PG data entries in the height_dbh
 
     with open(outputdata_filename, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
