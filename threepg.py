@@ -531,7 +531,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
         it in CSV form, where each tree for each line is written in chronological order.
     """
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
-    tree_dict = {'start':[['t', 'dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
+    tree_dict = {'tree_key':[['t', 'dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
     key_counter = -1
     
     for tree in tree_coordinates[1:]: # for each tree in the forest
@@ -565,17 +565,15 @@ def create_tree_list(tree_coordinates, tree_species,t):
                     new_c_diam = float(species[6]) + random_c_diam_offset
 
                     # append it to the tree_coordinate entry
-                    # [name, q_tree_form, , z, height, dbh, lcl, c_diameter]
-                    tree_output.append([name, inc_t, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
-                    tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
+                    tree_dict[tree_key].append([inc_t, False, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
 
                     found = True
                     break
+
         if not found:
             print(f"Uh oh! Tree data for {name} could not be found.")
-    print("======tree dict=========")
-    print(tree_dict)
-    return tree_output
+
+    return tree_dict
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
     """ Takes in the dictionary of tree data, outputs it as a csv
@@ -587,9 +585,18 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
         Tree name2, 1, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
         ..."""
     
+    # with open(output_csv_filepath, 'w', newline='') as csvfile:
+    #     csv_writer = csv.writer(csvfile)
+    #     csv_writer.writerows(tree_dict)
+
     with open(output_csv_filepath, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        csv_writer.writerows(tree_dict)
+        
+        # Iterate through each key in the dictionary
+        for key in tree_dict:
+            # Write each subarray (list of values) as a new row in the CSV
+            for subarray in tree_dict[key]:
+                csv_writer.writerow([key] + subarray)
     pass
 
 
