@@ -467,8 +467,8 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
             total_height = h # mean tree height
             live_crown_length = hl # distance between the top live foliage and the lowest live foliage
-            dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
-            height_dbh_list.append([t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
+            dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing trees
+            height_dbh_list.append([inc_t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
 
         # setting final biomass values
         wf = last_wf
@@ -494,7 +494,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 #     # recreate it here
 #     pass
 
-def create_tree_list(tree_coordinates, height_dbh,t):
+def create_tree_list(tree_coordinates, tree_species,t):
     """ Creates the list/dict of tree information for every single tree in the forest. 
         Taking it out of the 3PG function for better readability and also to isolate the 
         data structure so I can mess with it a little bit.
@@ -520,40 +520,40 @@ def create_tree_list(tree_coordinates, height_dbh,t):
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
     tree_dict = {'start':[['t', 'dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
 
-    for tree in tree_coordinates[1:]:
-        tree_name = tree[0]
+    for tree in tree_coordinates[1:]: # for each tree in the forest
+        name = tree[0]
         found = False
-        for tree_3pg in height_dbh:
-            #species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
-            tree_name_3pg = tree_3pg[0]
-            if tree_name == tree_name_3pg:
-                tree_form = tree_3pg[1]
+        for species in tree_species: # for each species of tree
+            #t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
+            species_name = species[1]
+            if name == species_name:
+                tree_form = species[2]
 
                 # assign slightly randomized values to the height and dbh
-                factor_height = float(tree_3pg[2]) / 4
+                factor_height = float(species[3]) / 4
                 random_height_offset = random.uniform(-factor_height, factor_height)
-                new_height = float(tree_3pg[2]) + random_height_offset
+                new_height = float(species[3]) + random_height_offset
 
-                factor_dbh = float(tree_3pg[3]) / 4
+                factor_dbh = float(species[4]) / 4
                 random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
-                new_dbh = float(tree_3pg[3]) + random_dbh_offset
+                new_dbh = float(species[4]) + random_dbh_offset
 
-                factor_lcl = float(tree_3pg[4]) / 4
+                factor_lcl = float(species[5]) / 4
                 random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
-                new_lcl = float(tree_3pg[4]) + random_lcl_offset
+                new_lcl = float(species[5]) + random_lcl_offset
 
-                factor_c_diam = float(tree_3pg[5]) / 4
+                factor_c_diam = float(species[6]) / 4
                 random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
-                new_c_diam = float(tree_3pg[5]) + random_c_diam_offset
+                new_c_diam = float(species[6]) + random_c_diam_offset
 
                 # append it to the tree_coordinate entry
                 # [name, q_tree_form, , z, height, dbh, lcl, c_diameter]
-                tree_output.append([tree_name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
+                tree_output.append([name, t, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
 
                 found = True
                 break
         if not found:
-            print(f"Uh oh! Tree data for {tree_name} could not be found.")
+            print(f"Uh oh! Tree data for {name} could not be found.")
 
     return tree_output
 
@@ -578,12 +578,12 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     # TODO: convert this to its own function to be used in foliager main
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
     height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
-    # print(f"height_dbh: {height_dbh}")
+    print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
     
     print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
-    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=True) # returns [name, x, z]
+    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=False) # returns [name, x, z]
     
     tree_output = create_tree_list(tree_coordinates, height_dbh,t)
     # for each of the 3-PG data entries in the height_dbh
