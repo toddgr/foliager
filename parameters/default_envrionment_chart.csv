@@ -1,0 +1,4 @@
+# Default_environment_chart.csv
+# Based on the 3PG climactic variables, these parameters have an influence over tree distribution in a scene
+# Also based on data from Thompson 2023 https://ir.library.oregonstate.edu/concern/parent/x920g532g/file_sets/9p290j47b
+Monthly Maximum Temperature, Monthly Minimum Temperature, Monthly Mean Daily Temperature, Solar Radiation, Vapour Pressure Deficit (VPD), Monthly Total Rainfall, Monthly Frost Days

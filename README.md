@@ -1,10 +1,13 @@
 # foliager
 
+![](trees.jpg)
+Photo by [Anton Atanasov](https://www.pexels.com/photo/worm-s-view-photography-of-trees-566496/)
+
 ## Description
 
-Foliager is a Python program designed to enhance the generation of virtual forests in Unreal Engine by providing a list of foliage based on user input regarding a specific climate, city, or area. It leverages Natural Language Processing (NLP) to understand user queries and produces a curated list of foliage that can be used to create realistic and diverse virtual environments.
+Foliager is a work-in-progress Python program designed to enhance the generation of virtual forests in Unreal Engine by providing a list of foliage based on user input regarding a specific climate, city, or area. It leverages Natural Language Processing (NLP) to understand user queries and produces a curated list of foliage that can be used to create realistic and diverse virtual environments.
 
-## Features
+## Features so far:
 
 - Utilizes NLP to interpret user queries related to foliage preferences.
 - Retrieves and compiles a list of foliage based on the specified climate, city, or area.
