@@ -465,6 +465,11 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             # stand volume
             vs = av * pow(b, nvb) * pow(h, nvh) * pow(b * b * h, nvbh) * n
 
+            total_height = h # mean tree height
+            live_crown_length = hl # distance between the top live foliage and the lowest live foliage
+            dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
+            height_dbh_list.append([t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
+
         # setting final biomass values
         wf = last_wf
         ws = last_ws
@@ -475,10 +480,10 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
         #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
         print(f"Live crown length: {hl}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
         #plot the trees
-        total_height = h # mean tree height
-        live_crown_length = hl # distance between the top live foliage and the lowest live foliage
-        dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
-        height_dbh_list.append([species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
+        # total_height = h # mean tree height
+        # live_crown_length = hl # distance between the top live foliage and the lowest live foliage
+        # dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
+        # height_dbh_list.append([species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
     return height_dbh_list
             
 # def init_trees():
@@ -489,7 +494,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 #     # recreate it here
 #     pass
 
-def create_tree_list(tree_coordinates, height_dbh):
+def create_tree_list(tree_coordinates, height_dbh,t):
     """ Creates the list/dict of tree information for every single tree in the forest. 
         Taking it out of the 3PG function for better readability and also to isolate the 
         data structure so I can mess with it a little bit.
@@ -513,6 +518,7 @@ def create_tree_list(tree_coordinates, height_dbh):
         it in CSV form, where each tree for each line is written in chronological order.
     """
     tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
+    tree_dict = {'start':[['t', 'dead', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]}
 
     for tree in tree_coordinates[1:]:
         tree_name = tree[0]
@@ -567,11 +573,11 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
     pass
 
 
-def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv"):
+def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=10):
 
     # TODO: convert this to its own function to be used in foliager main
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
     # print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
@@ -579,7 +585,7 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
     tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=True) # returns [name, x, z]
     
-    tree_output = create_tree_list(tree_coordinates, height_dbh)
+    tree_output = create_tree_list(tree_coordinates, height_dbh,t)
     # for each of the 3-PG data entries in the height_dbh
 
     tree_dict_to_csv(tree_output, outputdata_filename)
