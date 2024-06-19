@@ -552,24 +552,25 @@ def create_tree_list(tree_coordinates, tree_species,t):
 
 def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key, name, inc_t):
     """
-        Finds the specific tree's species information and assigns it
+        Finds the specific tree's species information and assigns it to the tree
     """
 
     random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
-    
+
     for species in tree_species: # for each species of tree
-            #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
+        #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
         species_name = species[1]
         if name == species_name:
             tree_form = species[2]
 
             if inc_t == species[0]: # if it's the correct t value we're looking for
-                    # assign slightly randomized values to the height and dbh
+                # assign slightly randomized values to the height and dbh
                 new_height = float(species[3]) + random_factors[0]
                 new_dbh = float(species[4]) + random_factors[1]
                 new_lcl = float(species[5]) + random_factors[2]
                 new_c_diam = float(species[6]) + random_factors[3]
-                    # append it to the entry
+                
+                # append it to the entry
                 tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle])
 
             inc_t +=1
