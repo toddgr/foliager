@@ -512,7 +512,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
         Then, once ALL of the data has been written for all the trees at all the times, then we can write
         it in CSV form, where each tree for each line is written in chronological order.
     """
-    
+
     tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle']]}
     key_counter = -1
     is_dead = False
@@ -527,7 +527,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
         found = False
         inc_t = 0
         for species in tree_species: # for each species of tree
-            #t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
+            #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
             species_name = species[1]
             if name == species_name:
                 tree_form = species[2]
@@ -552,7 +552,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
                     new_dbh = float(species[4]) + random_dbh_offset
                     new_lcl = float(species[5]) + random_lcl_offset
                     new_c_diam = float(species[6]) + random_c_diam_offset
-                    # append it to the tree_coordinate entry
+                    # append it to the entry
                     tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle])
 
                 inc_t +=1
@@ -564,14 +564,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
     return tree_dict
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
-    """ Takes in the dictionary of tree data, outputs it as a csv
-        Example format:
-        Tree name, 0, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
-        Tree name, 1, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
-        ...
-        Tree name2, 0, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
-        Tree name2, 1, dead, name, q_tree_form, x, z, height, dbh, lcl, c_diameter
-        ..."""
+    """ Takes in the dictionary of tree data, outputs it as a csv """
 
     with open(output_csv_filepath, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
