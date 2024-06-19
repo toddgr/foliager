@@ -488,13 +488,6 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
         # height_dbh_list.append([species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
     return height_dbh_list
             
-# def init_trees():
-#     # base this off of a combination of allison's code, as well as my random generation for scatter plots
-#     # I have the code where it writes the coordinates to a csv file, but I didn't push it from my pc so we will have to wait
-#     # take in the csv, parse each tree species collaection of coordinates, give the trees random height and breast height and stuff
-#     # I migth not even want to take in the csv-- i might want to just take the proof of concept and 
-#     # recreate it here
-#     pass
 
 def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
     """ Creates a unique dictionary key based on what tree we're iterating through"""
@@ -519,7 +512,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
         Then, once ALL of the data has been written for all the trees at all the times, then we can write
         it in CSV form, where each tree for each line is written in chronological order.
     """
-    tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
+    
     tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle']]}
     key_counter = -1
     is_dead = False
