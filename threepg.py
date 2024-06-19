@@ -537,7 +537,6 @@ def create_tree_list(tree_coordinates, tree_species,t):
     masting_cycle = 5 * 12 # in years -- so 5 years
 
     random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
-    
 
     for tree in tree_coordinates[1:]: # for each tree in the forest
         key_counter += 1
@@ -546,31 +545,38 @@ def create_tree_list(tree_coordinates, tree_species,t):
         name = tree[0]
         found = False
         inc_t = 0
-
-        random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
         
-        for species in tree_species: # for each species of tree
-            #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
-            species_name = species[1]
-            if name == species_name:
-                tree_form = species[2]
-
-                if inc_t == species[0]: # if it's the correct t value we're looking for
-                    # assign slightly randomized values to the height and dbh
-                    new_height = float(species[3]) + random_factors[0]
-                    new_dbh = float(species[4]) + random_factors[1]
-                    new_lcl = float(species[5]) + random_factors[2]
-                    new_c_diam = float(species[6]) + random_factors[3]
-                    # append it to the entry
-                    tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle])
-
-                inc_t +=1
-                found = True
-
-        if not found:
-            print(f"Uh oh! Tree data for {name} could not be found.")
+        create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key, name, inc_t)
 
     return tree_dict
+
+def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key, name, inc_t):
+    """
+        Finds the specific tree's species information and assigns it
+    """
+
+    random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
+    
+    for species in tree_species: # for each species of tree
+            #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
+        species_name = species[1]
+        if name == species_name:
+            tree_form = species[2]
+
+            if inc_t == species[0]: # if it's the correct t value we're looking for
+                    # assign slightly randomized values to the height and dbh
+                new_height = float(species[3]) + random_factors[0]
+                new_dbh = float(species[4]) + random_factors[1]
+                new_lcl = float(species[5]) + random_factors[2]
+                new_c_diam = float(species[6]) + random_factors[3]
+                    # append it to the entry
+                tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle])
+
+            inc_t +=1
+            found = True
+
+    if not found:
+        print(f"Uh oh! Tree data for {name} could not be found.")
 
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
