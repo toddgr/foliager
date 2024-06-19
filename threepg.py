@@ -500,6 +500,23 @@ def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
     else:
         return tree_key + str(spawn_count)
 
+def randomize_tree_factors(species_list):
+    for species in species_list:
+        # Randomized offsets -- different for each tree
+        factor_height = float(species[3]) / 4
+        random_height_offset = random.uniform(-factor_height, factor_height)
+
+        factor_dbh = float(species[4]) / 4
+        random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
+        
+        factor_lcl = float(species[5]) / 4
+        random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
+        
+        factor_c_diam = float(species[6]) / 4
+        random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
+
+        return [random_height_offset, random_dbh_offset, random_lcl_offset, random_c_diam_offset]
+    
 
 def create_tree_list(tree_coordinates, tree_species,t):
     """ Creates the list/dict of tree information for every single tree in the forest. 
@@ -519,6 +536,9 @@ def create_tree_list(tree_coordinates, tree_species,t):
     # TODO: create a parameter estimation for this
     masting_cycle = 5 * 12 # in years -- so 5 years
 
+    random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
+    
+
     for tree in tree_coordinates[1:]: # for each tree in the forest
         key_counter += 1
         tree_key = create_tree_key(key_counter)
@@ -526,32 +546,21 @@ def create_tree_list(tree_coordinates, tree_species,t):
         name = tree[0]
         found = False
         inc_t = 0
+
+        random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
+        
         for species in tree_species: # for each species of tree
             #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
             species_name = species[1]
             if name == species_name:
                 tree_form = species[2]
 
-                if inc_t == 0:
-                    # Randomized offsets -- different for each tree
-                    factor_height = float(species[3]) / 4
-                    random_height_offset = random.uniform(-factor_height, factor_height)
-
-                    factor_dbh = float(species[4]) / 4
-                    random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
-                    
-                    factor_lcl = float(species[5]) / 4
-                    random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
-                    
-                    factor_c_diam = float(species[6]) / 4
-                    random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
-                
                 if inc_t == species[0]: # if it's the correct t value we're looking for
                     # assign slightly randomized values to the height and dbh
-                    new_height = float(species[3]) + random_height_offset
-                    new_dbh = float(species[4]) + random_dbh_offset
-                    new_lcl = float(species[5]) + random_lcl_offset
-                    new_c_diam = float(species[6]) + random_c_diam_offset
+                    new_height = float(species[3]) + random_factors[0]
+                    new_dbh = float(species[4]) + random_factors[1]
+                    new_lcl = float(species[5]) + random_factors[2]
+                    new_c_diam = float(species[6]) + random_factors[3]
                     # append it to the entry
                     tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle])
 
@@ -562,6 +571,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
             print(f"Uh oh! Tree data for {name} could not be found.")
 
     return tree_dict
+
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
     """ Takes in the dictionary of tree data, outputs it as a csv """
