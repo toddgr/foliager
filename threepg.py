@@ -542,18 +542,19 @@ def create_tree_list(tree_coordinates, tree_species,t):
         key_counter += 1
         tree_key = create_tree_key(key_counter)
         tree_dict[tree_key] = []
-        name = tree[0]
-        found = False
-        inc_t = 0
         
-        create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key, name, inc_t)
+        create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key)
 
     return tree_dict
 
-def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key, name, inc_t):
+
+def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key):
     """
         Finds the specific tree's species information and assigns it to the tree
     """
+
+    name = tree[0]
+    inc_t = 0
 
     random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
 
@@ -564,6 +565,12 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
             tree_form = species[2]
 
             if inc_t == species[0]: # if it's the correct t value we're looking for
+                # check if it's the tree's masting period
+                    # if so, spawn a random number of trees
+                    # TODO double check the logic of this
+                if inc_t % masting_cycle == 0:
+                    spawn_some_trees()
+
                 # assign slightly randomized values to the height and dbh
                 new_height = float(species[3]) + random_factors[0]
                 new_dbh = float(species[4]) + random_factors[1]
@@ -579,6 +586,10 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
     if not found:
         print(f"Uh oh! Tree data for {name} could not be found.")
 
+
+def spawn_some_trees(parent_data):
+    pass
+    
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
     """ Takes in the dictionary of tree data, outputs it as a csv """
