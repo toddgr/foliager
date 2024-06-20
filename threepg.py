@@ -566,6 +566,7 @@ def create_species_information(tree_species, tree_dict, masting_cycle, tree, tre
         if name == species_name:
             found = add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
             inc_t += 1
+            age += 1
     if not found:
         print(f"Uh oh! Tree data for {name} could not be found.")
 
@@ -593,12 +594,8 @@ def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, m
             # TODO double check the logic of this
         if inc_t % masting_cycle == 0:
             spawn_some_trees(tree_key, tree_entry, tree_dict)
-
-    inc_t +=1
-    age += 1
-    found = True
     
-    return found
+        return True
 
 
 def determine_tree_stage(age):
