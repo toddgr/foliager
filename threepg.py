@@ -494,7 +494,6 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
 def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
     """ Creates a unique dictionary key based on what tree we're iterating through"""
-    
     # Generate all combinations of three letters from 'a' to 'z'
     three_letter_strings = [''.join(letters) for letters in itertools.product('abcdefghijklmnopqrstuvwxyz', repeat=3)]
 
@@ -502,6 +501,7 @@ def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
         return three_letter_strings[tree_count]
     else:
         return tree_key + str(spawn_count)
+
 
 def randomize_tree_factors(species_list):
     for species in species_list:
@@ -532,7 +532,6 @@ def create_tree_list(tree_coordinates, tree_species,t):
         Then, once ALL of the data has been written for all the trees at all the times, then we can write
         it in CSV form, where each tree for each line is written in chronological order.
     """
-
     tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
     key_counter = -1
     is_dead = False
@@ -546,19 +545,18 @@ def create_tree_list(tree_coordinates, tree_species,t):
         tree_key = create_tree_key(key_counter)
         tree_dict[tree_key] = []
         
-        create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key)
+        create_species_information(tree_species, tree_dict, masting_cycle, tree, tree_key)
 
     return tree_dict
 
 
-def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key):
+def create_species_information(tree_species, tree_dict, masting_cycle, tree, tree_key, age=0):
     """
         Finds the specific tree's species information and assigns it to the tree for each time
         interval that it is not dead
     """
-
     name = tree[0]
-    inc_t = 0
+    inc_t=0
 
     random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
 
@@ -566,34 +564,41 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
         #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
         species_name = species[1]
         if name == species_name:
-            age = inc_t
-            stage = determine_tree_stage(age)
-            tree_form = species[2]
-
-            if inc_t == species[0]: # if it's the correct t value we're looking for
-                if inc_t > 0 and not tree_dict[tree_key][inc_t-1][9]:# If the previous t value of the tree is dead
-                    break
-                
-                # check if it's the tree's masting period
-                    # if so, spawn a random number of trees
-                    # TODO double check the logic of this
-                if inc_t % masting_cycle == 0:
-                    spawn_some_trees(tree, tree_key)
-
-                # assign slightly randomized values to the height and dbh
-                new_height = float(species[3]) + random_factors[0]
-                new_dbh = float(species[4]) + random_factors[1]
-                new_lcl = float(species[5]) + random_factors[2]
-                new_c_diam = float(species[6]) + random_factors[3]
-                
-                # append it to the entry
-                tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle, age, stage])
-
-            inc_t +=1
-            found = True
-
+            found = add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
+            inc_t += 1
     if not found:
         print(f"Uh oh! Tree data for {name} could not be found.")
+
+
+def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t, is_dead=False):
+    stage = determine_tree_stage(age)
+    tree_form = species[2]
+
+    if inc_t == species[0]: # if it's the correct t value we're looking for
+        # if inc_t > 0 and not tree_dict[tree_key][inc_t-1][9]:# If the previous t value of the tree is dead
+        #     return #TODO fix
+
+        # assign slightly randomized values to the height and dbh
+        new_height = float(species[3]) + random_factors[0]
+        new_dbh = float(species[4]) + random_factors[1]
+        new_lcl = float(species[5]) + random_factors[2]
+        new_c_diam = float(species[6]) + random_factors[3]
+        
+        # append it to the entry
+        tree_entry = [inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle, age, stage]
+        tree_dict[tree_key].append(tree_entry)
+
+        # check if it's the tree's masting period
+            # if so, spawn a random number of trees
+            # TODO double check the logic of this
+        if inc_t % masting_cycle == 0:
+            spawn_some_trees(tree_key, tree_entry, tree_dict)
+
+    inc_t +=1
+    age += 1
+    found = True
+    
+    return found
 
 
 def determine_tree_stage(age):
@@ -626,19 +631,26 @@ def determine_tree_stage(age):
         return 'mature'
 
 
-def spawn_some_trees(parent, parent_key):
+def spawn_some_trees(parent_key, parent_entry, tree_dict):
     """
         Takes in the tree information and key from the parent, adds new tree seedlings
         within a specific area and gives them a similar key to the parent
     """
 
-    # For each 
+    # For each seedling spawned
+        # Create a new key from the parent
+        # Get new x and z coordinates
+            # Check to make sure that there is not already a tree there
+        # create_species_information() with:
+            # information obtained from the tree 
+
     pass
     
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
-    """ Takes in the dictionary of tree data, outputs it as a csv """
-
+    """ 
+    Takes in the dictionary of tree data, outputs it as a csv 
+    """
     with open(output_csv_filepath, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
         
