@@ -530,7 +530,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
         it in CSV form, where each tree for each line is written in chronological order.
     """
 
-    tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle']]}
+    tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
     key_counter = -1
     is_dead = False
     # TODO: create a parameter estimation for this
@@ -550,7 +550,8 @@ def create_tree_list(tree_coordinates, tree_species,t):
 
 def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, tree, tree_key):
     """
-        Finds the specific tree's species information and assigns it to the tree
+        Finds the specific tree's species information and assigns it to the tree for each time
+        interval that it is not dead
     """
 
     name = tree[0]
@@ -562,17 +563,19 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
         #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
         species_name = species[1]
         if name == species_name:
+            age = inc_t
+            stage = determine_tree_stage(age)
             tree_form = species[2]
 
             if inc_t == species[0]: # if it's the correct t value we're looking for
                 if inc_t > 0 and not tree_dict[tree_key][inc_t-1][9]:# If the previous t value of the tree is dead
                     break
-
+                
                 # check if it's the tree's masting period
                     # if so, spawn a random number of trees
                     # TODO double check the logic of this
                 if inc_t % masting_cycle == 0:
-                    spawn_some_trees()
+                    spawn_some_trees(tree, tree_key)
 
                 # assign slightly randomized values to the height and dbh
                 new_height = float(species[3]) + random_factors[0]
@@ -581,7 +584,7 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
                 new_c_diam = float(species[6]) + random_factors[3]
                 
                 # append it to the entry
-                tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle])
+                tree_dict[tree_key].append([inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle, age, stage])
 
             inc_t +=1
             found = True
@@ -590,7 +593,43 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
         print(f"Uh oh! Tree data for {name} could not be found.")
 
 
-def spawn_some_trees(parent_data=None):
+def determine_tree_stage(age):
+    """
+        Classify the growth stage of a tree based on how old it is.
+        TODO maybe get this to be more specific to different tree types
+
+        AGE IS IN MONTHS   
+    """
+    if age < 6: 
+        # This initial stage, where a seed germinates and becomes a seedling, 
+        # usually takes a few weeks to a few months.
+        return 'germinating'
+    
+    elif age < (3*12):
+        # The seedling stage is characterized by rapid growth and the development of 
+        # a strong root system and several sets of true leaves. This stage can last 
+        # anywhere from one to several years, often up to 2-3 years for many tree species.
+        return 'seedling'
+    
+    elif age < (6*12):
+        # This stage typically starts when the tree is about 1-3 years old and can last 
+        # until the tree is around 5-10 years old. During this period, the tree continues 
+        # to grow in height and girth but is not yet mature.
+        return 'young'
+    
+    else:  
+        # This stage can vary greatly in length depending on the species, with some trees 
+        # maturing in as little as 10-20 years, while others may take several decades.
+        return 'mature'
+
+
+def spawn_some_trees(parent, parent_key):
+    """
+        Takes in the tree information and key from the parent, adds new tree seedlings
+        within a specific area and gives them a similar key to the parent
+    """
+
+    # For each 
     pass
     
 
