@@ -1,9 +1,12 @@
 """
 File: 3pg.py
 Author: Grace Todd
-Date: February 21, 2024
-Description: My attempt at converting 3-PG to Python so that I can use it in my calculations and 
-             whatnot.
+Date: June 20, 2024
+Description: Uses 3-PG to calculate various parameters of a tree, which will be used to generate
+             each tree in the simulation at every time interval.
+             
+             Based on real, scientific data, and uses C++ skeleton framework provided by Allison
+             Thompson in her thesis here: https://ir.library.oregonstate.edu/concern/honors_college_theses/x920g532g.
 """
 
 import math # for log
