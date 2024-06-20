@@ -565,6 +565,9 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
             tree_form = species[2]
 
             if inc_t == species[0]: # if it's the correct t value we're looking for
+                if inc_t > 0 and not tree_dict[tree_key][inc_t-1][9]:# If the previous t value of the tree is dead
+                    break
+
                 # check if it's the tree's masting period
                     # if so, spawn a random number of trees
                     # TODO double check the logic of this
@@ -587,7 +590,7 @@ def create_species_information(tree_species, tree_dict, is_dead, masting_cycle, 
         print(f"Uh oh! Tree data for {name} could not be found.")
 
 
-def spawn_some_trees(parent_data):
+def spawn_some_trees(parent_data=None):
     pass
     
 
