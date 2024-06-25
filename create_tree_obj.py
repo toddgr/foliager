@@ -40,4 +40,10 @@ class Tree:
     
 
 if __name__ == '__main__':
-    pass
+    # example usage
+    trunk = TreeNode((0, 0, 0), (1, 1, 1))
+    branch1 = TreeNode((1, 1, 1), (1, 2, 1))
+    trunk.add_child(branch1)
+    
+    tree = Tree(trunk)
+    print(tree.traverse())
