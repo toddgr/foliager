@@ -538,7 +538,7 @@ def create_tree_list(tree_coordinates, tree_species,t):
     # TODO: create a parameter estimation for this
     masting_cycle = 5 * 12 # in years -- so 5 years
 
-    random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
+    # random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
 
     for tree in tree_coordinates[1:]: # for each tree in the forest
         key_counter += 1
@@ -593,9 +593,11 @@ def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, m
             # if so, spawn a random number of trees
             # TODO double check the logic of this
         if inc_t % masting_cycle == 0:
-            spawn_some_trees(tree_key, tree_entry, tree_dict)
+            spawn_some_trees(species, tree_key, tree_entry, tree_dict)
     
-        return True
+        found = True
+    
+    return found
 
 
 def determine_tree_stage(age):
@@ -628,7 +630,7 @@ def determine_tree_stage(age):
         return 'mature'
 
 
-def spawn_some_trees(parent_key, parent_entry, tree_dict):
+def spawn_some_trees(species, parent_key, parent_entry, tree_dict):
     """
         Takes in the tree information and key from the parent, adds new tree seedlings
         within a specific area and gives them a similar key to the parent
@@ -638,9 +640,20 @@ def spawn_some_trees(parent_key, parent_entry, tree_dict):
         # Create a new key from the parent
         # Get new x and z coordinates
             # Check to make sure that there is not already a tree there
-        # create_species_information() with:
+        # add_tree_To_dict() with:
             # information obtained from the tree 
+    
+    key = create_tree_key(tree_key=parent_key, spawn_count=1) # spawn count should change with each iter of the for loop
+    age = 0
+    name = parent_entry[1]
+    inc_t = parent_entry[0]
+    masting_cycle = parent_entry[10]
+    x = random_coordinate()
+    z = random_coordinate()
 
+    random_factors = randomize_tree_factors(species)
+    tree_dict[key] = [] 
+    add_to_tree_dict(species, tree_dict, key, random_factors, [name, x, z], name, masting_cycle, age, inc_t)
     pass
     
 
