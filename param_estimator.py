@@ -108,6 +108,7 @@ def calculate_parameter_values(tree, point_dict):
     
     return tree
 
+
 def calculate_leaf_similarity(tree, kb_tree):
     """ Calculate the parameters associated with similar leaf styles
         k, acx, sla_1, sla_0, t_sla_mid,yfx, yf0, tyf
@@ -123,6 +124,7 @@ def calculate_leaf_similarity(tree, kb_tree):
     
     return tree
 
+
 def calculate_canopy_similarity(tree, kb_tree):
     """ Calculate the parameters associated with similar canopy styles
         tc, mf, p2, p20, ms, wsx1000, nm, mf
@@ -136,6 +138,7 @@ def calculate_canopy_similarity(tree, kb_tree):
     tree.kf = kb_tree.kf
 
     return tree
+
 
 def calculate_wood_similarity(tree, kb_tree):
     """ Calculate the parameters associated with similar wood styles
@@ -163,6 +166,7 @@ def calculate_wood_similarity(tree, kb_tree):
 
     return tree
 
+
 def calculate_habitat_similarity(tree, kb_tree):
     """ Calculate the parameters associates with similar habitats
     t_min, t_opt, t_max, kd, n_theta, c_theta
@@ -177,6 +181,7 @@ def calculate_habitat_similarity(tree, kb_tree):
     tree.nws = kb_tree.nws
 
     return tree
+
 
 def calculate_general_similarity(tree, kb_tree):
     """ Calculate the parameters associated with general similarities
@@ -233,6 +238,7 @@ def estimate_parameters(tree, knowledge_base):
     # print(complete_tree.get_species_info())
     return complete_tree.get_species_info()
 
+
 def estimate_tree_list(tree_list, knowledge_base, io_filepath):
     """ Input: Knowledge Base, general information for a list of trees
         Output: Complete tree information for the list of trees """
@@ -243,9 +249,7 @@ def estimate_tree_list(tree_list, knowledge_base, io_filepath):
             tree_info = estimate_parameters(tree, knowledge_base)
             file.write(tree_info)
             file.write("\n")
-
-
-
+            
 
 # Example usage
 if __name__ == "__main__":
