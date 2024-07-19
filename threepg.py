@@ -593,7 +593,8 @@ def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, m
             # if so, spawn a random number of trees
             # TODO double check the logic of this
         if inc_t % masting_cycle == 0:
-            spawn_some_trees(species, tree_key, tree_entry, tree_dict)
+            #spawn_some_trees(species, tree_key, tree_entry, tree_dict)
+            pass
     
         found = True
     
@@ -648,8 +649,10 @@ def spawn_some_trees(species, parent_key, parent_entry, tree_dict):
     name = parent_entry[1]
     inc_t = parent_entry[0]
     masting_cycle = parent_entry[10]
-    x = random_coordinate()
-    z = random_coordinate()
+    #x = random_coordinate()
+    #z = random_coordinate()
+    x = parent_entry.x
+    z = parent_entry.z
 
     random_factors = randomize_tree_factors(species)
     tree_dict[key] = [] 
@@ -672,7 +675,7 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
     pass
 
 
-def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=12):
+def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=24):
 
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
     height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
