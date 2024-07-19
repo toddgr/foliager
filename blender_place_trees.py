@@ -58,8 +58,16 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
         if p_canopy_objects:
             canopy = p_canopy_objects[0]  # Reuse the existing canopy object
         else:
-            # Create the canopy
-            canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/pyramidal.obj"
+            # Create the canopy based on how big it is
+            if live_crown_length > 6:
+                num_tiers = 6
+            else:
+                num_tiers = int(live_crown_length)
+            scale = live_crown_length - num_tiers
+            
+            # load the proper cone canopy
+            canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/cone_tier_6.obj"
+                
             bpy.ops.wm.obj_import(filepath=canopy_filepath)
 
             # Get the canopy
@@ -72,6 +80,8 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
 
             # Hide the object in render
             canopy.hide_render = True
+            
+            canopy.scale = (1/6, 1/6, 1/6)
             
     elif tree_form == '[\'round\']':
         r_canopy_objects = [obj for obj in bpy.data.objects if obj.name.startswith("Round_Canopy")]
@@ -116,11 +126,11 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
             canopy.hide_render = True
         
     # Shade smooth
-    # bpy.context.view_layer.objects.active = canopy
+    # bpy.context.view_layer.objects.active canopy
     # bpy.ops.object.shade_smooth()
 
     # Set location and scale of the canopy
-    canopy_height = height /3.3# Temporary solution!!!
+    canopy_height = height / 3.3# Temporary solution!!!
     canopy.location = (x, y, canopy_height)
     canopy.scale = (crown_diameter, live_crown_length , crown_diameter) #x, z, y
 
