@@ -59,13 +59,15 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
             canopy = p_canopy_objects[0]  # Reuse the existing canopy object
         else:
             # Create the canopy based on how big it is
-            if live_crown_length > 6:
+            # TODO magic numbers -- should probably fix this
+            if live_crown_length > 10:
                 num_tiers = 6
             else:
                 num_tiers = int(live_crown_length)
             scale = live_crown_length - num_tiers
             
             # load the proper cone canopy
+            
             canopy_filepath = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/cone_tier_6.obj"
                 
             bpy.ops.wm.obj_import(filepath=canopy_filepath)
@@ -80,8 +82,6 @@ def create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tr
 
             # Hide the object in render
             canopy.hide_render = True
-            
-            canopy.scale = (1/6, 1/6, 1/6)
             
     elif tree_form == '[\'round\']':
         r_canopy_objects = [obj for obj in bpy.data.objects if obj.name.startswith("Round_Canopy")]
