@@ -17,21 +17,22 @@ def generate_l_system(n, d, axiom, rules):
     """
 
     # Rewrite the string for every iteration
-    string = axiom
 
     for _ in range(n):
-        string = ''
-
+        print(f'current axiom: {axiom}')
         # apply production rules
-        for char in axiom:
-            if char in rules:
-                string += rules[char]
-            else:
-                string += char
-        axiom = string
+        # for char in axiom:
+        #     if char in rules:
+        #         axiom.replace(char, rules[char])
+        for char in rules:
+            new_axiom = axiom.replace(char, rules[char])
+            print(f'replacing {char} with {rules[char]}')
 
-    print(f'final instructions: {string}')
-
+        axiom = new_axiom
+        print(f'next axiom: {new_axiom}')
+    
+    print(f'final instructions: {axiom}')
+    string=axiom
 
     # Interpret each instruction into coordinates and edges
     coordinates, edges = plot_l_system(d, string)
@@ -92,7 +93,7 @@ def plot_l_system(angle, string):
         d = degree to be turned
         string = string of commands
     """
-    step_length = 1 # how much to increase each point by
+    step_length = 10 # how much to increase each point by
     coordinates = [
         (0, 0, 0) # starting point
     ] # x-y-z of points
@@ -133,7 +134,8 @@ def plot_l_system(angle, string):
             # Rotate around the Z axis
             directions = np.array([rotate_vector(d, 'z', -angle) for d in directions])
         elif char == '[': # new branch
-            stack.append((position.copy(), direction_index, directions.copy()))
+            saved_position = position
+            stack.append((saved_position, direction_index, directions.copy()))
         elif char == ']': # end of new branch
             position, direction_index, directions = stack.pop()
 
@@ -149,7 +151,7 @@ def plot_3d_coordinates_and_edges(coordinates, edges):
     
     # Plot coordinates
     x_coords, y_coords, z_coords = zip(*coordinates)
-    ax.scatter(x_coords, y_coords, z_coords, color='blue', label='Coordinates')
+    # ax.scatter(x_coords, y_coords, z_coords, color='blue', label='Coordinates')
     
     # Plot edges
     for edge in edges:
@@ -169,9 +171,9 @@ def plot_3d_coordinates_and_edges(coordinates, edges):
 
 if __name__ == '__main__':
     # test - generating a quadratic koch island
-    n = 1
-    d = 90
-    axiom = 'F-F-F-F'
-    rules = {'F':'FF-F-F-F-F-F+F'}
+    n = 4
+    d = 22.5
+    axiom = 'F'
+    rules = {'F':'FF-[-F+F+F]+[+F-F-F]'}
 
     generate_l_system(n, d, axiom, rules)
