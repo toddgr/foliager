@@ -133,6 +133,18 @@ def plot_l_system(angle, string):
         elif char == '-':
             # Rotate around the Z axis
             directions = np.array([rotate_vector(d, 'z', -angle) for d in directions])
+        elif char == '\\':
+            # Rotate around the X axis
+            directions = np.array([rotate_vector(d, 'x', angle) for d in directions])
+        elif char == '/':
+            # Rotate around the Y axis
+            directions = np.array([rotate_vector(d, 'y', angle) for d in directions])
+        elif char == '^':
+            # Rotate around the X axis (upward)
+            directions = np.array([rotate_vector(d, 'x', angle) for d in directions])
+        elif char == '&':
+            # Rotate around the Y axis (downward)
+            directions = np.array([rotate_vector(d, 'y', -angle) for d in directions])
         elif char == '[': # new branch
             saved_position = position
             stack.append((saved_position, direction_index, directions.copy()))
@@ -163,7 +175,7 @@ def plot_3d_coordinates_and_edges(coordinates, edges):
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    ax.set_title('3D Coordinates and Edges')
+    ax.set_title('Foliager')
     plt.legend()
     plt.show()
 
@@ -172,8 +184,8 @@ def plot_3d_coordinates_and_edges(coordinates, edges):
 if __name__ == '__main__':
     # test - generating a quadratic koch island
     n = 4
-    d = 22.5
+    d = 25
     axiom = 'F'
-    rules = {'F':'FF-[-F+F+F]+[+F-F-F]'}
+    rules = {'F':'F[+F]F[-F][^F]&F'}
 
     generate_l_system(n, d, axiom, rules)
