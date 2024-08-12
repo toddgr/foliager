@@ -684,7 +684,7 @@ def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="out
     # We'll need to randomize the actual height and dbh for each individual tree
     
     print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
-    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=False) # returns [name, x, z]
+    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=True, num_trees=100) # returns [name, x, z]
     
     tree_output = create_tree_list(tree_coordinates, height_dbh,t)
     # for each of the 3-PG data entries in the height_dbh

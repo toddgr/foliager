@@ -20,7 +20,7 @@ def init_trees(foliage_file, output_csv_file, threepg=True, plot=False):
     """
     # Generate random data for the x and z coordinates
     np.random.seed(42)
-    num_trees = 50
+    num_trees = 100
     x_values = np.random.rand(num_trees)
     z_values = np.random.rand(num_trees)
     if threepg: 
@@ -70,7 +70,8 @@ def init_trees_dont_write_yet_original(foliage_file, threepg=True, plot=False):
     """
     # Generate random data for the x and z coordinates
     np.random.seed(42)
-    num_trees = 50
+    num_trees = 100
+
     x_values = np.random.rand(num_trees)
     z_values = np.random.rand(num_trees)
     if threepg: 
