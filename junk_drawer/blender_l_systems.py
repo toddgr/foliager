@@ -39,7 +39,7 @@ def create_mesh(vertices, edges, name="Test_Tree"):
 
     return obj
 
-def add_thickness(obj):
+def add_thickness(obj, thickness=0.1):
     """
         Once we have our coordinates in blender space, 
         we can start to model the tree.
@@ -52,6 +52,20 @@ def add_thickness(obj):
     # Apply the Skin Modifier
     bpy.ops.object.modifier_add(type='SKIN')
     
+    # Access the Skin Modifier
+    skin_modifier = obj.modifiers["Skin"]
+    
+    # Enter Edit Mode to adjust vertex radii
+    bpy.ops.object.mode_set(mode='EDIT')
+    
+    # Set the radius for each vertex
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.transform.resize(value=(thickness, thickness, thickness))  # Apply uniform scaling
+    
+    # Return to Object Mode
+    bpy.ops.object.mode_set(mode='OBJECT')
+    
+
     # Smooth out the tree
     bpy.ops.object.modifier_add(type='SUBSURF')
     bpy.context.object.modifiers["Subdivision"].levels = 4
