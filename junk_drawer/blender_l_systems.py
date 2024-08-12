@@ -9,7 +9,19 @@ Description: Taking what we did in l_systems_test and attempting to put it
 import bpy
 import numpy as np
 
-def create_mesh_object(vertices, edges, name="MyObject"):
+def create_mesh_object(vertices, edges, name="Test_Tree"):
+    # For debugging purposes
+    # Delete any existing objects with the same name
+    if name in bpy.data.objects:
+        obj_to_delete = bpy.data.objects[name]
+        
+        # Unlink the object from all collections it is in
+        for collection in obj_to_delete.users_collection:
+            collection.objects.unlink(obj_to_delete)
+        
+        # Delete the object itself
+        bpy.data.objects.remove(obj_to_delete, do_unlink=True)
+    
     # Create a new mesh
     mesh = bpy.data.meshes.new(name + "Mesh")
     
@@ -35,24 +47,28 @@ def generate_l_system(n, d, axiom, rules):
         axiom = the initial string
         rules = dict of production rules
     """
-
+    new_axiom = ''
     # Rewrite the string for every iteration
-
     for _ in range(n):
         print(f'current axiom: {axiom}')
         # apply production rules
         # for char in axiom:
         #     if char in rules:
         #         axiom.replace(char, rules[char])
-        for char in rules:
-            new_axiom = axiom.replace(char, rules[char])
-            print(f'replacing {char} with {rules[char]}')
+        for char in axiom:
+            print(f'current char: {char}')
+            if char in rules:
+                new_char = rules[char]
+                print(f'replacing {char} with {rules[char]}')
+                new_axiom += new_char
+            else:
+                new_axiom += char
 
         axiom = new_axiom
         print(f'next axiom: {new_axiom}')
     
-    print(f'final instructions: {axiom}')
-    string=axiom
+    print(f'final instructions: {new_axiom}')
+    string=new_axiom
 
     # Interpret each instruction into coordinates and edges
     print("Creating coordinates...")
@@ -112,7 +128,7 @@ def plot_l_system(angle, string):
         d = degree to be turned
         string = string of commands
     """
-    step_length = 10 # how much to increase each point by
+    step_length = 1 # how much to increase each point by
     coordinates = [
         (0, 0, 0) # starting point
     ] # x-y-z of points
@@ -154,7 +170,7 @@ def plot_l_system(angle, string):
             directions = np.array([rotate_vector(d, 'z', -angle) for d in directions])
         elif char == '\\':
             # Rotate around the X axis
-            directions = np.array([rotate_vector(d, 'x', angle) for d in directions])
+            directions = np.array([rotate_vector(d, 'x', -angle) for d in directions])
         elif char == '/':
             # Rotate around the Y axis
             directions = np.array([rotate_vector(d, 'y', angle) for d in directions])
@@ -166,7 +182,7 @@ def plot_l_system(angle, string):
             directions = np.array([rotate_vector(d, 'y', -angle) for d in directions])
         elif char == '[': # new branch
             saved_position = position
-            stack.append((saved_position, direction_index, directions.copy()))
+            stack.append((position, direction_index, directions.copy()))
         elif char == ']': # end of new branch
             position, direction_index, directions = stack.pop()
 
@@ -176,10 +192,10 @@ def plot_l_system(angle, string):
 
 if __name__ == '__main__':
     # example usage
-    n = 1
-    d = 25
-    axiom = 'F'
-    rules = {'F':'F[+F]F[-F][^F]&F'}
+    n = 3
+    d = 90
+    axiom = 'X'
+    rules = {'X':'&F\\[F]+[F]+[F]+[F]'}
 
     vertices, edges = generate_l_system(n, d, axiom, rules)
 
