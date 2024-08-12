@@ -65,6 +65,33 @@ def add_thickness(obj):
 
     return obj
 
+
+def add_material(obj, material_name="defaultMat"):
+    """ Applies a material to the new tree."""
+
+    # Select the object
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+
+    # Create a new red material
+    material = bpy.data.materials.new(name="BrownMaterial")
+    material.use_nodes = True  # Enable nodes for material (optional)
+    
+    # Set the material color to red
+    nodes = material.node_tree.nodes
+    bsdf_node = nodes.get('Principled BSDF')
+    if bsdf_node:
+        bsdf_node.inputs['Base Color'].default_value = (0.259, 0.149, 0.008, 1)  # Red color with full opacity
+    
+    # Assign the material to the mesh
+    if len(obj.data.materials) > 0:
+        obj.data.materials[0] = material
+    else:
+        obj.data.materials.append(material)
+
+    return obj
+
+
 def generate_l_system(n, d, axiom, rules):
     """
         n = number of iterations
@@ -226,4 +253,5 @@ if __name__ == '__main__':
 
     # Call the function
     tree = create_mesh(vertices, edges)
-    add_thickness(tree)
+    tree = add_thickness(tree)
+    tree = add_material(tree)
