@@ -35,10 +35,12 @@ def generate_l_system(n, d, axiom, rules):
     string=axiom
 
     # Interpret each instruction into coordinates and edges
+    print("Creating coordinates...")
     coordinates, edges = plot_l_system(d, string)
-    print("Coordinates:", coordinates)
-    print("Edges:", edges)
+    # print("Coordinates:", coordinates)
+    # print("Edges:", edges)
     
+    print("Plotting coordinates...")
     plot_3d_coordinates_and_edges(coordinates, edges)
 
 def rotate_vector(vector, axis, angle_deg):
