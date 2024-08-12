@@ -217,12 +217,13 @@ def plot_l_system(angle, string):
 
 if __name__ == '__main__':
     # example usage
-    n = 3
+    n = 4
     d = 90
     axiom = 'X'
-    rules = {'X':'&F\\[F]+[F]+[F]+[F]'}
+    rules = {'X':'&F\\+Y+Y+Y+Y^FF/', 'Y':'[FF]'}
 
     vertices, edges = generate_l_system(n, d, axiom, rules)
 
     # Call the function
-    create_mesh(vertices, edges)
+    tree = create_mesh(vertices, edges)
+    add_thickness(tree)
