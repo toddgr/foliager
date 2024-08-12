@@ -58,9 +58,7 @@ def add_thickness(obj, thickness=0.1):
     # Enter Edit Mode to adjust vertex radii
     bpy.ops.object.mode_set(mode='EDIT')
     
-    # Set the radius for each vertex
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.transform.resize(value=(thickness, thickness, thickness))  # Apply uniform scaling
+    #  ===== insert trunk and branch scaling stuff here =====
     
     # Return to Object Mode
     bpy.ops.object.mode_set(mode='OBJECT')
@@ -256,13 +254,25 @@ def plot_l_system(angle, string):
     return coordinates, edges
 
 
-if __name__ == '__main__':
-    # example usage
-    n = 4
+def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
+    """ Input: Calculated 3-PG parameters that define the dimensions
+               of the tree
+        Output: L systems parameters to generate trees from.
+    """
+
+    n = 1 # number of iterations
     d = 90
+
+
     axiom = 'X'
     rules = {'X':'&F\\+Y+Y+Y+Y^FF/', 'Y':'[FF]'}
 
+    return n, d, axiom, rules
+
+
+if __name__ == '__main__':
+    # example usage
+    n, d, axiom, rules = create_axiom_and_rules()
     vertices, edges = generate_l_system(n, d, axiom, rules)
 
     # Call the function
