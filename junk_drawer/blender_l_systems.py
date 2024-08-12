@@ -9,7 +9,7 @@ Description: Taking what we did in l_systems_test and attempting to put it
 import bpy
 import numpy as np
 
-def create_mesh_object(vertices, edges, name="Test_Tree"):
+def create_mesh(vertices, edges, name="Test_Tree"):
     # For debugging purposes
     # Delete any existing objects with the same name
     if name in bpy.data.objects:
@@ -39,6 +39,31 @@ def create_mesh_object(vertices, edges, name="Test_Tree"):
 
     return obj
 
+def add_thickness(obj):
+    """
+        Once we have our coordinates in blender space, 
+        we can start to model the tree.
+        This function turns lines into solid objects.
+    """
+    # Select the object
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    
+    # Apply the Skin Modifier
+    bpy.ops.object.modifier_add(type='SKIN')
+    
+    # Smooth out the tree
+    bpy.ops.object.modifier_add(type='SUBSURF')
+    bpy.context.object.modifiers["Subdivision"].levels = 4
+    
+    # Apply the modifiers
+    bpy.ops.object.modifier_apply(modifier="Skin")
+    bpy.ops.object.modifier_apply(modifier="Subdivision")
+    
+    # Apply smooth shading
+    bpy.ops.object.shade_smooth()
+
+    return obj
 
 def generate_l_system(n, d, axiom, rules):
     """
@@ -200,4 +225,4 @@ if __name__ == '__main__':
     vertices, edges = generate_l_system(n, d, axiom, rules)
 
     # Call the function
-    create_mesh_object(vertices, edges)
+    create_mesh(vertices, edges)
