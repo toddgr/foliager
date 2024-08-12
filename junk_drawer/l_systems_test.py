@@ -42,6 +42,7 @@ def generate_l_system(n, d, axiom, rules):
     
     print("Plotting coordinates...")
     plot_3d_coordinates_and_edges(coordinates, edges)
+    return coordinates, edges
 
 def rotate_vector(vector, axis, angle_deg):
     angle_rad = np.radians(angle_deg)
@@ -184,7 +185,7 @@ def plot_3d_coordinates_and_edges(coordinates, edges):
 
 
 if __name__ == '__main__':
-    # test - generating a quadratic koch island
+    # example usage
     n = 4
     d = 25
     axiom = 'F'
