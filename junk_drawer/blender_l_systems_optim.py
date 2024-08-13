@@ -232,6 +232,14 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
         axiom = 'X'
         rules = {'X': 'F[+X][-X]FX','F':'FF'}
+    elif shape == 'round':
+        pass
+    elif shape == 'oval':
+        pass
+    elif shape == 'pyramidal':
+        pass
+    else: # irregular
+        pass
 
 
     """ Reference
