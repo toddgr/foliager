@@ -6,8 +6,33 @@ Description: Taking what we did in l_systems_test and attempting to put it
             in Blender.
 """
 
-import bpy
+#import bpy
 import numpy as np
+
+# import matplotlib.pyplot as plt
+# from mpl_toolkits.mplot3d import Axes3D
+
+def plot_3d_coordinates_and_edges(coordinates, edges):
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Plot coordinates
+    x_coords, y_coords, z_coords = zip(*coordinates)
+    # ax.scatter(x_coords, y_coords, z_coords, color='blue', label='Coordinates')
+    
+    # Plot edges
+    for edge in edges:
+        x_values = [coordinates[edge[0]][0], coordinates[edge[1]][0]]
+        y_values = [coordinates[edge[0]][1], coordinates[edge[1]][1]]
+        z_values = [coordinates[edge[0]][2], coordinates[edge[1]][2]]
+        ax.plot(x_values, y_values, z_values, color='black', linestyle='-', linewidth=1)
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('Foliager')
+    plt.legend()
+    plt.show()
 
 def create_mesh(vertices, edges, name="Test_Tree"):
     # For debugging purposes
@@ -111,19 +136,21 @@ def generate_l_system(n, d, axiom, rules):
         axiom = the initial string
         rules = dict of production rules
     """
-    new_axiom = ''
+    
     # Rewrite the string for every iteration
     for _ in range(n):
+        new_axiom = ''
+        print(f'===== ITERATION {_} =====')
         print(f'current axiom: {axiom}')
         # apply production rules
         # for char in axiom:
         #     if char in rules:
         #         axiom.replace(char, rules[char])
         for char in axiom:
-            print(f'current char: {char}')
+            #print(f'current char: {char}')
             if char in rules:
                 new_char = rules[char]
-                print(f'replacing {char} with {rules[char]}')
+                #print(f'replacing {char} with {rules[char]}')
                 new_axiom += new_char
             else:
                 new_axiom += char
@@ -131,8 +158,9 @@ def generate_l_system(n, d, axiom, rules):
         axiom = new_axiom
         print(f'next axiom: {new_axiom}')
     
-    print(f'final instructions: {new_axiom}')
-    string=new_axiom
+    
+    string=new_axiom * n
+    print(f'final instructions: {string}')
 
     # Interpret each instruction into coordinates and edges
     print("Creating coordinates...")
@@ -260,12 +288,21 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
         Output: L systems parameters to generate trees from.
     """
 
-    n = 1 # number of iterations
-    d = 90
+    # each tree shape will have their own axiom rules to follow
+    if shape == 'cone': 
+        n = 5 # number of iterations
+        d = 25.7
 
 
-    axiom = 'X'
-    rules = {'X':'&F\\+Y+Y+Y+Y^FF/', 'Y':'[FF]'}
+        axiom = 'X'
+        rules = {'X': 'F[+X][-X]FX','F':'FF'}
+
+
+    """ Reference
+        X: The entire tree
+        Y: The starts of the branches
+        Z: The extensions of the branches
+    """
 
     return n, d, axiom, rules
 
@@ -274,6 +311,7 @@ if __name__ == '__main__':
     # example usage
     n, d, axiom, rules = create_axiom_and_rules()
     vertices, edges = generate_l_system(n, d, axiom, rules)
+    #plot_3d_coordinates_and_edges(vertices, edges)
 
     # Call the function
     tree = create_mesh(vertices, edges)
