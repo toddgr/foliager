@@ -1,40 +1,10 @@
-"""
-File: blender_l_systems.py
-Author: Grace Todd
-Date: August 12, 2024
-Description: Taking what we did in l_systems_test and attempting to put it
-            in Blender.
-"""
-
-#import bpy
 import numpy as np
-
-# import matplotlib.pyplot as plt
-# from mpl_toolkits.mplot3d import Axes3D
-
-def plot_3d_coordinates_and_edges(coordinates, edges):
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    
-    # Plot coordinates
-    x_coords, y_coords, z_coords = zip(*coordinates)
-    # ax.scatter(x_coords, y_coords, z_coords, color='blue', label='Coordinates')
-    
-    # Plot edges
-    for edge in edges:
-        x_values = [coordinates[edge[0]][0], coordinates[edge[1]][0]]
-        y_values = [coordinates[edge[0]][1], coordinates[edge[1]][1]]
-        z_values = [coordinates[edge[0]][2], coordinates[edge[1]][2]]
-        ax.plot(x_values, y_values, z_values, color='black', linestyle='-', linewidth=1)
-    
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title('Foliager')
-    plt.legend()
-    plt.show()
+import bpy
 
 def create_mesh(vertices, edges, name="Test_Tree"):
+    """
+        Turn the coordinates and edges into wireframe structures
+    """
     # For debugging purposes
     # Delete any existing objects with the same name
     if name in bpy.data.objects:
@@ -128,6 +98,85 @@ def add_material(obj, material_name="defaultMat"):
 
     return obj
 
+def rotate_vector(vector, axis, angle_rad):
+    cos_theta = np.cos(angle_rad)
+    sin_theta = np.sin(angle_rad)
+    
+    if axis == 'x':
+        rotation_matrix = np.array([
+            [1, 0, 0],
+            [0, cos_theta, -sin_theta],
+            [0, sin_theta, cos_theta]
+        ])
+    elif axis == 'y':
+        rotation_matrix = np.array([
+            [cos_theta, 0, sin_theta],
+            [0, 1, 0],
+            [-sin_theta, 0, cos_theta]
+        ])
+    elif axis == 'z':
+        rotation_matrix = np.array([
+            [cos_theta, -sin_theta, 0],
+            [sin_theta, cos_theta, 0],
+            [0, 0, 1]
+        ])
+    
+    return np.dot(rotation_matrix, vector)
+
+def plot_l_system(angle_deg, string):
+    """
+        Take the L system string and give coordinates and edges
+        to the series of points for use in Blender
+    """
+    step_length = 1
+    angle_rad = np.radians(angle_deg)
+    
+    # Directions for 3D: Forward, Right, Up
+    directions = np.array([
+        [1, 0, 0],  # X axis
+        [0, 1, 0],  # Y axis
+        [0, 0, 1]   # Z axis
+    ])
+    direction_index = 0  # Start facing along X axis
+    position = np.array([0.0, 0.0, 0.0])
+    
+    coordinates = [tuple(position)]
+    coordinates_map = {tuple(position): 0}
+    edges = []
+    stack = []
+    current_index = 0
+
+    for char in string:
+        if char == 'F':
+            new_position = tuple(position + directions[direction_index] * step_length)
+            if new_position not in coordinates_map:
+                current_index += 1
+                coordinates.append(new_position)
+                coordinates_map[new_position] = current_index
+
+            edges.append((coordinates_map[tuple(position)], coordinates_map[new_position]))
+            position = new_position
+
+        elif char == '+':
+            directions = np.array([rotate_vector(d, 'z', angle_rad) for d in directions])
+        elif char == '-':
+            directions = np.array([rotate_vector(d, 'z', -angle_rad) for d in directions])
+        elif char == '\\':
+            directions = np.array([rotate_vector(d, 'x', -angle_rad) for d in directions])
+        elif char == '/':
+            directions = np.array([rotate_vector(d, 'y', angle_rad) for d in directions])
+        elif char == '^':
+            directions = np.array([rotate_vector(d, 'x', angle_rad) for d in directions])
+        elif char == '&':
+            directions = np.array([rotate_vector(d, 'y', -angle_rad) for d in directions])
+        elif char == '[':  # new branch
+            stack.append((position, direction_index, directions.copy()))
+        elif char == ']':  # end of new branch
+            position, direction_index, directions = stack.pop()
+
+    print(coordinates)
+    return coordinates, edges
+
 
 def generate_l_system(n, d, axiom, rules):
     """
@@ -159,125 +208,13 @@ def generate_l_system(n, d, axiom, rules):
         print(f'next axiom: {new_axiom}')
     
     
-    string=new_axiom * n
+    string=new_axiom
     print(f'final instructions: {string}')
 
     # Interpret each instruction into coordinates and edges
     print("Creating coordinates...")
     coordinates, edges = plot_l_system(d, string)
 
-    return coordinates, edges
-
-def rotate_vector(vector, axis, angle_deg):
-    angle_rad = np.radians(angle_deg)
-    cos_theta = np.cos(angle_rad)
-    sin_theta = np.sin(angle_rad)
-    
-    if axis == 'x':
-        rotation_matrix = np.array([
-            [1, 0, 0],
-            [0, cos_theta, -sin_theta],
-            [0, sin_theta, cos_theta]
-        ])
-    elif axis == 'y':
-        rotation_matrix = np.array([
-            [cos_theta, 0, sin_theta],
-            [0, 1, 0],
-            [-sin_theta, 0, cos_theta]
-        ])
-    elif axis == 'z':
-        rotation_matrix = np.array([
-            [cos_theta, -sin_theta, 0],
-            [sin_theta, cos_theta, 0],
-            [0, 0, 1]
-        ])
-    
-    return np.dot(rotation_matrix, vector)
-
-
-def round_and_format_coordinates(coordinates, decimals=3):
-    formatted_coordinates = []
-    for point in coordinates:
-        formatted_point = tuple(round(coord, decimals) for coord in point)
-        # Convert -0.0 to 0.0
-        formatted_point = tuple(0.0 if coord == -0.0 else coord for coord in formatted_point)
-        formatted_coordinates.append(formatted_point)
-    return formatted_coordinates
-
-def round_and_format_position(tpl, decimals=3):
-    return tuple(0.0 if round(value, decimals) == -0.0 else round(value, decimals) for value in tpl)
-
-def find_key_by_value(d, target_value):
-    # Iterate through the dictionary items
-    for key, value in d.items():
-        if value == target_value:
-            return key
-    return None  # (Return None if the value is not found)
-
-def plot_l_system(angle, string):
-    """
-        Turn the L system string into coordinates and edges
-        d = degree to be turned
-        string = string of commands
-    """
-    step_length = 1 # how much to increase each point by
-    coordinates = [
-        (0, 0, 0) # starting point
-    ] # x-y-z of points
-    edges = [] # (start, end) of edges
-
- 
-    # Directions for 3D: Forward, Right, Up
-    directions = np.array([
-        [1, 0, 0],  # X axis
-        [0, 1, 0],  # Y axis
-        [0, 0, 1]   # Z axis
-    ])
-    direction_index = 0  # Start facing along X axis
-    position = np.array([0.0, 0.0, 0.0])
-    coordinates = [tuple(position)]
-    coordinates_map = {0:coordinates[0]}
-    edges = []
-    stack = []
-    i = 0
-
-    for char in string:
-        if char == 'F':
-            new_position = tuple(position + directions[direction_index] * step_length)
-            coordinates = round_and_format_coordinates(coordinates)
-            new_position = round_and_format_position(new_position)
-            if new_position not in coordinates_map.values():
-                i += 1
-                coordinates.append(tuple(new_position))
-                coordinates_map[i] = coordinates[i]
-
-            edges.append((find_key_by_value(coordinates_map, tuple(position)), find_key_by_value(coordinates_map, new_position)))
-            position = new_position
-            
-        elif char == '+':
-            # Rotate around the Z axis
-            directions = np.array([rotate_vector(d, 'z', angle) for d in directions])
-        elif char == '-':
-            # Rotate around the Z axis
-            directions = np.array([rotate_vector(d, 'z', -angle) for d in directions])
-        elif char == '\\':
-            # Rotate around the X axis
-            directions = np.array([rotate_vector(d, 'x', -angle) for d in directions])
-        elif char == '/':
-            # Rotate around the Y axis
-            directions = np.array([rotate_vector(d, 'y', angle) for d in directions])
-        elif char == '^':
-            # Rotate around the X axis (upward)
-            directions = np.array([rotate_vector(d, 'x', angle) for d in directions])
-        elif char == '&':
-            # Rotate around the Y axis (downward)
-            directions = np.array([rotate_vector(d, 'y', -angle) for d in directions])
-        elif char == '[': # new branch
-            stack.append((position, direction_index, directions.copy()))
-        elif char == ']': # end of new branch
-            position, direction_index, directions = stack.pop()
-
-    # round the coordinates
     return coordinates, edges
 
 
@@ -289,7 +226,7 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
     # each tree shape will have their own axiom rules to follow
     if shape == 'cone': 
-        n = 5 # number of iterations
+        n = 7 # number of iterations
         d = 25.7
 
 
@@ -313,6 +250,6 @@ if __name__ == '__main__':
     #plot_3d_coordinates_and_edges(vertices, edges)
 
     # Call the function
-    # tree = create_mesh(vertices, edges)
-    # tree = add_thickness(tree)
-    # tree = add_material(tree)
+    tree = create_mesh(vertices, edges)
+    tree = add_thickness(tree)
+    tree = add_material(tree)
