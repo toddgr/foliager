@@ -130,7 +130,8 @@ def plot_l_system(angle_deg, string):
     """
     step_length = 1
     angle_rad = np.radians(angle_deg)
-    
+    ninety_degrees = np.radians(90.)
+
     # Directions for 3D: Forward, Right, Up
     directions = np.array([
         [1, 0, 0],  # X axis
@@ -157,17 +158,17 @@ def plot_l_system(angle_deg, string):
             edges.append((coordinates_map[tuple(position)], coordinates_map[new_position]))
             position = new_position
 
-        elif char == '+':
+        elif char == '+': # z axis
             directions = np.array([rotate_vector(d, 'z', angle_rad) for d in directions])
-        elif char == '-':
+        elif char == '-': # z axis
             directions = np.array([rotate_vector(d, 'z', -angle_rad) for d in directions])
-        elif char == '\\':
+        elif char == '\\': # x axis
             directions = np.array([rotate_vector(d, 'x', -angle_rad) for d in directions])
-        elif char == '/':
+        elif char == '/': # y axis
             directions = np.array([rotate_vector(d, 'y', angle_rad) for d in directions])
-        elif char == '^':
+        elif char == '^': # x axis (up)
             directions = np.array([rotate_vector(d, 'x', angle_rad) for d in directions])
-        elif char == '&':
+        elif char == '&': # y axis (up
             directions = np.array([rotate_vector(d, 'y', -angle_rad) for d in directions])
         elif char == '[':  # new branch
             stack.append((position, direction_index, directions.copy()))
@@ -224,14 +225,19 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
         Output: L systems parameters to generate trees from.
     """
 
+    # height will determine
+    # dbh will determine
+    # lcl will determine
+    # c_diam will determine
+
     # each tree shape will have their own axiom rules to follow
     if shape == 'cone': 
-        n = 7 # number of iterations
-        d = 25.7
+        n = 5 # number of iterations
+        d = 20
 
 
         axiom = 'X'
-        rules = {'X': 'F[+X][-X]FX','F':'FF'}
+        rules = {'X': 'F[++X][--X][+//X][-//X][+&&X][-&&X]FX','F':'FF'}
     elif shape == 'round':
         pass
     elif shape == 'oval':
