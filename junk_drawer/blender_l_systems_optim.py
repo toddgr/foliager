@@ -237,17 +237,27 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
         axiom = 'X'
         rules = {'X': 'XF[++B]F[--B]F[+//B]F[-//B]F[+&&B]F[-&&B]F[//B][&&B]', 'L':'LF', 'B':'[+F]F[-F]F[+F]F[-F]', 'F': 'F'}
         
-        
     elif shape == 'round':
-        pass
+        
+        n = 2 # number of iterations
+        d = 45
+        axiom = 'X'
+        # might crash as is
+        #rules = {'X': '[++\\\\B][--\\\\B]F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[B]F[-B]F[+B]F[-B]F'}
+        #rules = {'X': 'F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
+        #rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
+        
+        
     elif shape == 'oval':
         pass
+    
     elif shape == 'pyramidal':
         
-        n = 4 # number of iterations
+        n = 3 # number of iterations
         d = 20
         axiom = 'X'
         rules = {'X': 'F[++X]F[--X]F[+//X]F[-//X]F[+&&X]F[-&&X]FX','F':'FF'}
+        
     else: # irregular
         pass
 
@@ -256,7 +266,7 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='cone')
+    n, d, axiom, rules = create_axiom_and_rules(shape='round')
     vertices, edges = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
