@@ -232,34 +232,31 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
     # each tree shape will have their own axiom rules to follow
     if shape == 'cone': 
-        n = 5 # number of iterations
-        d = 20
-
-
+        n =  5 # number of iterations
+        d = 45
         axiom = 'X'
-        rules = {'X': 'F[++X][--X][+//X][-//X][+&&X][-&&X]FX','F':'FF'}
+        rules = {'X': 'XF[++B]F[--B]F[+//B]F[-//B]F[+&&B]F[-&&B]F[//B][&&B]', 'L':'LF', 'B':'[+F]F[-F]F[+F]F[-F]', 'F': 'F'}
+        
+        
     elif shape == 'round':
         pass
     elif shape == 'oval':
         pass
     elif shape == 'pyramidal':
-        pass
+        
+        n = 4 # number of iterations
+        d = 20
+        axiom = 'X'
+        rules = {'X': 'F[++X]F[--X]F[+//X]F[-//X]F[+&&X]F[-&&X]FX','F':'FF'}
     else: # irregular
         pass
-
-
-    """ Reference
-        X: The entire tree
-        Y: The starts of the branches
-        Z: The extensions of the branches
-    """
 
     return n, d, axiom, rules
 
 
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules()
+    n, d, axiom, rules = create_axiom_and_rules(shape='cone')
     vertices, edges = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
