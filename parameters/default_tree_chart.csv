@@ -3,23 +3,3 @@
 # Tree and TreeList classes are automatically generated with these values
 # Make sure that there are no spaces between the attributes
 Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
-
-
-
-
-# Other potential attributes:
-# Deciduous vs. coniferous
-# Leaf shape and arrangement
-# Bark Texture and Color
-# Form and Habit
-# Flower Type and Structure
-# Fruit and seed characteristics
-# Growth rate (fast-growing, moderate-growing, slow-growing)
-# Lifespan
-# Climate tolerance
-# Soil preferences
-# Disease resistance
-# Fall coloration (interesting)
-# Root system
-# Wood density and hardness
-# Invasive/noninvasive to area
