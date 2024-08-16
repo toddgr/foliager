@@ -47,27 +47,32 @@ def make_valid_filename(input_string):
     return cleaned_string + extension
 
 def generate_prompt():
-    attributes = csv_file_to_string("parameters/default_tree_chart.csv")
-    prompt = "Output an unnumbered list of tree types in CSV format that can be found in "
+    species_attributes = csv_file_to_string("parameters/default_tree_chart.csv")
+    climate_attributes = csv_file_to_string("parameters/default_environment_data.csv")
+    species_prompt = "Output an unnumbered list of tree types in CSV format that can be found in "
     location = input("Enter the climate, city, or area:")
-    prompt += location + " with the following attributes:" + attributes
-    prompt += attributes
+    species_prompt += location + " with the following attributes:" + species_attributes
+    species_prompt += species_attributes
     #print(prompt)
     print("Generating foliage list for ", location, "...")
 
-    return prompt, location
+    climate_prompt = "Output a csv with monthly values using the following headers: "
+    climate_prompt += climate_attributes
+    climate_prompt += "for " + location
+
+    return species_prompt, climate_prompt, location
 
 if __name__ == '__main__':
     asknlp = False       # If we want to generate new data --> usage is limited
 
-    climate_data_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
+    #climate_data_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
     param_est_output = "test_data/param_est_output.csv"                 # in-between file for parameter estimation
     threepg_output_filepath = "test_data/OUTPUT_DATA.csv"
     knowledge_base = "test_data/species_data_kb.csv"
  
     if asknlp: 
-        prompt, location = generate_prompt()
-        response = ask_nlp(prompt) #commented out to save query time
+        species_prompt, climate_prompt, location = generate_prompt()
+        response = ask_nlp(species_prompt) #commented out to save query time
         #print(response)
         # Write the NLP response to a csv file
         nlp_response_filepath = "test_data/" + make_valid_filename(location)
@@ -81,7 +86,7 @@ if __name__ == '__main__':
     else:
         # use last NLP prompt (that I know works)
         nlp_response_filepath = "test_data/portland_oregon_foliage.csv"
-        print(f"===== NLP NOT USED. =====\n Parsing tree data from {nlp_response_filepath}...")
+        print(f"===== LLM NOT USED. =====\n Parsing tree data from {nlp_response_filepath}...")
         foliage_list = parse_csv_file(nlp_response_filepath)
 
 
