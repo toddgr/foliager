@@ -46,24 +46,30 @@ def make_valid_filename(input_string):
 
     return cleaned_string + extension
 
-def generate_prompt():
-    species_attributes = csv_file_to_string("parameters/default_tree_chart.csv")
+def generate_climate_prompt(location):
     climate_attributes = csv_file_to_string("parameters/default_environment_data.csv")
-    species_prompt = "Output an unnumbered list of tree types in CSV format that can be found in "
-    location = input("Enter the climate, city, or area:")
-    species_prompt += location + " with the following attributes:" + species_attributes
-    species_prompt += species_attributes
-    #print(prompt)
-    print("Generating foliage list for ", location, "...")
-
+    
     climate_prompt = "Output a csv with monthly values using the following headers: "
     climate_prompt += climate_attributes
     climate_prompt += "for " + location
 
-    return species_prompt, climate_prompt, location
+    #print(climate_prompt)
+    print(f"Generating climate information for {location} ...")
+    return climate_prompt
+
+def generate_species_prompt(location):
+    species_attributes = csv_file_to_string("parameters/default_tree_chart.csv")
+    species_prompt = "Output an unnumbered list of tree types in CSV format that can be found in "
+    species_prompt += location + " with the following attributes:" + species_attributes
+    species_prompt += species_attributes
+
+    #print(prompt)
+    print(f"Generating foliage list for {location}...")
+
+    return species_prompt
 
 if __name__ == '__main__':
-    asknlp = False       # If we want to generate new data --> usage is limited
+    asknlp = True       # If we want to generate new data --> usage is limited
 
     #climate_data_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
     param_est_output = "test_data/param_est_output.csv"                 # in-between file for parameter estimation
@@ -71,14 +77,19 @@ if __name__ == '__main__':
     knowledge_base = "test_data/species_data_kb.csv"
  
     if asknlp: 
-        species_prompt, climate_prompt, location = generate_prompt()
-        response = ask_nlp(species_prompt) #commented out to save query time
+        location = input("Enter the climate, city, or area:")
+        
+        species_prompt = generate_species_prompt(location)
+        climate_prompt = generate_climate_prompt(location)
+        
+        species_response = ask_nlp(species_prompt) #comment out to save query time
         #print(response)
-        # Write the NLP response to a csv file
+
+        # Write the foliage data to a csv file
         nlp_response_filepath = "test_data/" + make_valid_filename(location)
         with open(nlp_response_filepath, 'w') as file:
             file.write(initial_attributes)
-            file.write(response)
+            file.write(species_response)
             print("Writing to file ", nlp_response_filepath)
             # Now to parse input into Tree and TreeList objects
         foliage_list = parse_csv_file(nlp_response_filepath)
