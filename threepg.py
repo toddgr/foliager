@@ -1,9 +1,12 @@
 """
 File: 3pg.py
 Author: Grace Todd
-Date: February 21, 2024
-Description: My attempt at converting 3-PG to Python so that I can use it in my calculations and 
-             whatnot.
+Date: June 20, 2024
+Description: Uses 3-PG to calculate various parameters of a tree, which will be used to generate
+             each tree in the simulation at every time interval.
+             
+             Based on real, scientific data, and uses C++ skeleton framework provided by Allison
+             Thompson in her thesis here: https://ir.library.oregonstate.edu/concern/honors_college_theses/x920g532g.
 """
 
 import math # for log
@@ -12,6 +15,7 @@ from parse_tree_input import csv_file_to_list
 from plot_trees_random import init_trees, init_trees_dont_write_yet
 import csv
 import random
+import itertools
 
 # So I'm going to start out by using Allison's implementation of a tree struct for the sake of visualization. 
 # In the future, though, I'll integrate this with my own tree_class. I jsut don't know how different they will
@@ -117,63 +121,6 @@ physmod_method = 0 # this denotes the method used to calculate physmod. 0 = comb
 agemod_method = 0 # 0 = agemod not used, 1 = agemod used
 display_mode = 0 # cones vs textures. Probably won't use this but I'll keep for ref, for now.
 
-
-"""
-    ==================== SPECIES DATA ========================
-    Original -- This data is all from Forrester et al. in press, and featured on the 3PDGmix.Data
-    Excel sheet. The data is refered to as 
-    Since this program deals specifically with Douglas Firs, this data will not change. 
-
-    So... these are the parameters that I either need to a) force the NLP to find data on,
-    or b) generalize for the purposes of the program. Also double check that these have constant values
-    and aren't computed based on something. I want to give the NLP as few things to look for as possible.
-
-    Eventually, maybe I can automate this so that it reads in these values from a generated CSV, which then assigns it values in the program.
-"""
-
-
-
-# lec = douglasfir.lec # a light extinction coefficient
-
-# p2 = douglasfir.p2 # diameter at breast height at 2cm, used in partitioning ratios
-# p20 = douglasfir.p20 # diameter at breast height at 20cm, used in partitioning ratios
-
-# acx = douglasfir.acx # species-specific max potential canopy quantum efficiency
-
-# sla_1 = douglasfir.sla_1 # SLA in older stands
-# sla_0 = douglasfir.sla_0 # SLA in younger stands
-# t_sla_mid = douglasfir.t_sla_mid # age where SLA = 0.5(sla_0-sla_1)
-
-# fn0 = douglasfir.fn0 # value of fN when FR = 0
-# nfn = douglasfir.nfn # power of (1-FR) in fN
-
-# tc = douglasfir.tc # age when canopy closes
-
-# max_age = douglasfir.max_age # Max stand age, used in age mod
-# r_age = douglasfir.r_age # relative age to give fage = 0.5
-# n_age = douglasfir.n_age # power of relative age in f_age function
-
-# # Mean fractions of biomass per tree that is lost when a tree dies -- per pool
-# mf = douglasfir.mf
-# mr = douglasfir.mr
-# ms = douglasfir.ms
-
-# # Biomass
-# yfx = douglasfir.yfx
-# yf0 = douglasfir.yf0
-# tyf = douglasfir.tyf
-# yr = douglasfir.yr # average monthly root turnover rate (1/month)
-# nr_min = douglasfir.nr_min # minimum root partitioning ratio
-# nr_max = douglasfir.nr_max # maximum root partitioning ratio
-# m_0 = douglasfir.m_0 # m on sites of poor fertility, eg. FR=0
-
-# # for mortality
-# wsx1000 = douglasfir.wsx1000 # value of wsx when n = 1000
-# nm = douglasfir.nm # exponent of self-thinning rule
-
-"""
-    ================ MISC ===============
-"""
 cr = 0.47 # conversion ratio for making GPP into NPP
 
 """
@@ -522,6 +469,12 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             # stand volume
             vs = av * pow(b, nvb) * pow(h, nvh) * pow(b * b * h, nvbh) * n
 
+            total_height = h # mean tree height
+            live_crown_length = hl # distance between the top live foliage and the lowest live foliage
+            dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing trees
+            # TODO: approximate masting cycle here
+            height_dbh_list.append([inc_t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
+
         # setting final biomass values
         wf = last_wf
         ws = last_ws
@@ -532,73 +485,208 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
         #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
         print(f"Live crown length: {hl}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
         #plot the trees
-        total_height = h # mean tree height
-        live_crown_length = hl # distance between the top live foliage and the lowest live foliage
-        dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
-        height_dbh_list.append([species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
+        # total_height = h # mean tree height
+        # live_crown_length = hl # distance between the top live foliage and the lowest live foliage
+        # dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
+        # height_dbh_list.append([species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
     return height_dbh_list
             
-# def init_trees():
-#     # base this off of a combination of allison's code, as well as my random generation for scatter plots
-#     # I have the code where it writes the coordinates to a csv file, but I didn't push it from my pc so we will have to wait
-#     # take in the csv, parse each tree species collaection of coordinates, give the trees random height and breast height and stuff
-#     # I migth not even want to take in the csv-- i might want to just take the proof of concept and 
-#     # recreate it here
-#     pass
 
-def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv"):
+def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
+    """ Creates a unique dictionary key based on what tree we're iterating through"""
+    # Generate all combinations of three letters from 'a' to 'z'
+    three_letter_strings = [''.join(letters) for letters in itertools.product('abcdefghijklmnopqrstuvwxyz', repeat=3)]
 
-    # TODO: convert this to its own function to be used in foliager main
+    if tree_key is None: # original tree
+        return three_letter_strings[tree_count]
+    else:
+        return tree_key + str(spawn_count)
+
+
+def randomize_tree_factors(species_list):
+    for species in species_list:
+        # Randomized offsets -- different for each tree
+        factor_height = float(species[3]) / 4
+        random_height_offset = random.uniform(-factor_height, factor_height)
+
+        factor_dbh = float(species[4]) / 4
+        random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
+        
+        factor_lcl = float(species[5]) / 4
+        random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
+        
+        factor_c_diam = float(species[6]) / 4
+        random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
+
+        return [random_height_offset, random_dbh_offset, random_lcl_offset, random_c_diam_offset]
+    
+
+def create_tree_list(tree_coordinates, tree_species,t):
+    """ Creates the list/dict of tree information for every single tree in the forest. 
+        Taking it out of the 3PG function for better readability and also to isolate the 
+        data structure so I can mess with it a little bit.
+
+        This is so that we can access multiple instances of the same tree at different time values, and 
+        also to make it easier to spawn/kill off trees in an organized way.
+
+        Then, once ALL of the data has been written for all the trees at all the times, then we can write
+        it in CSV form, where each tree for each line is written in chronological order.
+    """
+    tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
+    key_counter = -1
+    is_dead = False
+    # TODO: create a parameter estimation for this
+    masting_cycle = 5 * 12 # in years -- so 5 years
+
+    # random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
+
+    for tree in tree_coordinates[1:]: # for each tree in the forest
+        key_counter += 1
+        tree_key = create_tree_key(key_counter)
+        tree_dict[tree_key] = []
+        
+        create_species_information(tree_species, tree_dict, masting_cycle, tree, tree_key)
+
+    return tree_dict
+
+
+def create_species_information(tree_species, tree_dict, masting_cycle, tree, tree_key, age=0):
+    """
+        Finds the specific tree's species information and assigns it to the tree for each time
+        interval that it is not dead
+    """
+    name = tree[0]
+    inc_t=0
+
+    random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
+
+    for species in tree_species: # for each species of tree
+        #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
+        species_name = species[1]
+        if name == species_name:
+            found = add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
+            inc_t += 1
+            age += 1
+    if not found:
+        print(f"Uh oh! Tree data for {name} could not be found.")
+
+
+def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t, is_dead=False):
+    stage = determine_tree_stage(age)
+    tree_form = species[2]
+
+    if inc_t == species[0]: # if it's the correct t value we're looking for
+        # if inc_t > 0 and not tree_dict[tree_key][inc_t-1][9]:# If the previous t value of the tree is dead
+        #     return #TODO fix
+
+        # assign slightly randomized values to the height and dbh
+        new_height = float(species[3]) + random_factors[0]
+        new_dbh = float(species[4]) + random_factors[1]
+        new_lcl = float(species[5]) + random_factors[2]
+        new_c_diam = float(species[6]) + random_factors[3]
+        
+        # append it to the entry
+        tree_entry = [inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle, age, stage]
+        tree_dict[tree_key].append(tree_entry)
+
+        # check if it's the tree's masting period
+            # if so, spawn a random number of trees
+            # TODO double check the logic of this
+        if inc_t % masting_cycle == 0:
+            spawn_some_trees(species, tree_key, tree_entry, tree_dict)
+    
+        found = True
+    
+    return found
+
+
+def determine_tree_stage(age):
+    """
+        Classify the growth stage of a tree based on how old it is.
+        TODO maybe get this to be more specific to different tree types
+
+        AGE IS IN MONTHS   
+    """
+    if age < 6: 
+        # This initial stage, where a seed germinates and becomes a seedling, 
+        # usually takes a few weeks to a few months.
+        return 'germinating'
+    
+    elif age < (3*12):
+        # The seedling stage is characterized by rapid growth and the development of 
+        # a strong root system and several sets of true leaves. This stage can last 
+        # anywhere from one to several years, often up to 2-3 years for many tree species.
+        return 'seedling'
+    
+    elif age < (6*12):
+        # This stage typically starts when the tree is about 1-3 years old and can last 
+        # until the tree is around 5-10 years old. During this period, the tree continues 
+        # to grow in height and girth but is not yet mature.
+        return 'young'
+    
+    else:  
+        # This stage can vary greatly in length depending on the species, with some trees 
+        # maturing in as little as 10-20 years, while others may take several decades.
+        return 'mature'
+
+
+def spawn_some_trees(species, parent_key, parent_entry, tree_dict):
+    """
+        Takes in the tree information and key from the parent, adds new tree seedlings
+        within a specific area and gives them a similar key to the parent
+    """
+
+    # For each seedling spawned
+        # Create a new key from the parent
+        # Get new x and z coordinates
+            # Check to make sure that there is not already a tree there
+        # add_tree_To_dict() with:
+            # information obtained from the tree 
+    
+    key = create_tree_key(tree_key=parent_key, spawn_count=1) # spawn count should change with each iter of the for loop
+    age = 0
+    name = parent_entry[1]
+    inc_t = parent_entry[0]
+    masting_cycle = parent_entry[10]
+    x = random_coordinate()
+    z = random_coordinate()
+
+    random_factors = randomize_tree_factors(species)
+    tree_dict[key] = [] 
+    add_to_tree_dict(species, tree_dict, key, random_factors, [name, x, z], name, masting_cycle, age, inc_t)
+    pass
+    
+
+def tree_dict_to_csv(tree_dict, output_csv_filepath):
+    """ 
+    Takes in the dictionary of tree data, outputs it as a csv 
+    """
+    with open(output_csv_filepath, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        
+        # Iterate through each key in the dictionary
+        for key in tree_dict:
+            # Write each subarray (list of values) as a new row in the CSV
+            for subarray in tree_dict[key]:
+                csv_writer.writerow([key] + subarray)
+    pass
+
+
+def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=12):
+
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 10)
-    # print(f"height_dbh: {height_dbh}")
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
+    print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
     
     print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
-    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=True) # returns [name, x, z]
+    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=False) # returns [name, x, z]
     
+    tree_output = create_tree_list(tree_coordinates, height_dbh,t)
     # for each of the 3-PG data entries in the height_dbh
-    tree_output = [['name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter']]
 
-    for tree in tree_coordinates[1:]:
-        tree_name = tree[0]
-        found = False
-        for tree_3pg in height_dbh:
-            #species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter
-            tree_name_3pg = tree_3pg[0]
-            if tree_name == tree_name_3pg:
-                tree_form = tree_3pg[1]
-
-                # assign slightly randomized values to the height and dbh
-                factor_height = float(tree_3pg[2]) / 4
-                random_height_offset = random.uniform(-factor_height, factor_height)
-                new_height = float(tree_3pg[2]) + random_height_offset
-
-                factor_dbh = float(tree_3pg[3]) / 4
-                random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
-                new_dbh = float(tree_3pg[3]) + random_dbh_offset
-
-                factor_lcl = float(tree_3pg[4]) / 4
-                random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
-                new_lcl = float(tree_3pg[4]) + random_lcl_offset
-
-                factor_c_diam = float(tree_3pg[5]) / 4
-                random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
-                new_c_diam = float(tree_3pg[5]) + random_c_diam_offset
-
-                # append it to the tree_coordinate entry
-                # [name, q_tree_form, , z, height, dbh, lcl, c_diameter]
-                tree_output.append([tree_name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam])
-
-                found = True
-                break
-        if not found:
-            print(f"Uh oh! Tree data for {tree_name} could not be found.")
-
-    with open(outputdata_filename, 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerows(tree_output)
+    tree_dict_to_csv(tree_output, outputdata_filename)
 
     print("\n===== CALCULATIONS FINISHED ===== ")
     print(f"Data for use in Blender outputted to: {outputdata_filename}")

@@ -1,2 +1,4 @@
 /venv/
 parameters/secret_key.txt
+test_data/OUTPUT_DATA.csv
+test_data/param_est_output.csv
