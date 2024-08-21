@@ -1,7 +1,6 @@
 # foliager
 
-![](trees.jpg)
-Photo by [Anton Atanasov](https://www.pexels.com/photo/worm-s-view-photography-of-trees-566496/)
+![](forest.png)
 
 ## Description
 
