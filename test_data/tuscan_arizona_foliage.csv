@@ -1,0 +1,5 @@
+Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
+Oak,Quercus,elliptical,medium,deciduous,green,round,deep,temperate,ridges,brown
+Pine,Pinus,linear,dense,evergreen,green,pyramidal,shallow,continental,scales,gray
+Mesquite,Prosopis,linear,thin,deciduous,green,spreading,deep,arid,furrows,brown
+Juniper,Juniperus,lancolate,thin,evergreen,green,pyramidal,shallow,arid,scales,gray

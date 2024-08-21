@@ -1,0 +1,13 @@
+month,tmax,tmin,rain,solar_rad,frost_days,soil_texture
+January,28,18,2.5,5.6,0,loamy_sand
+February,29,18,1.8,6.2,0,loamy_sand
+March,30,19,1.2,6.8,0,fine_sand
+April,31,20,0.5,7.4,0,fine_sand
+May,32,21,0.3,7.8,0,sandy_loams
+June,33,23,0.7,7.6,0,sandy_loams
+July,33,24,1.3,7.2,0,sandy_loams
+August,33,24,1.6,6.9,0,sandy_loams
+September,33,24,2.0,6.7,0,sandy_loams
+October,32,23,3.0,6.3,0,sandy_loams
+November,30,21,3.5,5.9,0,loamy_sand
+December,29,19,2.8,5.5,0,loamy_sand

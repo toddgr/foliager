@@ -1,0 +1,6 @@
+Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
+Quaking aspen,Populus tremuloides,oval,medium,deciduous,green,round,shallow,temperate,smooth,white
+Rocky Mountain juniper,Juniperus scopulorum,linear,thin,evergreen,green,pyramidal,deep,temperate,strips,gray
+White fir,Abies concolor,linear,medium,evergreen,green,pyramidal,shallow,temperate,scales,gray
+Engelmann spruce,Picea engelmannii,linear,dense,evergreen,green,pyramidal,deep,temperate,scales,gray
+Bigtooth maple,Acer grandidentatum,truncate,medium,deciduous,green,round,shallow,temperate,smooth,gray

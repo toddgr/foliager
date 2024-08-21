@@ -1,0 +1,13 @@
+month,tmax(average_maximum_monthly_temperature_celsius),tmin(average_minimum_monthly_temperature_celsius),rain(cm),solar_rad(kwh/m2),frost_days(average_number_of_monthly_frost_days),soil_texture
+January,22,10,5,4.5,0,loamy_sand
+February,24,11,6,5.2,0,loamy_sand
+March,27,14,8,5.8,0,loamy_sand
+April,30,17,7,6.4,0,sandy_loams
+May,32,20,9,6.9,0,sandy_loams
+June,33,22,15,6.8,0,sandy_loams
+July,34,23,17,6.5,0,sandy_loams
+August,34,23,16,6.3,0,sandy_loams
+September,33,22,14,6.1,0,sandy_loams
+October,30,19,9,5.7,0,sandy_loams
+November,26,15,6,5.2,0,loamy_sand
+December,23,12,4,4.7,0,loamy_sand
