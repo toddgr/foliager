@@ -50,9 +50,11 @@ def make_valid_filename(input_string):
 def generate_climate_prompt(location):
     climate_attributes = csv_file_to_string("parameters/default_environment_data.csv")
     
-    climate_prompt = "Output a csv with monthly values using the following headers: "
-    climate_prompt += climate_attributes
+    climate_prompt = "Output a csv providing the data for monthly values for the following: "
+    climate_prompt += initial_climate_attributes
     climate_prompt += "for " + location
+    climate_prompt += "\n use the headers [month, tmax, tmin, rain, solar_rad, frost_days, soil_texture]. \
+        for soil_texture, choose one of the options provided in the parentheses."
 
     #print(climate_prompt)
     print(f"Generating climate information for {location} ...")
@@ -70,7 +72,7 @@ def generate_species_prompt(location):
     return species_prompt
 
 if __name__ == '__main__':
-    asknlp = True       # If we want to generate new data --> usage is limited
+    asknlp = False       # If we want to generate new data --> usage is limited
 
     param_est_output = "test_data/param_est_output.csv"                 # in-between file for parameter estimation
     threepg_output_filepath = "test_data/OUTPUT_DATA.csv"
@@ -108,8 +110,8 @@ if __name__ == '__main__':
 
     else:
         # use last NLP prompt (that I know works)
-        climate_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
-        species_response_filepath = "test_data/portland_oregon_foliage.csv"
+        climate_filepath = "test_data/prineville_oregon_climate.csv"    #temporary
+        species_response_filepath = "test_data/prineville_oregon_foliage.csv"
         print(f"===== LLM NOT USED. =====\n Parsing tree data from {species_response_filepath}...")
         foliage_list = parse_csv_file(species_response_filepath)
 

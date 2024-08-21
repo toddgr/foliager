@@ -36,12 +36,13 @@ class Month:
     """
         Holds important information for visualization based on data from the site about the current month.
     """
-    def __init__(self, site_tmax, site_tmin, site_rain, site_solar_rad, site_frost_days, site_soil_water, site_max_soil_water):
+    def __init__(self, site_tmax, site_tmin, site_rain, site_solar_rad, site_frost_days, site_soil_texture, site_soil_water=0, site_max_soil_water=0):
         self.tmax = site_tmax   # Average maximum temperature for the month
         self.tmin = site_tmin   # Average minimum temperature for the month
         self.rain = site_rain   # Average rainfall for the month
         self.solar_rad = site_solar_rad # Average solar radiation for the month
         self.frost_days = site_frost_days   # Average number of frost days for the month
+        self.soil_texture = site_soil_texture
         self.soil_water = site_soil_water
         self.max_soil_water = site_max_soil_water
 
@@ -100,12 +101,12 @@ d = 1. # mean daytime VPD --> SLIDER 0.5 - 2.
 """
 
 # Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
-init_wf = 7.
-init_wr = 9.
-init_ws = 20.
+init_wf = 1. #7.
+init_wr = 1. #9.
+init_ws = 1. #20.
 
-init_b = 9 # initial dbh-- was 18
-init_sw = 200   # initiial available soil water
+init_b = 0. #9 # initial dbh-- was 18
+init_sw = 0. #200   # initial available soil water
 
 #irr = MYSTERY # irrigation (mm/month).
 #et = MYSTERY # evapotranspiration (mm/month).
@@ -176,6 +177,89 @@ def read_climate_data_original(filename):
 
     return month_data, init_month_data
 
+def approximate_soil_data(soil_texture):
+    """ NLP categorizes the type of soil for the area,
+        and we approximate its values based on the category
+        data from https://ucanr.edu/sites/UrbanHort/files/80243.pdf
+        and converted to metric units
+
+        |-----------------------------------------------|
+        | === soil texture ===  | holding capacity (cm) |
+        |-----------------------|-----------------------|
+        | very coarse sand      | 1.016 - 1.905         |   A
+        |-----------------------|-----------------------|
+        | coarse sand           |                       |
+        | fine sand             | 1.905 - 3.175         |   B
+        | loamy sand            |                       |
+        |-----------------------|-----------------------|
+        | sandy loams           |                       |   C
+        | fine sandy loams      | 3.175 - 4.445         |
+        |-----------------------|-----------------------|
+        | very fine sandy loams |                       |
+        | loams                 | 3.81 - 5.842          |   D
+        | silt loams            |                       |
+        |-----------------------|-----------------------|
+        | clay loams            |                       |
+        | silt clay loams       | 4.445 - 6.35          |   E
+        | sandy clay loams      |                       |
+        |-----------------------|-----------------------|
+        | sandy clays           |                       |
+        | silty clays           | 4.064 - 6.35          |   F
+        | clays                 |                       |
+        |-----------------------------------------------|
+    """
+    # Holding capacity A
+    if soil_texture == "very_coarse_sand":
+        # capacity range
+        min = 1.016
+        max = 1.905
+
+    # Holding capacity B
+    elif soil_texture == "coarse_sand" or \
+        soil_texture == "fine_sand" or \
+        soil_texture == "loamy_sand":
+        # capacity range - lowest in B
+        min = 1.905
+        max = 3.175
+        # TODO refine the categories and apply different
+        # sections for each subcategory
+        #max = ((max - min) / 3) + min
+
+    # Holding capacity C
+    elif soil_texture == "sandy_loams" or \
+        soil_texture == "fine_sandy_loams":
+        min = 3.175
+        max = 4.445
+    
+    # Holding capacity D
+    elif soil_texture == "very_fine_sandy_loams" or \
+        soil_texture == "loams" or \
+        soil_texture == "silt_loams":
+        min = 3.81
+        max = 5.842
+
+    # Holding capacity E
+    elif soil_texture == "clay_loams" or \
+        soil_texture == "silt_clay_loams" or \
+        soil_texture == "sandy_clay_loams":
+        min = 4.445
+        max = 6.35
+
+    # Holding capacity F
+    elif soil_texture == "sandy_clays" or \
+        soil_texture == "silty_clays" or \
+        soil_texture == "clays":
+        min = 4.064
+        max = 6.35
+    else:
+        print(f"ERROR Invalid soil texture: {soil_texture}")
+        return None
+    
+    
+    soil_water = random.uniform(min,max)
+    max_soil_water = max
+    return soil_water, max_soil_water
+
 def read_climate_data(file_path):
     """
         Reads in a CSV file that contains data on the monthdata
@@ -187,14 +271,19 @@ def read_climate_data(file_path):
         reader = csv.DictReader(file)
         i = 0
         for row in reader:
+            soil_texture = row['soil_texture']
+            soil_water, max_soil_water = approximate_soil_data(soil_texture)
+            print(f"soil_water: {soil_water}, max_soil_water: {max_soil_water}")
+
             month_data.append(Month(
                 site_tmax = float(row['tmax']),
                 site_tmin = float(row['tmin']),
                 site_rain = float(row['rain']),
                 site_solar_rad = float(row['solar_rad']),
                 site_frost_days = float(row['frost_days']),
-                site_soil_water = float(row['soil_water']),
-                site_max_soil_water = float(row['max_soil_water'])
+                site_soil_texture = soil_texture,
+                site_soil_water = soil_water,
+                site_max_soil_water=max_soil_water
             ))
 
             init_month_data.append(Month(
@@ -203,10 +292,12 @@ def read_climate_data(file_path):
                 site_rain=month_data[i].rain,
                 site_solar_rad=month_data[i].solar_rad,
                 site_frost_days=month_data[i].frost_days,
-                site_soil_water=month_data[i].soil_water,
-                site_max_soil_water=month_data[i].max_soil_water
+                site_soil_texture=month_data[i].soil_texture,
+                site_soil_water=soil_water,
+                site_max_soil_water=max_soil_water
             ))
             i = i + 1
+
     return month_data, init_month_data
 
 def parse_env_data(file_path):
@@ -256,12 +347,12 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
         # setting initial b from user input initial b so that it can be used to compute WF
         # Fix this so no user input?
-        b = 18
+        b = 1
 
         for inc_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
-            current_month = (start_month + inc_t) % 12
+            current_month = ((start_month + inc_t) % 12)-1
             if current_month == 0:
-                current_month = 12
+                current_month = 11
 
             # compute the PAR/aC mods
             # temperature mod
@@ -326,9 +417,11 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
                 gac = (age0 + inc_t / 12) / species.tc
             else:
                 gac = 1.
+            print(f"GAC: {gac}")
             
             # light absorption --> absorption photosynthetically active radiation (PAR)
             # Often called o/pa
+            print(f"e_exp = (-{species.k} *  {l} / {gac})")
             e_exp = (-species.k * l)/gac
             par = (1. - pow(E, e_exp)) * 2.3 * gac * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
         
@@ -348,7 +441,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             ap = species.p2/(pow(2., np)) # equation A29
 
             # computing pfs
-            b = 18
+            b = 1
             pfs = ap * pow(b, np)
             #print(f"pfs:{pfs}, ap:{ap}, b:{b}, np:{np}\npfs = ap * pow(b, np)")
 
@@ -363,7 +456,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
             # print("last_ws:", last_ws)
             # seeing if we need to thin
-            while last_ws / n > wsx:
+            while last_ws / n > wsx and n > 0:
                 # need to thin
                 n -= 1  # decreasing n
                 delta_n += 1 # increasing delta_n counter
@@ -389,6 +482,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             # setting current = to last month's
             curr_wf = last_wf
             curr_ws = last_ws
+            print(f"curr_ws = last_ws: {last_ws}")
             curr_wr = last_wr
 
             #print(f"curr_ws (part 1): {curr_ws}")
@@ -404,9 +498,13 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             #print(f"curr_ws (part 2): {curr_ws}")
 
             # making the current into last month's for the next month
-            last_wf = curr_wf
-            last_ws = curr_ws
-            last_wr = curr_wr
+            if curr_wf > 0.:
+                last_wf = curr_wf
+            if curr_ws > 0.:
+                last_ws = curr_ws
+            print(f"last_ws = curr_ws (cannot be negative): {last_ws}")
+            if curr_wr > 0.:
+                last_wr = curr_wr
 
             delta_n = 0 # resetting delta_n
 
@@ -445,9 +543,11 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             nvh = species.nvh
             nvbh = species.nvbh
 
-            # calculating b from mean individual stem mass (inversioon of A65 of user manual)
+            # calculating b from mean individual stem mass (inversion of A65 of user manual)
+            print(f"last_ws: {last_ws}, n: {n}")
             iws = last_ws / n # individual stem mass
             b = pow(iws/aws, (1.0/nws)) *100
+            print(f"b: {b}, iws: {iws}, aws: {aws}, nws: {nws}")
 
             # bias correction to adjust b
             # TODO implement later?
@@ -471,7 +571,8 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
             total_height = h # mean tree height
             live_crown_length = hl # distance between the top live foliage and the lowest live foliage
-            dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing trees
+            print(f"BA: {ba}")
+            dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
             # TODO: approximate masting cycle here
             height_dbh_list.append([inc_t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
 
@@ -655,6 +756,9 @@ def spawn_some_trees(species, parent_key, parent_entry, tree_dict):
     tree_dict[key] = [] 
     add_to_tree_dict(species, tree_dict, key, random_factors, [name, x, z], name, masting_cycle, age, inc_t)
     pass
+
+def random_coordinate():
+    return random.uniform(0, 1)
     
 
 def tree_dict_to_csv(tree_dict, output_csv_filepath):

@@ -2,5 +2,5 @@ Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linea
 Oak,Quercus,elliptical,medium,deciduous,green,round,deep,temperate,furrows,brown
 Maple,Acer,lancolate,dense,deciduous,green,oval,shallow,temperate,smooth,gray
 Douglas Fir,Pseudotsuga,linear,very dense,evergreen,green,pyramidal,deep,temperate,scales,gray
-Willow,Salix,oval,thin,deciduous,green,spreading,shallow,temperate,lenticels,brown
-Redwood,Sequoia,linear,very dense,evergreen,green,pyramidal,deep,temperate,ridges,red
+Willow,Salix,oval,thin,deciduous,green,spreading,shallow,temperate,ridges,brown
+Pine,Pinus,needle-like,medium,evergreen,green,pyramidal,deep,temperate,scales,red
