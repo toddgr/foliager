@@ -72,7 +72,6 @@ def generate_species_prompt(location):
 if __name__ == '__main__':
     asknlp = True       # If we want to generate new data --> usage is limited
 
-    #climate_data_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
     param_est_output = "test_data/param_est_output.csv"                 # in-between file for parameter estimation
     threepg_output_filepath = "test_data/OUTPUT_DATA.csv"
     knowledge_base = "test_data/species_data_kb.csv"
@@ -100,15 +99,16 @@ if __name__ == '__main__':
         climate_response = ask_nlp(climate_prompt)
 
         # Write the climate information to a csv file
-        climate_response_filepath = "test_data/" + make_valid_filename(location + " climate")
-        with open(climate_response_filepath, 'w') as file:
+        climate_filepath = "test_data/" + make_valid_filename(location + " climate")
+        with open(climate_filepath, 'w') as file:
             file.write(initial_climate_attributes)
             file.write(climate_response)
 
-            print(f"Writing to file {climate_response_filepath}")
+            print(f"Writing to file {climate_filepath}")
 
     else:
         # use last NLP prompt (that I know works)
+        climate_filepath = "test_data/douglas_fir_climate_data.csv"    #temporary
         species_response_filepath = "test_data/portland_oregon_foliage.csv"
         print(f"===== LLM NOT USED. =====\n Parsing tree data from {species_response_filepath}...")
         foliage_list = parse_csv_file(species_response_filepath)
@@ -119,8 +119,9 @@ if __name__ == '__main__':
         print(tree.name)
 
     estimate_tree_list(foliage_list, knowledge_base, param_est_output)
+    
 
     print("\n\n ===== CALCULATING 3-PG PARAMETERS NOW =====")
-    threepg(climate_data_filepath, param_est_output, threepg_output_filepath)
+    threepg(climate_filepath, param_est_output, threepg_output_filepath)
 
     
