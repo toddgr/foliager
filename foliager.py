@@ -101,7 +101,7 @@ if __name__ == '__main__':
         # Write the climate information to a csv file
         climate_filepath = "test_data/" + make_valid_filename(location + " climate")
         with open(climate_filepath, 'w') as file:
-            file.write(initial_climate_attributes)
+            #file.write(initial_climate_attributes)
             file.write(climate_response)
 
             print(f"Writing to file {climate_filepath}")

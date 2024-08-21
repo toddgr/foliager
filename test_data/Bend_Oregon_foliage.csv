@@ -1,6 +1,6 @@
 Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
-Aspen,Populus tremuloides,oval,medium,deciduous,green,pyramidal,shallow,temperate,smooth,white
-Ponderosa Pine,Pinus ponderosa,linear,medium,evergreen,green,pyramidal,deep,temperate,furrows,red
-Juniper,Juniperus communis,scale-like,thin,evergreen,green,irregular,shallow,arid,scales,brown
-Douglas Fir,Pseudotsuga menziesii,linear,medium,evergreen,green,pyramidal,deep,temperate,furrows,gray
-Manzanita,Arctostaphylos,elliptical,thin,evergreen,green,spreading,shallow,arid,smooth,red
+Ponderosa Pine,Pinus ponderosa,needle,medium,evergreen,green,pyramidal,deep,temperate,furrows,red
+Douglas Fir,Pseudotsuga menziesii,needle,medium,evergreen,green,pyramidal,shallow,temperate,furrows,gray
+Quaking Aspen,Populus tremuloides,round,thin,deciduous,green,oval,shallow,temperate,smooth,white
+Western Juniper,Juniperus occidentalis,needle,thin,evergreen,green,irregular,deep,temperate,scales,gray
+White Fir,Abies concolor,needle,medium,evergreen,green,pyramidal,shallow,temperate,smooth,gray
