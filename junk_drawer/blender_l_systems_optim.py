@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import bpy
 
 def create_mesh(vertices, edges, name="Test_Tree"):
@@ -130,7 +131,7 @@ def plot_l_system(angle_deg, string):
     """
     step_length = 1
     angle_rad = np.radians(angle_deg)
-    ninety_degrees = np.radians(90.)
+    max_deviation = np.radians(45)  # How much the random angle can deviate from original
 
     # Directions for 3D: Forward, Right, Up
     directions = np.array([
@@ -148,6 +149,8 @@ def plot_l_system(angle_deg, string):
     current_index = 0
 
     for char in string:
+        # Randomize the angle a little bit
+        rand_angle = random.uniform(angle_rad - max_deviation, angle_rad + max_deviation)
         if char == 'F':
             new_position = tuple(position + directions[direction_index] * step_length)
             if new_position not in coordinates_map:
@@ -159,17 +162,17 @@ def plot_l_system(angle_deg, string):
             position = new_position
 
         elif char == '+': # z axis
-            directions = np.array([rotate_vector(d, 'z', angle_rad) for d in directions])
+            directions = np.array([rotate_vector(d, 'z', rand_angle) for d in directions])
         elif char == '-': # z axis
-            directions = np.array([rotate_vector(d, 'z', -angle_rad) for d in directions])
+            directions = np.array([rotate_vector(d, 'z', -rand_angle) for d in directions])
         elif char == '\\': # x axis
-            directions = np.array([rotate_vector(d, 'x', -angle_rad) for d in directions])
+            directions = np.array([rotate_vector(d, 'x', -rand_angle) for d in directions])
         elif char == '/': # y axis
-            directions = np.array([rotate_vector(d, 'y', angle_rad) for d in directions])
+            directions = np.array([rotate_vector(d, 'y', rand_angle) for d in directions])
         elif char == '^': # x axis (up)
-            directions = np.array([rotate_vector(d, 'x', angle_rad) for d in directions])
+            directions = np.array([rotate_vector(d, 'x', rand_angle) for d in directions])
         elif char == '&': # y axis (up
-            directions = np.array([rotate_vector(d, 'y', -angle_rad) for d in directions])
+            directions = np.array([rotate_vector(d, 'y', -rand_angle) for d in directions])
         elif char == '[':  # new branch
             stack.append((position, direction_index, directions.copy()))
         elif char == ']':  # end of new branch
@@ -245,7 +248,7 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
         # might crash as is
         #rules = {'X': '[++\\\\B][--\\\\B]F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[B]F[-B]F[+B]F[-B]F'}
         #rules = {'X': 'F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
-        #rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
+        rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
         
         
     elif shape == 'oval':
