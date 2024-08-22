@@ -129,9 +129,9 @@ def plot_l_system(angle_deg, string):
         Take the L system string and give coordinates and edges
         to the series of points for use in Blender
     """
-    step_length = 1
+    step_length = 2
     angle_rad = np.radians(angle_deg)
-    max_deviation = np.radians(45)  # How much the random angle can deviate from original
+    max_deviation = np.radians(20)  # How much the random angle can deviate from original
 
     # Directions for 3D: Forward, Right, Up
     directions = np.array([
@@ -235,31 +235,32 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
     # each tree shape will have their own axiom rules to follow
     if shape == 'cone': 
-        n =  5 # number of iterations
-        d = 45
-        axiom = 'X'
-        rules = {'X': 'XF[++B]F[--B]F[+//B]F[-//B]F[+&&B]F[-&&B]F[//B][&&B]', 'L':'LF', 'B':'[+F]F[-F]F[+F]F[-F]', 'F': 'F'}
+        pass
         
     elif shape == 'round':
+        # step length 5?
+        n = 5 # number of iterations
+        d = -60
+        axiom = 'FFFFFA'
+        #rules = {'X': 'F[++X]F[--X]F[+//X]F[-//X]F[+&&X]F[-&&X]FX','F':'FF'}
+        rules = {'A': 'FB[F+A]B[F-A]B[F/A]B[F&A]', 'B': 'BB'}
         
-        n = 2 # number of iterations
-        d = 45
-        axiom = 'X'
+    elif shape == 'oval':
+        n = 4 # number of iterations (stay at 3)
+        d = 30
+        axiom = 'FX'
         # might crash as is
         #rules = {'X': '[++\\\\B][--\\\\B]F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[B]F[-B]F[+B]F[-B]F'}
         #rules = {'X': 'F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
-        rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
+        rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]X','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]'}
         
-        
-    elif shape == 'oval':
-        pass
     
     elif shape == 'pyramidal':
-        
-        n = 3 # number of iterations
-        d = 20
+        n =  6 # number of iterations
+        d =  50
         axiom = 'X'
-        rules = {'X': 'F[++X]F[--X]F[+//X]F[-//X]F[+&&X]F[-&&X]FX','F':'FF'}
+        rules = {'X': '[+B]F[-B]F[+/B]F[-/B]F[+&B]F[-&B]X', 'L':'LF','B':'[L+F]F[L-F]F[L+F]F[L-F]'}
+        
         
     else: # irregular
         pass
@@ -269,7 +270,7 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='round')
+    n, d, axiom, rules = create_axiom_and_rules(shape='cone')
     vertices, edges = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
