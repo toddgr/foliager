@@ -604,22 +604,24 @@ def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
         return tree_key + str(spawn_count)
 
 
-def randomize_tree_factors(species_list):
-    for species in species_list:
-        # Randomized offsets -- different for each tree
-        factor_height = float(species[3]) / 4
-        random_height_offset = random.uniform(-factor_height, factor_height)
+def randomize_tree_factors(species):
+    i = 0
+    # Randomized offsets -- different for each tree
+    print(f"=====SPECIES:==== {species} \n ==== ")
+    factor_height = float(species[3]) / 4
+    random_height_offset = random.uniform(-factor_height, factor_height)
 
-        factor_dbh = float(species[4]) / 4
-        random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
-        
-        factor_lcl = float(species[5]) / 4
-        random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
-        
-        factor_c_diam = float(species[6]) / 4
-        random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
+    factor_dbh = float(species[4]) / 4
+    random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
+    
+    factor_lcl = float(species[5]) / 4
+    random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
+    
+    factor_c_diam = float(species[6]) / 4
+    random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
+    i += 1
 
-        return [random_height_offset, random_dbh_offset, random_lcl_offset, random_c_diam_offset]
+    return [random_height_offset, random_dbh_offset, random_lcl_offset, random_c_diam_offset]
     
 
 def create_tree_list(tree_coordinates, tree_species,t):
@@ -645,7 +647,8 @@ def create_tree_list(tree_coordinates, tree_species,t):
         key_counter += 1
         tree_key = create_tree_key(key_counter)
         tree_dict[tree_key] = []
-        
+
+        # this is wrong        
         create_species_information(tree_species, tree_dict, masting_cycle, tree, tree_key)
 
     return tree_dict
