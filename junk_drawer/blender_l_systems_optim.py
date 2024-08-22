@@ -129,7 +129,7 @@ def plot_l_system(angle_deg, string):
         Take the L system string and give coordinates and edges
         to the series of points for use in Blender
     """
-    step_length = 2
+    step_length = 5
     angle_rad = np.radians(angle_deg)
     max_deviation = np.radians(20)  # How much the random angle can deviate from original
 
@@ -235,7 +235,10 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
     # each tree shape will have their own axiom rules to follow
     if shape == 'cone': 
-        pass
+        n =  3 # number of iterations
+        d = 30
+        axiom = 'FX'
+        rules = {'X': 'F[+B][-B]F[+/B][-/B]F[+&B][-&B]FX', 'L':'LF','B':'[+L+F]F[-L-F]F[+L+F]F[-L-F]'}
         
     elif shape == 'round':
         # step length 5?
