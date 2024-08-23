@@ -129,7 +129,7 @@ def plot_l_system(angle_deg, string):
         Take the L system string and give coordinates and edges
         to the series of points for use in Blender
     """
-    step_length = 5
+    step_length = 1
     angle_rad = np.radians(angle_deg)
     max_deviation = np.radians(20)  # How much the random angle can deviate from original
 
@@ -139,7 +139,7 @@ def plot_l_system(angle_deg, string):
         [0, 1, 0],  # Y axis
         [0, 0, 1]   # Z axis
     ])
-    direction_index = 0  # Start facing along X axis
+    direction_index = 2  # Start facing along X axis
     position = np.array([0.0, 0.0, 0.0])
     
     coordinates = [tuple(position)]
@@ -191,6 +191,7 @@ def generate_l_system(n, d, axiom, rules):
     """
     
     # Rewrite the string for every iteration
+    new_axiom = ''
     for _ in range(n):
         new_axiom = ''
         print(f'===== ITERATION {_} =====')
@@ -235,10 +236,10 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
     # each tree shape will have their own axiom rules to follow
     if shape == 'cone': 
-        n =  3 # number of iterations
+        n =  2 # number of iterations
         d = 30
         axiom = 'FX'
-        rules = {'X': 'F[+B][-B]F[+/B][-/B]F[+&B][-&B]FX', 'L':'LF','B':'[+L+F]F[-L-F]F[+L+F]F[-L-F]'}
+        rules = {'X': 'F[+B][-B]F[+/B][-/B]F[+&B][-&B]X', 'L':'LF','B':'[+L+F]F[-L-F]F[+L+F]F[-L-F]'}
         
     elif shape == 'round':
         # step length 5?
@@ -264,6 +265,12 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
         axiom = 'X'
         rules = {'X': '[+B]F[-B]F[+/B]F[-/B]F[+&B]F[-&B]X', 'L':'LF','B':'[L+F]F[L-F]F[L+F]F[L-F]'}
         
+    elif shape == 'proper':
+        n = 1
+        d = 90
+        trunk = 'F' * height
+        axiom = trunk
+        rules = {}
         
     else: # irregular
         pass
@@ -273,7 +280,7 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
 
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='cone')
+    n, d, axiom, rules = create_axiom_and_rules(shape='proper')
     vertices, edges = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
