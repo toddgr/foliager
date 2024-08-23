@@ -223,10 +223,12 @@ def generate_l_system(n, d, axiom, rules):
     return coordinates, edges
 
 
-def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
+def create_axiom_and_rules(dbh=1, lcl=24, c_diam=10, height=20, branch_spacing=2, shape='dimension_test'):
     """ Input: Calculated 3-PG parameters that define the dimensions
                of the tree
         Output: L systems parameters to generate trees from.
+        
+        Branch spacing has to be evenly divided by the lcl to work 
     """
 
     # height will determine
@@ -242,35 +244,36 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
         rules = {'X': 'F[+B][-B]F[+/B][-/B]F[+&B][-&B]X', 'L':'LF','B':'[+L+F]F[-L-F]F[+L+F]F[-L-F]'}
         
     elif shape == 'round':
-        # step length 5?
+        # step length 5
         n = 5 # number of iterations
         d = -60
         axiom = 'FFFFFA'
-        #rules = {'X': 'F[++X]F[--X]F[+//X]F[-//X]F[+&&X]F[-&&X]FX','F':'FF'}
         rules = {'A': 'FB[F+A]B[F-A]B[F/A]B[F&A]', 'B': 'BB'}
         
     elif shape == 'oval':
-        n = 4 # number of iterations (stay at 3)
+        n = 3 # number of iterations (stay at 3, looks prettiest at 4)
         d = 30
         axiom = 'FX'
-        # might crash as is
-        #rules = {'X': '[++\\\\B][--\\\\B]F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[B]F[-B]F[+B]F[-B]F'}
-        #rules = {'X': 'F[++B][--B]F[+//B][-//B]F[+&&B][-&&B]FX','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]F'}
         rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]X','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]'}
         
-    
     elif shape == 'pyramidal':
         n =  6 # number of iterations
         d =  50
         axiom = 'X'
         rules = {'X': '[+B]F[-B]F[+/B]F[-/B]F[+&B]F[-&B]X', 'L':'LF','B':'[L+F]F[L-F]F[L+F]F[L-F]'}
         
-    elif shape == 'proper':
-        n = 1
-        d = 90
-        trunk = 'F' * height
-        axiom = trunk
-        rules = {}
+    elif shape == 'dimension_test':
+        n = 2 # 1 gets the trunk, 2 gets the branches 
+        d = 45
+        trunk = create_trunk(height)
+        branch = create_branch(c_diam, lcl, shape)
+        
+        branches = create_branches(branch)
+        #branch_iter = 'BF' * lcl
+        branch_iter = ('B' + ('F' * branch_spacing)) * int(lcl / branch_spacing)
+        
+        axiom = 'TX'
+        rules = {'T':trunk, 'B':branches, 'X':branch_iter}
         
     else: # irregular
         pass
@@ -278,9 +281,66 @@ def create_axiom_and_rules(dbh=1, lcl=2, c_diam=2, height=4, shape='cone'):
     return n, d, axiom, rules
 
 
+def create_trunk(height):
+    """
+        Takes in height of the trunk of a tree, returns the string
+        for L system to create the proper trunk size
+    """
+    return 'F' * height
+
+
+def create_branches(branch):
+    """ makes branches in all directions """
+    branches = put_in_branch(add_yaw(add_roll(branch))) + put_in_branch(add_yaw(add_roll(branch, '&'), '-'))\
+        + put_in_branch(add_yaw(add_pitch(add_roll(branch)))) + put_in_branch(add_yaw(add_pitch(add_roll(branch, '&')), '-'))\
+        + put_in_branch(add_yaw(add_pitch(add_roll(branch), '^'))) + put_in_branch(add_yaw(add_pitch(add_roll(branch, '&'), '^'), '-'))
+    return branches
+
+
+def create_branch(c_diam, lcl, shape):
+    """
+         Takes in the dimensions for live crown, 
+         Returns string for L system to generate a branch
+    """
+    branch = ''
+    
+    if shape == 'dimension_test':
+        #branch += ('F[+F][-F]' * random.randint(int(c_diam/2)-2, int(c_diam/2)))
+        branch += ('F' * random.randint(int(c_diam/2)-2, int(c_diam/2)+1))
+        #for _ in range(int(c_diam/4)):
+            #branch += 'F[+F]F[-F]'
+    
+    #return 'F' * int (c_diam/2)
+    return branch
+
+
+def add_pitch(word, sign='\\'):
+    # x axis
+    if sign=='\\':
+        return '\\' + word
+    return '^' + word
+
+
+def add_roll(word, sign='/'):
+    # y axis
+    if sign=='/':
+        return '/' + word
+    return '&' + word
+
+
+def add_yaw(word, sign='+'):
+    # z axis
+    if sign == '+':    
+        return '+' + word
+    return '-' + word
+
+def put_in_branch(word):
+    return '[' + word + ']'
+
+
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='proper')
+    n, d, axiom, rules = create_axiom_and_rules(shape='dimension_test')
     vertices, edges = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
