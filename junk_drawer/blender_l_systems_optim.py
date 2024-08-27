@@ -62,7 +62,7 @@ def add_thickness(obj, thickness=0.1):
 
     # Smooth out the tree
     bpy.ops.object.modifier_add(type='SUBSURF')
-    bpy.context.object.modifiers["Subdivision"].levels = 4
+    bpy.context.object.modifiers["Subdivision"].levels = 1
     
     # Apply the modifiers
     bpy.ops.object.modifier_apply(modifier="Skin")
@@ -90,7 +90,6 @@ def add_material(obj, color='brown', texture='smooth', material_name="defaultMat
     
     #TODO Have some slight randomization of the color from tree to tree, even if the color is specified
     # Set the material color
-    # RGB color picker: https://rgbcolorpicker.com/0-1
     if color == 'gray':
         nodes = material.node_tree.nodes
         bsdf_node = nodes.get('Principled BSDF')
@@ -114,7 +113,7 @@ def add_material(obj, color='brown', texture='smooth', material_name="defaultMat
         nodes = material.node_tree.nodes
         bsdf_node = nodes.get('Principled BSDF')
         if bsdf_node:
-            bsdf_node.inputs['Base Color'].default_value = (0.259, 0.149, 0.008, 1)
+            bsdf_node.inputs['Base Color'].default_value = (0.259, 0.149, 0.008, 1)  # Red color with full opacity
     
     #=====================================
     
@@ -125,6 +124,94 @@ def add_material(obj, color='brown', texture='smooth', material_name="defaultMat
         obj.data.materials.append(material)
 
     return obj
+
+
+
+def assign_texture(obj_name, image_path, color='brown', texture='smooth'):
+    """ Assigns the bark texture to the tree with smart UV projection
+        Input: tree object name, /path/to/image
+        Output: tree object with new texture
+    """
+    mix_factor = 1.
+    
+    # Get the object
+    obj = bpy.data.objects.get(obj_name)
+    if obj is None:
+        print(f"Object '{obj_name}' not found.")
+        return
+    
+    # Set the object to active and in edit mode for unwrapping
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode='EDIT')
+    
+    # Select all faces
+    bpy.ops.mesh.select_all(action='SELECT')
+    
+    # Apply Smart UV Project
+    # Angle limit --> the higher it is, the more face grouping will happen
+    # Island margin --> spacing/padding between the face groupings
+    bpy.ops.uv.smart_project(angle_limit=75.0, island_margin=0.0)
+    
+    # Switch back to object mode
+    bpy.ops.object.mode_set(mode='OBJECT')
+    
+    # Ensure the object has a material
+    if not obj.data.materials:
+        mat = bpy.data.materials.new(name="Material")
+        obj.data.materials.append(mat)
+    else:
+        mat = obj.data.materials[0]
+    
+    # Enable 'Use Nodes' in the material
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    
+    # Clear existing nodes
+    for node in nodes:
+        nodes.remove(node)
+    
+    # Add necessary nodes
+    tex_image_node = nodes.new(type='ShaderNodeTexImage')
+    mix_rgb_node = nodes.new(type='ShaderNodeMixRGB')
+    rgb_node = nodes.new(type='ShaderNodeRGB')
+    bsdf_node = nodes.new(type='ShaderNodeBsdfPrincipled')
+    output_node = nodes.new(type='ShaderNodeOutputMaterial')
+    
+    # Set node positions (just to help with organization)
+    tex_image_node.location = (-600, 300)
+    mix_rgb_node.location = (-300, 300)
+    rgb_node.location = (-600, 100)
+    bsdf_node.location = (0, 300)
+    output_node.location = (300, 300)
+    
+    # Configure the RGB node
+    if color == 'gray':
+        rgba_color = (0.231, 0.22, 0.165, 1) 
+    elif color == 'white':
+        rgba_color = (0.831, 0.765, 0.671, 1)
+    elif color == 'red':
+        rgba_color = (0.451, 0.094, 0.024, 1)
+    else: # color is brown
+        rgba_color = (0.259, 0.149, 0.008, 1)
+    rgb_node.outputs['Color'].default_value = rgba_color
+    
+    # Configure the MixRGB node
+    mix_rgb_node.inputs['Fac'].default_value = mix_factor  # Set the mix factor
+    mix_rgb_node.blend_type = 'MULTIPLY'  # Testing -- can change this to 'ADD', 'MULTIPLY', etc.
+
+    # Link the nodes
+    links = mat.node_tree.links
+    links.new(tex_image_node.outputs['Color'], mix_rgb_node.inputs['Color1'])
+    links.new(rgb_node.outputs['Color'], mix_rgb_node.inputs['Color2'])
+    links.new(mix_rgb_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+    links.new(bsdf_node.outputs['BSDF'], output_node.inputs['Surface'])
+    
+    # Load the image and assign it to the texture node
+    image = bpy.data.images.load(image_path)
+    tex_image_node.image = image
+    
+    print(f"Texture '{image.name}' assigned and Smart UV Project applied to object '{obj_name}'.")
+
 
 def rotate_vector(vector, axis, angle_rad):
     cos_theta = np.cos(angle_rad)
@@ -397,4 +484,5 @@ if __name__ == '__main__':
     # Call the function
     tree = create_mesh(vertices, edges)
     tree = add_thickness(tree)
-    tree = add_material(tree, color='gray')
+    #tree = add_material(tree, color='gray')
+    assign_texture(tree.name, 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg')
