@@ -74,22 +74,49 @@ def add_thickness(obj, thickness=0.1):
     return obj
 
 
-def add_material(obj, material_name="defaultMat"):
-    """ Applies a material to the new tree."""
+def add_material(obj, color='brown', texture='smooth', material_name="defaultMat"):
+    """ Applies a material to the new tree.
+        Possible textures: smooth/lenticels/furrows/ridges/cracks/scales/strips
+        Possible colors: gray/white/red/brown"""
 
     # Select the object
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
 
-    # Create a new red material
-    material = bpy.data.materials.new(name="BrownMaterial")
+    # Create a new material
+    material = bpy.data.materials.new(name="Material")
     material.use_nodes = True  # Enable nodes for material (optional)
     
-    # Set the material color to red
-    nodes = material.node_tree.nodes
-    bsdf_node = nodes.get('Principled BSDF')
-    if bsdf_node:
-        bsdf_node.inputs['Base Color'].default_value = (0.259, 0.149, 0.008, 1)  # Red color with full opacity
+    
+    #TODO Have some slight randomization of the color from tree to tree, even if the color is specified
+    # Set the material color
+    # RGB color picker: https://rgbcolorpicker.com/0-1
+    if color == 'gray':
+        nodes = material.node_tree.nodes
+        bsdf_node = nodes.get('Principled BSDF')
+        if bsdf_node:
+            bsdf_node.inputs['Base Color'].default_value = (0.231, 0.22, 0.165, 1)
+    elif color == 'white':
+        nodes = material.node_tree.nodes
+        bsdf_node = nodes.get('Principled BSDF')
+        if bsdf_node:
+            bsdf_node.inputs['Base Color'].default_value = (0.831, 0.765, 0.671, 1)
+    elif color == 'red':
+        nodes = material.node_tree.nodes
+        bsdf_node = nodes.get('Principled BSDF')
+        if bsdf_node:
+            bsdf_node.inputs['Base Color'].default_value = (0.451, 0.094, 0.024, 1)
+    else:
+        # might be a combination of more than one color, address later.
+        # for now, make brown
+        color = 'brown'
+        
+        nodes = material.node_tree.nodes
+        bsdf_node = nodes.get('Principled BSDF')
+        if bsdf_node:
+            bsdf_node.inputs['Base Color'].default_value = (0.259, 0.149, 0.008, 1)
+    
+    #=====================================
     
     # Assign the material to the mesh
     if len(obj.data.materials) > 0:
@@ -252,7 +279,7 @@ def create_axiom_and_rules(dbh=1, lcl=10, c_diam=10, height=10, branch_spacing=2
         
     elif shape == 'oval':
         n = 3 # number of iterations (stay at 3, looks prettiest at 4)
-        d = 60
+        d = 30
         axiom = 'FX'
         rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]X','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]'}
         
@@ -370,4 +397,4 @@ if __name__ == '__main__':
     # Call the function
     tree = create_mesh(vertices, edges)
     tree = add_thickness(tree)
-    tree = add_material(tree)
+    tree = add_material(tree, color='gray')
