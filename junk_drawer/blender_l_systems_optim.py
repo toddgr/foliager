@@ -127,12 +127,29 @@ def add_material(obj, color='brown', texture='smooth', material_name="defaultMat
 
 
 
-def assign_texture(obj_name, image_path, color='brown', texture='smooth'):
+def assign_texture(obj_name, color='brown', texture='smooth'):
     """ Assigns the bark texture to the tree with smart UV projection
         Input: tree object name, /path/to/image
         Output: tree object with new texture
     """
     mix_factor = 1.
+
+    texture_paths = {
+        'smooth': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+        'lenticels': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+        'furrows': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+        'ridges': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+        'cracks': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+        'scales': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+        'strips': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+    }
+
+    color_mappings = {
+        'gray': (0.231, 0.22, 0.165, 1),
+        'white': (0.831, 0.765, 0.671, 1),
+        'red': (0.451, 0.094, 0.024, 1),
+        'brown': (0.259, 0.149, 0.008, 1)  # Default color
+    }
     
     # Get the object
     obj = bpy.data.objects.get(obj_name)
@@ -185,14 +202,15 @@ def assign_texture(obj_name, image_path, color='brown', texture='smooth'):
     output_node.location = (300, 300)
     
     # Configure the RGB node
-    if color == 'gray':
-        rgba_color = (0.231, 0.22, 0.165, 1) 
-    elif color == 'white':
-        rgba_color = (0.831, 0.765, 0.671, 1)
-    elif color == 'red':
-        rgba_color = (0.451, 0.094, 0.024, 1)
-    else: # color is brown
-        rgba_color = (0.259, 0.149, 0.008, 1)
+    rgba_color = color_mappings.get(color, color_mappings[color])
+    # Randomize the RGB values a little bit
+    variation=0.05
+    rgba_color = (
+        max(0, min(1, rgba_color[0] + random.uniform(-variation, variation))),
+        max(0, min(1, rgba_color[1] + random.uniform(-variation, variation))),
+        max(0, min(1, rgba_color[2] + random.uniform(-variation, variation))),
+        rgba_color[3]  # Alpha value remains unchanged
+    )
     rgb_node.outputs['Color'].default_value = rgba_color
     
     # Configure the MixRGB node
@@ -207,6 +225,7 @@ def assign_texture(obj_name, image_path, color='brown', texture='smooth'):
     links.new(bsdf_node.outputs['BSDF'], output_node.inputs['Surface'])
     
     # Load the image and assign it to the texture node
+    image_path = texture_paths[texture]    
     image = bpy.data.images.load(image_path)
     tex_image_node.image = image
     
@@ -337,7 +356,7 @@ def generate_l_system(n, d, axiom, rules):
     return coordinates, edges
 
 
-def create_axiom_and_rules(dbh=1, lcl=10, c_diam=10, height=10, branch_spacing=2, shape='dimension_test'):
+def create_axiom_and_rules(dbh=1, lcl=10, c_diam=20, height=10, branch_spacing=2, shape='dimension_test'):
     """ Input: Calculated 3-PG parameters that define the dimensions
                of the tree
         Output: L systems parameters to generate trees from.
@@ -477,12 +496,22 @@ def put_in_branch(word):
 
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='oval')
+    n, d, axiom, rules = create_axiom_and_rules(shape='dimension_test')
     vertices, edges = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
     # Call the function
-    tree = create_mesh(vertices, edges)
+    tree = create_mesh(vertices, edges, 'Tree1')
     tree = add_thickness(tree)
     #tree = add_material(tree, color='gray')
-    assign_texture(tree.name, 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg')
+    assign_texture(tree.name, color='gray', texture='smooth')
+    
+    tree = create_mesh(vertices, edges, 'Tree2')
+    tree = add_thickness(tree)
+    #tree = add_material(tree, color='gray')
+    assign_texture(tree.name, color='gray', texture='smooth')
+    
+    tree = create_mesh(vertices, edges, 'Tree3')
+    tree = add_thickness(tree)
+    #tree = add_material(tree, color='gray')
+    assign_texture(tree.name, color='gray', texture='smooth')
