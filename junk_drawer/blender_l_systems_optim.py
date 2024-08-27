@@ -223,7 +223,7 @@ def generate_l_system(n, d, axiom, rules):
     return coordinates, edges
 
 
-def create_axiom_and_rules(dbh=1, lcl=24, c_diam=10, height=20, branch_spacing=2, shape='dimension_test'):
+def create_axiom_and_rules(dbh=1, lcl=10, c_diam=10, height=10, branch_spacing=2, shape='dimension_test'):
     """ Input: Calculated 3-PG parameters that define the dimensions
                of the tree
         Output: L systems parameters to generate trees from.
@@ -243,7 +243,7 @@ def create_axiom_and_rules(dbh=1, lcl=24, c_diam=10, height=20, branch_spacing=2
         axiom = 'FX'
         rules = {'X': 'F[+B][-B]F[+/B][-/B]F[+&B][-&B]X', 'L':'LF','B':'[+L+F]F[-L-F]F[+L+F]F[-L-F]'}
         
-    elif shape == 'round':
+    elif shape == 'old_round':
         # step length 5
         n = 5 # number of iterations
         d = -60
@@ -252,7 +252,7 @@ def create_axiom_and_rules(dbh=1, lcl=24, c_diam=10, height=20, branch_spacing=2
         
     elif shape == 'oval':
         n = 3 # number of iterations (stay at 3, looks prettiest at 4)
-        d = 30
+        d = 60
         axiom = 'FX'
         rules = {'X': 'F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]F[++B][--B][+//B][-//B][+&&B][-&&B]X','F':'FF', 'B':'F[+B]F[-B]F[+B]F[-B]'}
         
@@ -274,6 +274,24 @@ def create_axiom_and_rules(dbh=1, lcl=24, c_diam=10, height=20, branch_spacing=2
         
         axiom = 'TX'
         rules = {'T':trunk, 'B':branches, 'X':branch_iter}
+        
+    elif shape=="round":
+        # step length 5
+        n = 3 # number of iterations
+        d = 60
+        
+        trunk = create_trunk(height)
+        branch = create_branch(c_diam, lcl, shape)
+        
+        branches = create_branches(branch)
+        #branch_iter = 'BF' * lcl
+        branch_iter = ('B' + ('F' * branch_spacing)) * int(lcl / branch_spacing)
+        
+        axiom = 'TX'
+        rules = {'T':trunk, 'B':branches, 'X':branch_iter}
+        
+        #axiom = 'FFFFFA'
+        #rules = {'A': 'FB[F+A]B[F-A]B[F/A]B[F&A]', 'B': 'BB'}
         
     else: # irregular
         pass
@@ -306,9 +324,14 @@ def create_branch(c_diam, lcl, shape):
     
     if shape == 'dimension_test':
         #branch += ('F[+F][-F]' * random.randint(int(c_diam/2)-2, int(c_diam/2)))
-        branch += ('F' * random.randint(int(c_diam/2)-2, int(c_diam/2)+1))
+        branch += ('F' * random.randint(int(c_diam/2)-2, (int(c_diam/2))+1))
         #for _ in range(int(c_diam/4)):
             #branch += 'F[+F]F[-F]'
+            
+    elif shape == 'round':
+        for _ in range(int(c_diam/2)):
+            sub_branch = int(c_diam/2) - _
+            branch += 'F[+' + ('F' * sub_branch) + '][-' + ('F' * sub_branch) + '][/' + ('F' * sub_branch) +'][&' + ('F' * sub_branch) + ']'
     
     #return 'F' * int (c_diam/2)
     return branch
@@ -340,7 +363,7 @@ def put_in_branch(word):
 
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='dimension_test')
+    n, d, axiom, rules = create_axiom_and_rules(shape='oval')
     vertices, edges = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
