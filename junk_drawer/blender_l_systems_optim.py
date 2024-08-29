@@ -364,7 +364,7 @@ def generate_l_system(n, d, axiom, rules):
     return coordinates, edges, leaves
 
 
-def create_axiom_and_rules(dbh=1, lcl=10, c_diam=20, height=10, branch_spacing=2, shape='dimension_test'):
+def create_axiom_and_rules(dbh=1, lcl=10, c_diam=10, height=10, branch_spacing=2, shape='dimension_test'):
     """ Input: Calculated 3-PG parameters that define the dimensions
                of the tree
         Output: L systems parameters to generate trees from.
@@ -613,8 +613,8 @@ if __name__ == '__main__':
 
     # Call the function
     tree = create_mesh(vertices, edges, 'Tree1')
-    dbh = 3
-    tree = add_trunk_thickness(tree, 20, dbh)
-    assign_texture(tree.name, color='red', texture='furrows')
+    dbh = 4
+    tree = add_trunk_thickness(tree, 30, dbh)
+    assign_texture(tree.name, color='white', texture='furrows')
     place_leaves(leaves)
     
