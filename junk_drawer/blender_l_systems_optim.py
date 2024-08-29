@@ -487,7 +487,7 @@ def place_leaves(coordinates):
     
     # Select all mesh objects in the scene
     for obj in bpy.data.objects:
-        if obj.type == 'MESH' and "Sphere" in obj.name:
+        if "Sphere" in obj.name:
             obj.select_set(True)
     
     # Delete selected objects
@@ -589,7 +589,7 @@ def join_leaves_and_tree(name='Tree'):
     
     # Select all mesh objects (assuming the leaves and tree are all meshes)
     for obj in bpy.data.objects:
-        if obj.type == 'MESH':
+        if obj.type == 'MESH' and ("Sphere" in obj.name or name in obj.name):
             obj.select_set(True)
     
     # Join all selected objects
@@ -600,32 +600,18 @@ def join_leaves_and_tree(name='Tree'):
     
     return bpy.data.objects.get(name)
 
-if __name__ == '__main__':
-    # example usage
-    
-    # Input the dimensions (replace this with 3-pg stuff later)
-    dbh = 1.0761190473952216
-    lcl = 15.295402001866439
-    trunk_height = 2.2409858501440074
-    c_diam = 16.31533715124446
-    
-    tree_name = 'Tree'
-    bark_color = 'white'
-    bark_texture = 'furrows'
-    
-    position = (10,10,0)
-    
-    
+
+def build_tree(name, position, dbh, lcl, trunk_height, c_diam, bark_color, bark_texture):
     # create the l-system
     n, d, axiom, rules = create_axiom_and_rules(dbh, lcl, c_diam, trunk_height, shape='leaf_test')
     vertices, edges, leaves = generate_l_system(n, d, axiom, rules)
 
     # make the tree
-    tree = create_mesh(vertices, edges, tree_name)
+    tree = create_mesh(vertices, edges, name)
     tree = add_trunk_thickness(tree, trunk_height+lcl, dbh)
     assign_texture(tree.name, bark_color, bark_texture)
     place_leaves(leaves)
-    tree = join_leaves_and_tree('Tree')
+    tree = join_leaves_and_tree(name)
     
     # Set the 3D cursor to (0, 0, 0)
     bpy.context.scene.cursor.location = (0, 0, 0)
@@ -635,3 +621,20 @@ if __name__ == '__main__':
     
     # Move the object to the specified location
     tree.location = position
+
+if __name__ == '__main__':
+    # example usage
+    
+    # Input the dimensions (replace this with 3-pg stuff later)
+    dbh = 1.0761190473952216
+    lcl = 15.295402001866439
+    trunk_height = 2.2409858501440074
+    c_diam = 16.31533715124446
+
+    bark_color = 'white'
+    bark_texture = 'furrows'
+    
+    build_tree('Tree1', (10, 10, 0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
+    build_tree('Tree2', (0,0,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
+    build_tree('Tree3', (-10, -10,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
+    
