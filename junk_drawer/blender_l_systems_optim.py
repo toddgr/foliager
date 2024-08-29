@@ -613,7 +613,7 @@ def build_tree(name, position, dbh, lcl, trunk_height, c_diam, bark_color, bark_
     place_leaves(leaves)
     tree = join_leaves_and_tree(name)
     
-    # Set the 3D cursor to (0, 0, 0)
+    # Set the 3D cursor to the origin
     bpy.context.scene.cursor.location = (0, 0, 0)
     
     bpy.context.view_layer.objects.active = tree
@@ -622,19 +622,19 @@ def build_tree(name, position, dbh, lcl, trunk_height, c_diam, bark_color, bark_
     # Move the object to the specified location
     tree.location = position
 
+
 if __name__ == '__main__':
     # example usage
-    
     # Input the dimensions (replace this with 3-pg stuff later)
-    dbh = 1.0761190473952216
-    lcl = 15.295402001866439
-    trunk_height = 2.2409858501440074
-    c_diam = 16.31533715124446
+    dbh = 1.58402328222362
+    lcl = 14.234187202330084
+    trunk_height = 5
+    c_diam = 15
 
-    bark_color = 'white'
+    bark_color = 'gray'
     bark_texture = 'furrows'
     
-    build_tree('Tree1', (10, 10, 0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
-    build_tree('Tree2', (0,0,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
-    build_tree('Tree3', (-10, -10,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
-    
+    build_tree('Bigleaf Maple', (0, 0, 0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
+    #build_tree('Tree2', (0,0,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
+    #build_tree('Tree3', (-10, -10,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
+        

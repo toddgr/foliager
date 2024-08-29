@@ -273,7 +273,7 @@ def read_climate_data(file_path):
         for row in reader:
             soil_texture = row['soil_texture']
             soil_water, max_soil_water = approximate_soil_data(soil_texture)
-            print(f"soil_water: {soil_water}, max_soil_water: {max_soil_water}")
+            #print(f"soil_water: {soil_water}, max_soil_water: {max_soil_water}")
 
             month_data.append(Month(
                 site_tmax = float(row['tmax']),
@@ -417,11 +417,11 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
                 gac = (age0 + inc_t / 12) / species.tc
             else:
                 gac = 1.
-            print(f"GAC: {gac}")
+            #print(f"GAC: {gac}")
             
             # light absorption --> absorption photosynthetically active radiation (PAR)
             # Often called o/pa
-            print(f"e_exp = (-{species.k} *  {l} / {gac})")
+            #print(f"e_exp = (-{species.k} *  {l} / {gac})")
             e_exp = (-species.k * l)/gac
             par = (1. - pow(E, e_exp)) * 2.3 * gac * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
         
@@ -482,7 +482,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             # setting current = to last month's
             curr_wf = last_wf
             curr_ws = last_ws
-            print(f"curr_ws = last_ws: {last_ws}")
+            #print(f"curr_ws = last_ws: {last_ws}")
             curr_wr = last_wr
 
             #print(f"curr_ws (part 1): {curr_ws}")
@@ -502,7 +502,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
                 last_wf = curr_wf
             if curr_ws > 0.:
                 last_ws = curr_ws
-            print(f"last_ws = curr_ws (cannot be negative): {last_ws}")
+            #print(f"last_ws = curr_ws (cannot be negative): {last_ws}")
             if curr_wr > 0.:
                 last_wr = curr_wr
 
@@ -544,10 +544,10 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             nvbh = species.nvbh
 
             # calculating b from mean individual stem mass (inversion of A65 of user manual)
-            print(f"last_ws: {last_ws}, n: {n}")
+            #print(f"last_ws: {last_ws}, n: {n}")
             iws = last_ws / n # individual stem mass
             b = pow(iws/aws, (1.0/nws)) *100
-            print(f"b: {b}, iws: {iws}, aws: {aws}, nws: {nws}")
+            #print(f"b: {b}, iws: {iws}, aws: {aws}, nws: {nws}")
 
             # bias correction to adjust b
             # TODO implement later?
@@ -571,10 +571,10 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
             total_height = h # mean tree height
             live_crown_length = hl # distance between the top live foliage and the lowest live foliage
-            print(f"BA: {ba}")
+            #print(f"BA: {ba}")
             dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
             # TODO: approximate masting cycle here
-            height_dbh_list.append([inc_t, species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
+            height_dbh_list.append([inc_t, species.name, species.q_bark_texture, species.q_bark_color, total_height, dbh, live_crown_length, crown_diameter])
 
         # setting final biomass values
         wf = last_wf
@@ -607,17 +607,17 @@ def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
 def randomize_tree_factors(species):
     i = 0
     # Randomized offsets -- different for each tree
-    print(f"=====SPECIES:==== {species} \n ==== ")
-    factor_height = float(species[3]) / 4
+    #print(f"=====SPECIES:==== {species} \n ==== ")
+    factor_height = float(species[4]) / 4
     random_height_offset = random.uniform(-factor_height, factor_height)
 
-    factor_dbh = float(species[4]) / 4
+    factor_dbh = float(species[5]) / 4
     random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
     
-    factor_lcl = float(species[5]) / 4
+    factor_lcl = float(species[6]) / 4
     random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
     
-    factor_c_diam = float(species[6]) / 4
+    factor_c_diam = float(species[7]) / 4
     random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
     i += 1
 
@@ -635,7 +635,7 @@ def create_tree_list(tree_coordinates, tree_species, t):
         Then, once ALL of the data has been written for all the trees at all the times, then we can write
         it in CSV form, where each tree for each line is written in chronological order.
     """
-    tree_dict = {'tree_key':[['t', 'name', 'q_tree_form', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
+    tree_dict = {'tree_key':[['t', 'name', 'bark_texture', 'bark_color', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
     key_counter = -1
     is_dead = False
     # TODO: create a parameter estimation for this
@@ -647,9 +647,9 @@ def create_tree_list(tree_coordinates, tree_species, t):
         key_counter += 1
         tree_key = create_tree_key(key_counter)
         tree_dict[tree_key] = []
-
-        # this is wrong        
+       
         for sp_tree in tree_species:
+            #print(f"sp_tree: {sp_tree}. tree_species:{tree_species}")
             create_species_information(sp_tree, tree_dict, masting_cycle, tree, tree_key)
 
     return tree_dict
@@ -661,40 +661,36 @@ def create_species_information(species, tree_dict, masting_cycle, tree, tree_key
         interval that it is not dead
     """
     name = tree[0]
-    inc_t=0
+    inc_t=60
 
     random_factors = randomize_tree_factors(species) # [height, dbh, lcl, c_diam]
 
-    print(f"random factors: {random_factors}")
-    #for species in species: # for each species of tree
-    print(f"tree_species: {species}")
-    #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
+    #t, species.name, species.bark_texture, species.bark_color, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
     species_name = species[1]
     if name == species_name:
-        found = add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
+        add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
         inc_t += 1
         age += 1
-    #if not found:
-        #print(f"Uh oh! Tree data for {name} could not be found.")
 
 
 def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t, is_dead=False):
     found = False
     stage = determine_tree_stage(age)
-    tree_form = species[2]
+    bark_texture = species[2]
+    bark_color = species[3]
 
     if inc_t == species[0]: # if it's the correct t value we're looking for
         # if inc_t > 0 and not tree_dict[tree_key][inc_t-1][9]:# If the previous t value of the tree is dead
         #     return #TODO fix
 
         # assign slightly randomized values to the height and dbh
-        new_height = float(species[3]) + random_factors[0]
-        new_dbh = float(species[4]) + random_factors[1]
-        new_lcl = float(species[5]) + random_factors[2]
-        new_c_diam = float(species[6]) + random_factors[3]
+        new_height = float(species[4]) + random_factors[0]
+        new_dbh = float(species[5]) + random_factors[1]
+        new_lcl = float(species[6]) + random_factors[2]
+        new_c_diam = float(species[7]) + random_factors[3]
         
         # append it to the entry
-        tree_entry = [inc_t, name, tree_form, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle, age, stage]
+        tree_entry = [inc_t, name, bark_texture, bark_color, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle, age, stage]
         tree_dict[tree_key].append(tree_entry)
 
         # check if it's the tree's masting period
@@ -783,11 +779,11 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
     pass
 
 
-def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=12):
+def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=60):
 
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 1)
-    print(f"height_dbh: {height_dbh}")
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
+    #print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
     
