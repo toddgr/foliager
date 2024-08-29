@@ -1,6 +1,8 @@
 import numpy as np
 import random
 import bpy
+import bmesh
+import math
 
 def create_mesh(vertices, edges, name="Test_Tree"):
     """
@@ -35,7 +37,7 @@ def create_mesh(vertices, edges, name="Test_Tree"):
 
     return obj
 
-def add_thickness(obj, thickness=0.1):
+def add_thickness(obj, thickness=1):
     """
         Once we have our coordinates in blender space, 
         we can start to model the tree.
@@ -54,25 +56,27 @@ def add_thickness(obj, thickness=0.1):
     # Enter Edit Mode to adjust vertex radii
     bpy.ops.object.mode_set(mode='EDIT')
     
-    #  ===== insert trunk and branch scaling stuff here =====
+    # Select all vertices
+    bpy.ops.mesh.select_all(action='SELECT')
     
-    # Return to Object Mode
-    bpy.ops.object.mode_set(mode='OBJECT')
+    # # Adjust the radius of the selected vertices
+    # bpy.ops.transform.resize(value=(thickness, thickness, thickness))
     
-
-    # Smooth out the tree
-    bpy.ops.object.modifier_add(type='SUBSURF')
-    bpy.context.object.modifiers["Subdivision"].levels = 1
+    # # Return to Object Mode
+    # bpy.ops.object.mode_set(mode='OBJECT')
     
-    # Apply the modifiers
-    bpy.ops.object.modifier_apply(modifier="Skin")
-    bpy.ops.object.modifier_apply(modifier="Subdivision")
+    # # Smooth out the tree
+    # bpy.ops.object.modifier_add(type='SUBSURF')
+    # bpy.context.object.modifiers["Subdivision"].levels = 1
     
-    # Apply smooth shading
-    bpy.ops.object.shade_smooth()
+    # # Apply the modifiers
+    # bpy.ops.object.modifier_apply(modifier="Skin")
+    # bpy.ops.object.modifier_apply(modifier="Subdivision")
+    
+    # # Apply smooth shading
+    # bpy.ops.object.shade_smooth()
 
     return obj
-
 
 def add_material(obj, color='brown', texture='smooth', material_name="defaultMat"):
     """ Applies a material to the new tree.
@@ -134,14 +138,15 @@ def assign_texture(obj_name, color='brown', texture='smooth'):
     """
     mix_factor = 1.
 
+    #TODO Add more specific textures when trunk thickness is implemented    
     texture_paths = {
-        'smooth': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
-        'lenticels': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
-        'furrows': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
-        'ridges': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
-        'cracks': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
-        'scales': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
-        'strips': 'C:/Users/Grace/Downloads/1492ba95031866e6b95840bc80669653.jpg',
+        'smooth': 'C:/Users/Grace/Downloads/texture-smooth.png',
+        'lenticels': 'C:/Users/Grace/Downloads/texture-smooth.png',
+        'furrows': 'C:/Users/Grace/Downloads/texture-furrows.jpg',
+        'ridges': 'C:/Users/Grace/Downloads/texture-furrows.jpg',
+        'cracks': 'C:/Users/Grace/Downloads/texture-furrows.jpg',
+        'scales': 'C:/Users/Grace/Downloads/texture-furrows.jpg',
+        'strips': 'C:/Users/Grace/Downloads/texture-furrows.jpg',
     }
 
     color_mappings = {
@@ -277,6 +282,7 @@ def plot_l_system(angle_deg, string):
     
     coordinates = [tuple(position)]
     coordinates_map = {tuple(position): 0}
+    leaves = []
     edges = []
     stack = []
     current_index = 0
@@ -310,9 +316,11 @@ def plot_l_system(angle_deg, string):
             stack.append((position, direction_index, directions.copy()))
         elif char == ']':  # end of new branch
             position, direction_index, directions = stack.pop()
+        elif char == '*': # leaf
+            leaves.append(position)
 
-    print(coordinates)
-    return coordinates, edges
+    print(leaves)
+    return coordinates, edges, leaves
 
 
 def generate_l_system(n, d, axiom, rules):
@@ -351,9 +359,9 @@ def generate_l_system(n, d, axiom, rules):
 
     # Interpret each instruction into coordinates and edges
     print("Creating coordinates...")
-    coordinates, edges = plot_l_system(d, string)
+    coordinates, edges, leaves = plot_l_system(d, string)
 
-    return coordinates, edges
+    return coordinates, edges, leaves
 
 
 def create_axiom_and_rules(dbh=1, lcl=10, c_diam=20, height=10, branch_spacing=2, shape='dimension_test'):
@@ -395,7 +403,7 @@ def create_axiom_and_rules(dbh=1, lcl=10, c_diam=20, height=10, branch_spacing=2
         axiom = 'X'
         rules = {'X': '[+B]F[-B]F[+/B]F[-/B]F[+&B]F[-&B]X', 'L':'LF','B':'[L+F]F[L-F]F[L+F]F[L-F]'}
         
-    elif shape == 'dimension_test':
+    elif shape == 'dimension_test' or shape == 'leaf_test':
         n = 2 # 1 gets the trunk, 2 gets the branches 
         d = 45
         trunk = create_trunk(height)
@@ -460,6 +468,12 @@ def create_branch(c_diam, lcl, shape):
         branch += ('F' * random.randint(int(c_diam/2)-2, (int(c_diam/2))+1))
         #for _ in range(int(c_diam/4)):
             #branch += 'F[+F]F[-F]'
+
+    if shape == 'leaf_test':
+        #branch += ('F[+F][-F]' * random.randint(int(c_diam/2)-2, int(c_diam/2)))
+        branch += ('F' * random.randint(int(c_diam/2)-2, (int(c_diam/2))+1)) + '*'
+        #for _ in range(int(c_diam/4)):
+            #branch += 'F[+F]F[-F]'
             
     elif shape == 'round':
         for _ in range(int(c_diam/2)):
@@ -493,25 +507,114 @@ def add_yaw(word, sign='+'):
 def put_in_branch(word):
     return '[' + word + ']'
 
+def place_leaves(coordinates):
+    """
+    Takes in a list of coordinates, places leaves in those positions.
+    """
+    radius = 1
+    
+    # Deselect all objects first
+    bpy.ops.object.select_all(action='DESELECT')
+    
+    # Select all mesh objects in the scene
+    for obj in bpy.data.objects:
+        if obj.type == 'MESH' and "Sphere" in obj.name:
+            obj.select_set(True)
+    
+    # Delete selected objects
+    bpy.ops.object.delete()
+    
+    for coords in coordinates:
+        x, y, z = coords
+        
+        # Create a sphere
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=(x, y, z))
+        
+        # (O
+
+
+def add_trunk_thickness(obj, total_height, thickness=1):
+    """
+    This function turns lines into solid objects by adding a Skin Modifier and
+    resizing trunk to match 3-PG dimensions.
+    """
+    # Select the object
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    
+    # Apply the Skin Modifier
+    bpy.ops.object.modifier_add(type='SKIN')
+    
+    # Access the Skin Modifier
+    skin_modifier = obj.modifiers["Skin"]
+    
+    # Enter Edit Mode to adjust vertex radii
+    bpy.ops.object.mode_set(mode='EDIT')
+    
+    # Get the BMesh from the object
+    bm = bmesh.from_edit_mesh(obj.data)
+    
+    # Deselect all vertices first
+    for v in bm.verts:
+        v.select_set(False)
+    
+    # Select vertices with x and y coordinates of 0
+    for v in bm.verts:
+        if abs(v.co.x) < 1e-6 and abs(v.co.y) < 1e-6 and abs(v.co.z) < total_height - (total_height / 4):
+            v.select_set(True)
+    
+    # Update the mesh to apply the selection
+    bmesh.update_edit_mesh(obj.data)
+    
+    # Resize the selected vertices
+    bpy.ops.transform.skin_resize(
+        value=(thickness, thickness, thickness),
+        orient_type='GLOBAL',
+        orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
+        orient_matrix_type='GLOBAL',
+        mirror=True,
+        use_proportional_edit=True,
+        proportional_edit_falloff='INVERSE_SQUARE',
+        proportional_size=thickness/2,
+        use_proportional_connected=False,
+        use_proportional_projected=False,
+        snap=False,
+        snap_elements={'INCREMENT'},
+        use_snap_project=False,
+        snap_target='CLOSEST',
+        use_snap_self=True,
+        use_snap_edit=True,
+        use_snap_nonedit=True,
+        use_snap_selectable=False
+    )
+    
+    # Return to Object Mode
+    bpy.ops.object.mode_set(mode='OBJECT')
+    
+    # Smooth out the tree
+    bpy.ops.object.modifier_add(type='SUBSURF')
+    bpy.context.object.modifiers["Subdivision"].levels = 1
+    
+    # Apply the modifiers
+    bpy.ops.object.modifier_apply(modifier="Skin")
+    bpy.ops.object.modifier_apply(modifier="Subdivision")
+    
+    # Apply smooth shading
+    bpy.ops.object.shade_smooth()
+
+    return obj
+
 
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='dimension_test')
-    vertices, edges = generate_l_system(n, d, axiom, rules)
+    n, d, axiom, rules = create_axiom_and_rules(shape='leaf_test')
+    vertices, edges, leaves = generate_l_system(n, d, axiom, rules)
     #plot_3d_coordinates_and_edges(vertices, edges)
 
     # Call the function
     tree = create_mesh(vertices, edges, 'Tree1')
-    tree = add_thickness(tree)
-    #tree = add_material(tree, color='gray')
-    assign_texture(tree.name, color='gray', texture='smooth')
+    dbh = 3
+    tree = add_trunk_thickness(tree, 20, dbh)
+    assign_texture(tree.name, color='red', texture='furrows')
+    place_leaves(leaves)
     
-    tree = create_mesh(vertices, edges, 'Tree2')
-    tree = add_thickness(tree)
-    #tree = add_material(tree, color='gray')
-    assign_texture(tree.name, color='gray', texture='smooth')
-    
-    tree = create_mesh(vertices, edges, 'Tree3')
-    tree = add_thickness(tree)
-    #tree = add_material(tree, color='gray')
-    assign_texture(tree.name, color='gray', texture='smooth')
