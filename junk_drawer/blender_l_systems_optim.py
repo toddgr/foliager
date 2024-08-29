@@ -78,67 +78,17 @@ def add_thickness(obj, thickness=1):
 
     return obj
 
-def add_material(obj, color='brown', texture='smooth', material_name="defaultMat"):
-    """ Applies a material to the new tree.
-        Possible textures: smooth/lenticels/furrows/ridges/cracks/scales/strips
-        Possible colors: gray/white/red/brown"""
-
-    # Select the object
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
-
-    # Create a new material
-    material = bpy.data.materials.new(name="Material")
-    material.use_nodes = True  # Enable nodes for material (optional)
-    
-    
-    #TODO Have some slight randomization of the color from tree to tree, even if the color is specified
-    # Set the material color
-    if color == 'gray':
-        nodes = material.node_tree.nodes
-        bsdf_node = nodes.get('Principled BSDF')
-        if bsdf_node:
-            bsdf_node.inputs['Base Color'].default_value = (0.231, 0.22, 0.165, 1)
-    elif color == 'white':
-        nodes = material.node_tree.nodes
-        bsdf_node = nodes.get('Principled BSDF')
-        if bsdf_node:
-            bsdf_node.inputs['Base Color'].default_value = (0.831, 0.765, 0.671, 1)
-    elif color == 'red':
-        nodes = material.node_tree.nodes
-        bsdf_node = nodes.get('Principled BSDF')
-        if bsdf_node:
-            bsdf_node.inputs['Base Color'].default_value = (0.451, 0.094, 0.024, 1)
-    else:
-        # might be a combination of more than one color, address later.
-        # for now, make brown
-        color = 'brown'
-        
-        nodes = material.node_tree.nodes
-        bsdf_node = nodes.get('Principled BSDF')
-        if bsdf_node:
-            bsdf_node.inputs['Base Color'].default_value = (0.259, 0.149, 0.008, 1)  # Red color with full opacity
-    
-    #=====================================
-    
-    # Assign the material to the mesh
-    if len(obj.data.materials) > 0:
-        obj.data.materials[0] = material
-    else:
-        obj.data.materials.append(material)
-
-    return obj
 
 
-
-def assign_texture(obj_name, color='brown', texture='smooth'):
+def assign_texture(obj_name, color='brown', texture=None):
     """ Assigns the bark texture to the tree with smart UV projection
-        Input: tree object name, /path/to/image
-        Output: tree object with new texture
+        Input: tree object name, /path/to/image/texture
+        Output: tree object with new color/texture/both
     """
     mix_factor = 1.
 
     #TODO Add more specific textures when trunk thickness is implemented    
+        # Texture paths for different texture types
     texture_paths = {
         'smooth': 'C:/Users/Grace/Downloads/texture-smooth.png',
         'lenticels': 'C:/Users/Grace/Downloads/texture-smooth.png',
@@ -149,12 +99,13 @@ def assign_texture(obj_name, color='brown', texture='smooth'):
         'strips': 'C:/Users/Grace/Downloads/texture-furrows.jpg',
     }
 
+    # Color mappings for different color names
     color_mappings = {
         'gray': (0.231, 0.22, 0.165, 1),
         'white': (0.831, 0.765, 0.671, 1),
         'red': (0.451, 0.094, 0.024, 1),
         'brown': (0.259, 0.149, 0.008, 1),  # Default color
-        'green' :(0., 1., 0., 1)
+        'green': (0.047, 0.522, 0.075, 1) # Leaf color
     }
     
     # Get the object
@@ -171,14 +122,12 @@ def assign_texture(obj_name, color='brown', texture='smooth'):
     bpy.ops.mesh.select_all(action='SELECT')
     
     # Apply Smart UV Project
-    # Angle limit --> the higher it is, the more face grouping will happen
-    # Island margin --> spacing/padding between the face groupings
     bpy.ops.uv.smart_project(angle_limit=75.0, island_margin=0.0)
     
     # Switch back to object mode
     bpy.ops.object.mode_set(mode='OBJECT')
     
-    # Ensure the object has a material
+    # Check if the object has a material
     if not obj.data.materials:
         mat = bpy.data.materials.new(name="Material")
         obj.data.materials.append(mat)
@@ -189,53 +138,71 @@ def assign_texture(obj_name, color='brown', texture='smooth'):
     mat.use_nodes = True
     nodes = mat.node_tree.nodes
     
-    # Clear existing nodes
+    # Clear existing nodes (if any)
     for node in nodes:
         nodes.remove(node)
     
-    # Add necessary nodes
-    tex_image_node = nodes.new(type='ShaderNodeTexImage')
-    mix_rgb_node = nodes.new(type='ShaderNodeMixRGB')
-    rgb_node = nodes.new(type='ShaderNodeRGB')
+    # Add nodes for BSDF and output
     bsdf_node = nodes.new(type='ShaderNodeBsdfPrincipled')
     output_node = nodes.new(type='ShaderNodeOutputMaterial')
     
-    # Set node positions (just to help with organization)
-    tex_image_node.location = (-600, 300)
-    mix_rgb_node.location = (-300, 300)
-    rgb_node.location = (-600, 100)
+    # Set node positions 
+    # (just to help with organization in case we want to use the UI to change it)
     bsdf_node.location = (0, 300)
     output_node.location = (300, 300)
     
-    # Configure the RGB node
-    rgba_color = color_mappings.get(color, color_mappings[color])
-    # Randomize the RGB values a little bit
-    variation=0.05
-    rgba_color = (
-        max(0, min(1, rgba_color[0] + random.uniform(-variation, variation))),
-        max(0, min(1, rgba_color[1] + random.uniform(-variation, variation))),
-        max(0, min(1, rgba_color[2] + random.uniform(-variation, variation))),
-        rgba_color[3]  # Alpha value remains unchanged
-    )
-    rgb_node.outputs['Color'].default_value = rgba_color
+    # Set color or texture (or both)
+    if texture and texture in texture_paths:
+        tex_image_node = nodes.new(type='ShaderNodeTexImage')
+        mix_rgb_node = nodes.new(type='ShaderNodeMixRGB')
+        rgb_node = nodes.new(type='ShaderNodeRGB')
+        
+        tex_image_node.location = (-600, 300)
+        mix_rgb_node.location = (-300, 300)
+        rgb_node.location = (-600, 100)
+        
+        # Configure the RGB node
+        rgba_color = color_mappings.get(color, color_mappings[color])
+        color_variation = 0.05
+        rgba_color = (
+            max(0, min(1, rgba_color[0] + random.uniform(-color_variation, color_variation))),
+            max(0, min(1, rgba_color[1] + random.uniform(-color_variation, color_variation))),
+            max(0, min(1, rgba_color[2] + random.uniform(-color_variation, color_variation))),
+            rgba_color[3]  # Alpha value remains unchanged
+        )
+        rgb_node.outputs['Color'].default_value = rgba_color
+        
+        # Configure the MixRGB node
+        mix_rgb_node.inputs['Fac'].default_value = mix_factor
+        mix_rgb_node.blend_type = 'MULTIPLY'  # Or any other blend type you want
+        
+        # Link the nodes
+        links = mat.node_tree.links
+        links.new(tex_image_node.outputs['Color'], mix_rgb_node.inputs['Color1'])
+        links.new(rgb_node.outputs['Color'], mix_rgb_node.inputs['Color2'])
+        links.new(mix_rgb_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+        links.new(bsdf_node.outputs['BSDF'], output_node.inputs['Surface'])
+        
+        # Load the image and assign it to the texture node
+        image_path = texture_paths[texture]    
+        image = bpy.data.images.load(image_path)
+        tex_image_node.image = image
     
-    # Configure the MixRGB node
-    mix_rgb_node.inputs['Fac'].default_value = mix_factor  # Set the mix factor
-    mix_rgb_node.blend_type = 'MULTIPLY'  # Testing -- can change this to 'ADD', 'MULTIPLY', etc.
-
-    # Link the nodes
-    links = mat.node_tree.links
-    links.new(tex_image_node.outputs['Color'], mix_rgb_node.inputs['Color1'])
-    links.new(rgb_node.outputs['Color'], mix_rgb_node.inputs['Color2'])
-    links.new(mix_rgb_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+    else:
+        # No texture, just use the default color (brown)
+        links = mat.node_tree.links
+        rgba_color = color_mappings.get(color, color_mappings[color])
+        color_variation = 0.05
+        rgba_color = (
+            max(0, min(1, rgba_color[0] + random.uniform(-color_variation, color_variation))),
+            max(0, min(1, rgba_color[1] + random.uniform(-color_variation, color_variation))),
+            max(0, min(1, rgba_color[2] + random.uniform(-color_variation, color_variation))),
+            rgba_color[3]  # Alpha value remains unchanged
+        )
+        bsdf_node.inputs['Base Color'].default_value = rgba_color
+    
+    # Final link to output
     links.new(bsdf_node.outputs['BSDF'], output_node.inputs['Surface'])
-    
-    # Load the image and assign it to the texture node
-    image_path = texture_paths[texture]    
-    image = bpy.data.images.load(image_path)
-    tex_image_node.image = image
-    
-    print(f"Texture '{image.name}' assigned and Smart UV Project applied to object '{obj_name}'.")
 
 
 def rotate_vector(vector, axis, angle_rad):
