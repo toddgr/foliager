@@ -782,7 +782,7 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
 def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=12):
 
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
+    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, 1)
     print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
