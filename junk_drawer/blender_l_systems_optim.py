@@ -597,6 +597,8 @@ def join_leaves_and_tree(name='Tree'):
     
     # Rename the active object (which is the result of the join operation)
     bpy.context.object.name = name
+    
+    return bpy.data.objects.get(name)
 
 if __name__ == '__main__':
     # example usage
@@ -611,7 +613,7 @@ if __name__ == '__main__':
     bark_color = 'white'
     bark_texture = 'furrows'
     
-    position = (1,2)
+    position = (10,10,0)
     
     
     # create the l-system
@@ -623,5 +625,13 @@ if __name__ == '__main__':
     tree = add_trunk_thickness(tree, trunk_height+lcl, dbh)
     assign_texture(tree.name, bark_color, bark_texture)
     place_leaves(leaves)
-    join_leaves_and_tree('Tree')
+    tree = join_leaves_and_tree('Tree')
     
+    # Set the 3D cursor to (0, 0, 0)
+    bpy.context.scene.cursor.location = (0, 0, 0)
+    
+    bpy.context.view_layer.objects.active = tree
+    bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='BOUNDS')
+    
+    # Move the object to the specified location
+    tree.location = position
