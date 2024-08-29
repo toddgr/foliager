@@ -153,7 +153,8 @@ def assign_texture(obj_name, color='brown', texture='smooth'):
         'gray': (0.231, 0.22, 0.165, 1),
         'white': (0.831, 0.765, 0.671, 1),
         'red': (0.451, 0.094, 0.024, 1),
-        'brown': (0.259, 0.149, 0.008, 1)  # Default color
+        'brown': (0.259, 0.149, 0.008, 1),  # Default color
+        'green' :(0., 1., 0., 1)
     }
     
     # Get the object
@@ -364,7 +365,7 @@ def generate_l_system(n, d, axiom, rules):
     return coordinates, edges, leaves
 
 
-def create_axiom_and_rules(dbh=1, lcl=10, c_diam=10, height=10, branch_spacing=2, shape='dimension_test'):
+def create_axiom_and_rules(dbh, lcl, c_diam, height, branch_spacing=2, shape='dimension_test'):
     """ Input: Calculated 3-PG parameters that define the dimensions
                of the tree
         Output: L systems parameters to generate trees from.
@@ -372,10 +373,10 @@ def create_axiom_and_rules(dbh=1, lcl=10, c_diam=10, height=10, branch_spacing=2
         Branch spacing has to be evenly divided by the lcl to work 
     """
 
-    # height will determine
-    # dbh will determine
-    # lcl will determine
-    # c_diam will determine
+    # height will determine the height of the trunk
+    # dbh will determine the diameter of the trunk
+    # lcl will determine the height of the live crown
+    # c_diam will determine the diameter of the live crown
 
     # each tree shape will have their own axiom rules to follow
     if shape == 'cone': 
@@ -445,7 +446,7 @@ def create_trunk(height):
         Takes in height of the trunk of a tree, returns the string
         for L system to create the proper trunk size
     """
-    return 'F' * height
+    return 'F' * int(height)
 
 
 def create_branches(branch):
@@ -507,6 +508,7 @@ def add_yaw(word, sign='+'):
 def put_in_branch(word):
     return '[' + word + ']'
 
+
 def place_leaves(coordinates):
     """
     Takes in a list of coordinates, places leaves in those positions.
@@ -527,11 +529,16 @@ def place_leaves(coordinates):
     for coords in coordinates:
         x, y, z = coords
         
-        # Create a sphere
+        # Create a sphere at the given coordinates
         bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=(x, y, z))
         
-        # (O
-
+        # Get the reference to the newly created object
+        obj = bpy.context.object
+        assign_texture(obj.name, 'green')
+        
+    # Apply smooth shading
+    bpy.ops.object.shade_smooth()
+        
 
 def add_trunk_thickness(obj, total_height, thickness=1):
     """
@@ -605,16 +612,49 @@ def add_trunk_thickness(obj, total_height, thickness=1):
     return obj
 
 
+def join_leaves_and_tree(name='Tree'):
+    """ 
+        Joins together all the leaves and the tree and renames it accordingly
+    """
+    
+    # Deselect all objects first
+    bpy.ops.object.select_all(action='DESELECT')
+    
+    # Select all mesh objects (assuming the leaves and tree are all meshes)
+    for obj in bpy.data.objects:
+        if obj.type == 'MESH':
+            obj.select_set(True)
+    
+    # Join all selected objects
+    bpy.ops.object.join()
+    
+    # Rename the active object (which is the result of the join operation)
+    bpy.context.object.name = name
+
 if __name__ == '__main__':
     # example usage
-    n, d, axiom, rules = create_axiom_and_rules(shape='leaf_test')
+    
+    # Input the dimensions (replace this with 3-pg stuff later)
+    dbh = 1.0761190473952216
+    lcl = 15.295402001866439
+    trunk_height = 2.2409858501440074
+    c_diam = 16.31533715124446
+    
+    tree_name = 'Tree'
+    bark_color = 'white'
+    bark_texture = 'furrows'
+    
+    position = (1,2)
+    
+    
+    # create the l-system
+    n, d, axiom, rules = create_axiom_and_rules(dbh, lcl, c_diam, trunk_height, shape='leaf_test')
     vertices, edges, leaves = generate_l_system(n, d, axiom, rules)
-    #plot_3d_coordinates_and_edges(vertices, edges)
 
-    # Call the function
-    tree = create_mesh(vertices, edges, 'Tree1')
-    dbh = 4
-    tree = add_trunk_thickness(tree, 30, dbh)
-    assign_texture(tree.name, color='white', texture='furrows')
+    # make the tree
+    tree = create_mesh(vertices, edges, tree_name)
+    tree = add_trunk_thickness(tree, trunk_height+lcl, dbh)
+    assign_texture(tree.name, bark_color, bark_texture)
     place_leaves(leaves)
+    join_leaves_and_tree('Tree')
     
