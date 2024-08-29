@@ -624,7 +624,7 @@ def randomize_tree_factors(species):
     return [random_height_offset, random_dbh_offset, random_lcl_offset, random_c_diam_offset]
     
 
-def create_tree_list(tree_coordinates, tree_species,t):
+def create_tree_list(tree_coordinates, tree_species, t):
     """ Creates the list/dict of tree information for every single tree in the forest. 
         Taking it out of the 3PG function for better readability and also to isolate the 
         data structure so I can mess with it a little bit.
@@ -649,12 +649,13 @@ def create_tree_list(tree_coordinates, tree_species,t):
         tree_dict[tree_key] = []
 
         # this is wrong        
-        create_species_information(tree_species, tree_dict, masting_cycle, tree, tree_key)
+        for sp_tree in tree_species:
+            create_species_information(sp_tree, tree_dict, masting_cycle, tree, tree_key)
 
     return tree_dict
 
 
-def create_species_information(tree_species, tree_dict, masting_cycle, tree, tree_key, age=0):
+def create_species_information(species, tree_dict, masting_cycle, tree, tree_key, age=0):
     """
         Finds the specific tree's species information and assigns it to the tree for each time
         interval that it is not dead
@@ -662,20 +663,23 @@ def create_species_information(tree_species, tree_dict, masting_cycle, tree, tre
     name = tree[0]
     inc_t=0
 
-    random_factors = randomize_tree_factors(tree_species) # [height, dbh, lcl, c_diam]
+    random_factors = randomize_tree_factors(species) # [height, dbh, lcl, c_diam]
 
-    for species in tree_species: # for each species of tree
-        #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
-        species_name = species[1]
-        if name == species_name:
-            found = add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
-            inc_t += 1
-            age += 1
-    if not found:
-        print(f"Uh oh! Tree data for {name} could not be found.")
+    print(f"random factors: {random_factors}")
+    #for species in species: # for each species of tree
+    print(f"tree_species: {species}")
+    #t, species.name, species.q_tree_form, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
+    species_name = species[1]
+    if name == species_name:
+        found = add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
+        inc_t += 1
+        age += 1
+    #if not found:
+        #print(f"Uh oh! Tree data for {name} could not be found.")
 
 
 def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t, is_dead=False):
+    found = False
     stage = determine_tree_stage(age)
     tree_form = species[2]
 
@@ -696,8 +700,8 @@ def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, m
         # check if it's the tree's masting period
             # if so, spawn a random number of trees
             # TODO double check the logic of this
-        if inc_t % masting_cycle == 0:
-            spawn_some_trees(species, tree_key, tree_entry, tree_dict)
+        #if inc_t % masting_cycle == 0:
+            #spawn_some_trees(species, tree_key, tree_entry, tree_dict)
     
         found = True
     
