@@ -53,7 +53,7 @@ co2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken fr
 
 # VPD 
 d = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
-# kd = douglasfir.kd # defines the stomatal response to VPD
+# kd defines the stomatal response to VPD
 
 """
     ==================== STAND DATA ========================
