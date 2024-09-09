@@ -68,9 +68,6 @@ init_ws = 1. #20.
 init_b = 0. #9 # initial dbh-- was 18
 init_sw = 0. #200   # initial available soil water
 
-#irr = MYSTERY # irrigation (mm/month).
-#et = MYSTERY # evapotranspiration (mm/month).
-
 # general for GPP
 fr = 1 # fertility rating, ranges from 0 to 1
 
@@ -78,63 +75,32 @@ age0 = 5 # this is the stand's age in years at t = 0
 start_month = 5 # this is the number of the month in which the simulation is beginning
 start_year = 2024 # this is the year the simulation was started. Used for prints only?
 
-physmod_method = 0 # this denotes the method used to calculate physmod. 0 = combo 1= limiting
-agemod_method = 0 # 0 = agemod not used, 1 = agemod used
+#physmod_method = 0 # this denotes the method used to calculate physmod. 0 = combo 1= limiting
+#agemod_method = 0 # 0 = agemod not used, 1 = agemod used
 
 cr = 0.47 # conversion ratio for making GPP into NPP
 
 """
     ==================== 3PG OUTPUTS ========================
-n = MYSTERY # trees per square hectare
-#gpp = MYSTERY # gross primary production
-#npp = MYSTERY # net primary production
-#wf = MYSTERY # foliage biomass (Mg/ha which is megagramme/hectare, a megagramme is a tonne)
-#wr = MYSTERY # root biomass (Mg/ha)
-#ws = MYSTERY # stem biomass (Mg/ha)
-#par = MYSTERY # absorption of photosynthetically active radiation
-#mean_stem_mass = MYSTERY # this comes from the mortality calculations? We think
-#live_crown_length = MYSTERY # length of live portion of tree foliage
-#crown_base_height = MYSTERY # how far off ground does the live crown start
-b = MYSTERY # mean diameter at breast height, aks B or DBH (cm)
-h = 8 # mean total tree height, aka H (m)
-hl = MYSTERY # live crown length (m)
-k = SPECIES_SPECIFIC # crown diameter (m)
-ba = MYSTERY # basal area (m^2)
-vs = MYSTERY # stand volume (m^3/ha)
-gac = MYSTERY # proportion of ground area covered by the canopy
+n = trees per square hectare
+gpp = gross primary production
+npp = net primary production
+wf = foliage biomass (Mg/ha which is megagramme/hectare, a megagramme is a tonne)
+wr = root biomass (Mg/ha)
+ws = stem biomass (Mg/ha)
+par = absorption of photosynthetically active radiation
+mean_stem_mass comes from the mortality calculations? We think
+live_crown_length = length of live portion of tree foliage
+crown_base_height = how far off ground does the live crown start
+b =  mean diameter at breast height, aks B or DBH (cm)
+h = mean total tree height, aka H (m)
+hl = live crown length (m)
+k = crown diameter (m)
+ba = basal area (m^2)
+vs = stand volume (m^3/ha)
+gac = proportion of ground area covered by the canopy
 """
 
-def read_climate_data_original(filename):
-    """
-        Reads in a CSV file that contains data on the monthdata
-    """
-    month_data = []  # Assuming monthdata is a list of objects with attributes site_tmax, site_tmin, etc.
-    init_month_data = []  # Assuming initmonthdata is also a list of objects with similar attributes
-
-    with open(filename, 'r') as fp:
-        i = 1
-        for line in fp:
-            fields = line.strip().split(',')
-
-            month_data.append(Month(
-                site_tmax=float(fields[0]),
-                site_tmin=float(fields[1]),
-                site_rain=float(fields[2]),
-                site_solar_rad=float(fields[3]),
-                site_frost_days=float(fields[4])
-            ))
-
-            init_month_data.append(Month(
-                site_tmax=month_data[i].site_tmax,
-                site_tmin=month_data[i].site_tmin,
-                site_rain=month_data[i].site_rain,
-                site_solar_rad=month_data[i].site_solar_rad,
-                site_frost_days=month_data[i].site_frost_days
-            ))
-            # print(i)
-            i += 1
-
-    return month_data, init_month_data
 
 def approximate_soil_data(soil_texture):
     """ NLP categorizes the type of soil for the area,
@@ -356,14 +322,14 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             #     fa = 1. / (1. + pow(age_base, species.n_age))
             
             # calculating phys mod
-            physmod = 1.
-            if physmod_method:
-                # limiting physmod, uses only most limiting of vpd and soil water mods
-                lim = fd if fd <= ftheta else ftheta
-                physmod = fa * lim
-            else:
-                # combo physmod, both vpd and soil water mods influence physmods
-                physmod = fa * fd * ftheta
+            # physmod = 1.
+            # if physmod_method:
+            #     # limiting physmod, uses only most limiting of vpd and soil water mods
+            #     lim = fd if fd <= ftheta else ftheta
+            #     physmod = fa * lim
+            # else:
+            #     # combo physmod, both vpd and soil water mods influence physmods
+            physmod = fa * fd * ftheta
             
             # SLA -- specific leaf area
             exp1 = pow(((age0 * 12.) + inc_t)/species.t_sla_mid, 2.)
