@@ -186,9 +186,11 @@ def approximate_soil_data(soil_texture):
     max_soil_water = max
     return soil_water, max_soil_water
 
+
 def read_climate_data(file_path):
     """
-        Reads in a CSV file that contains data on the monthdata
+        Reads in a CSV file that contains climate data for each month of the year
+        Derived from and approximated by LLM
     """
     month_data = []  # Assuming monthdata is a list of objects with attributes site_tmax, site_tmin, etc.
     init_month_data = []  # Assuming initmonthdata is also a list of objects with similar attributes
@@ -226,10 +228,12 @@ def read_climate_data(file_path):
 
     return month_data, init_month_data
 
+
 def parse_env_data(file_path):
     """ Parses through the environment data for the forest
         (inlcudes both climate data and stand data) to be 
-        used in 3-PG """
+        used in 3-PG 
+        TODO Not being used at the moment"""
     # Parse the CSV line into a list
     env_list = csv_file_to_list(file_path)
     # Put those values into an Environment class
@@ -247,7 +251,7 @@ def parse_env_data(file_path):
     We're basically just assigning and calculating values for all of the globals that we defined above. 
     Now that I think of it... breaking this up might help to optimize the proces. Maybe.
 """
-def compute(environment_data_filename, speciesdata_filename, outputdata_filename, t):
+def compute(environment_data_filename, speciesdata_filename, t):
     """
         Takes in climate data, species data, time in months since beginning of simulation
         Computes the outputs for the 3PG algorithm
@@ -708,7 +712,7 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
 def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=12):
 
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, outputdata_filename, t)
+    height_dbh = compute(climatedata_filename, speciesdata_filename, t)
     print(f"height_dbh: {height_dbh}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
