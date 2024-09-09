@@ -1,7 +1,7 @@
 """
 File: 3pg.py
 Author: Grace Todd
-Date: June 20, 2024
+Date: September 9, 2024
 Description: Uses 3-PG to calculate various parameters of a tree, which will be used to generate
              each tree in the simulation at every time interval.
              
@@ -17,9 +17,6 @@ import csv
 import random
 import itertools
 
-# So I'm going to start out by using Allison's implementation of a tree struct for the sake of visualization. 
-# In the future, though, I'll integrate this with my own tree_class. I jsut don't know how different they will
-# be yet, and whether or not it would be efficient to have them as the same class.
 
 class TreeViz:
     """
@@ -32,72 +29,35 @@ class TreeViz:
         self.draw = draw                # Bool -- either draw or don't draw the tree
 
 
+"""
+    CLIMATE DATA
+"""
 class Month:
     """
         Holds important information for visualization based on data from the site about the current month.
+        Derived and estimated from LLM.
     """
     def __init__(self, site_tmax, site_tmin, site_rain, site_solar_rad, site_frost_days, site_soil_texture, site_soil_water=0, site_max_soil_water=0):
-        self.tmax = site_tmax   # Average maximum temperature for the month
-        self.tmin = site_tmin   # Average minimum temperature for the month
-        self.rain = site_rain   # Average rainfall for the month
-        self.solar_rad = site_solar_rad # Average solar radiation for the month
-        self.frost_days = site_frost_days   # Average number of frost days for the month
-        self.soil_texture = site_soil_texture
-        self.soil_water = site_soil_water
-        self.max_soil_water = site_max_soil_water
-
-"""
-    ==================== SITE DATA ========================
-"""
-MYSTERY = None # Using MYSTERY to define variables that I don't know the value of yet.
-SPECIES_SPECIFIC = None # Don't want to hard code Douglas fir values for tree parameters
-
-
-# monthly climate data
-# month_data = [Month() for _ in range(13)]
-# init_month_data = [Month() for _ in range(13)]
-# climatedata_filename = 'test_data/douglas_fir_climate_data.csv'
-# speciesdata_filename = 'test_data/douglas_fir_species_data.csv'
-# speciesdata_list = parse_species_data(speciesdata_filename)
-# douglasfir = speciesdata_list[0] # Using Douglas fir as a starting pooint bc we know all the values
-# month_data, init_month_data = read_climate_data(filename)
-
-# for modding sliders -- what else is this used for?
-site_tmax_mod = 0.
-site_tmin_mod = 0.
-site_rain_mod = 0
-site_solar_rad_mod = 0.
-site_frost_days_mod = 0.
-
-# temperature- all in degrees C
-# t_min = douglasfir.t_min # minimun monthly temperature for growth 
-# t_opt = douglasfir.t_opt # Optimum monthly temperature for growth 
-# t_max = douglasfir.t_max # maximum monthly temperature for growth
-
-# frost
-# df = douglasfir.df # mean number of frost days per month 
-# kf = douglasfir.kf # number of days of production lost for each frost day
+        self.tmax = site_tmax   # Average maximum temperature for the month (C)
+        self.tmin = site_tmin   # Average minimum temperature for the month (C)
+        self.rain = site_rain   # Average rainfall for the month (cm)
+        self.solar_rad = site_solar_rad # Average solar radiation for the month (kwh/m2)
+        self.frost_days = site_frost_days   # Average number of frost days for the month (int)
+        self.soil_texture = site_soil_texture # Average soil texture of the site -- used to estimate:
+        self.soil_water = site_soil_water           # Average amount of soil water (cm water per ft of soil)
+        self.max_soil_water = site_max_soil_water   # Maximum possible soil water (cm of water per ft of soil)
 
 # CO2 
 # fcax_700 = douglasfir.fcax_700 # This one is the "assimilation enhancement factor at 700 ppm" "parameter[s] define the species specific repsonses to changes in atmospheric co2"
-co2 = 350 # Atmospheric CO2 (ppm) -- number from oregon values from random site, change later
+co2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
 
 # VPD 
-d = 1. # mean daytime VPD --> SLIDER 0.5 - 2.
+d = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
 # kd = douglasfir.kd # defines the stomatal response to VPD
-
-# Soil water mod, and other soil stuff
-# soil_water = douglasfir.soil_water # Available soil water
-# max_soil_water = douglasfir.max_soil_water # Maximum available soil water
-# n_theta = douglasfir.n_theta # "Power of moisture ration deficit" "differences in the relationship between transpiration rate and soil water content for different soil textures"
-# c_theta = douglasfir.c_theta # Moisture ration deficit for fq = 0.5
-
 
 """
     ==================== STAND DATA ========================
-    This data is about the stand in question. This is largely decided by
-    the user of 3PG, as the point is to be able to use this program 
-    for whatever your tree stand is. 
+    This data is about the stand in question. . 
 """
 
 # Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
@@ -120,7 +80,6 @@ start_year = 2024 # this is the year the simulation was started. Used for prints
 
 physmod_method = 0 # this denotes the method used to calculate physmod. 0 = combo 1= limiting
 agemod_method = 0 # 0 = agemod not used, 1 = agemod used
-display_mode = 0 # cones vs textures. Probably won't use this but I'll keep for ref, for now.
 
 cr = 0.47 # conversion ratio for making GPP into NPP
 
@@ -181,7 +140,8 @@ def approximate_soil_data(soil_texture):
     """ NLP categorizes the type of soil for the area,
         and we approximate its values based on the category
         data from https://ucanr.edu/sites/UrbanHort/files/80243.pdf
-        and converted to metric units
+        and converted to metric units from in. per ft. of soil
+        to cm per ft. of soil
 
         |-----------------------------------------------|
         | === soil texture ===  | holding capacity (cm) |
@@ -328,7 +288,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
     """
     E = 2.718
     PI = 3.1415
-    d = 0.8
+    #sd = 0.8
     n = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
     environment = parse_env_data(environment_data_filename)
@@ -369,7 +329,7 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
 
             # frost mod
             df = month_data[current_month].frost_days
-            ff = 1. - species.kf * (df/30.)
+            ff = 1. - species.kf * (df/30.) 
 
             # nutrition mod
             fn = 1. - (1. - species.fn0) * pow((1. - fr), species.nfn)
@@ -391,9 +351,9 @@ def compute(environment_data_filename, speciesdata_filename, outputdata_filename
             # age mod --> used if denoted in glui
             # TODO maybe just not use this?
             fa = 1.
-            if agemod_method:
-                age_base = ((age0 + (inc_t / 12.))/species.max_age)/species.r_age
-                fa = 1. / (1. + pow(age_base, species.n_age))
+            # if agemod_method:
+            #     age_base = ((age0 + (inc_t / 12.))/species.max_age)/species.r_age
+            #     fa = 1. / (1. + pow(age_base, species.n_age))
             
             # calculating phys mod
             physmod = 1.
