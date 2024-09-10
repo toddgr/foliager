@@ -321,11 +321,10 @@ class Species:
         """
         Prints the qualitative data about a tree species. Just for fun, but also for fact checking.
         """
-        print(f'========== {self.name} ===========')
-        print(f'a.k.a {self.name_scientific}')
+        print(f'========== {self.name} ({self.name_scientific}) ===========')
         print(f'{self.name} are a {self.q_deciduous_evergreen[0]} species, and are commonly found in {", ".join(self.q_habitat)} climates.')
-        print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.q_tree_form)} form, with {", ".join(self.q_leaf_color)}, {", ".join(self.q_leaf_shape)} leaves.')
-        print(f'WOOD: The bark of {self.name} have a {", ".join(self.q_bark_texture)} texture and tend to be {", ".join(self.q_bark_color)} in color.\n')
+        print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.q_tree_form)} form, with {", ".join(self.q_leaf_color)}, {", ".join(self.q_leaf_shape)}-type leaves.')
+        print(f'WOOD: The bark of {self.name} have a {" or ".join(self.q_bark_texture)} texture and tend to be {" and ".join(self.q_bark_color)} in color.\n')
 
 
 class Tree(Species):
