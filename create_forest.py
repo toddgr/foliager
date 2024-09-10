@@ -68,6 +68,14 @@ class Forest:
     def add_tree(self, tree):
         self.trees.append(tree)
 
+    def get_climate(self):
+        print("=== GETTING CLIMATE FOR THIS FOREST ===")
+        print("Month, tmax (C), tmin (C), rain (cm), solar radiation (kwh/m2), num frost days,\
+ soil water (cm/ft), max soil water (cm/ft), soil texture")
+        for month in self.climate:
+            print(f'{month.month}, {month.tmax}, {month.tmin}, {month.rain}, {month.solar_rad},\
+ {month.frost_days}, {month.soil_water}, {month.max_soil_water}, {month.soil_texture}')
+
 
     class ClimateByMonth:
         """
@@ -94,6 +102,7 @@ class Forest:
             self.rain = r               # Average rainfall (cm)
             self.solar_rad = sr         # Average solar radiation (kwh/m2)
             self.frost_days = fd        # Average number of frost days (int)
+            self.soil_texture = st
             
             self.soil_water, self.max_soil_water = self.estimate_soil_water(st)
         
@@ -217,6 +226,7 @@ def create_forest(climate_fp):
     # read in the climate data
     # initialize the forest based on climate data
     forest = Forest(climate_fp)
+    forest.get_climate()
 
     # 2. Compute data for each species
 
