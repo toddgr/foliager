@@ -1,7 +1,7 @@
 """
 File: 3pg.py
 Author: Grace Todd
-Date: September 9, 2024
+Date: September 10, 2024
 Description: Uses 3-PG to calculate various parameters of a tree, which will be used to generate
              each tree in the simulation at every time interval.
              
@@ -12,7 +12,7 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
 import math # for log
 from threepg_species_data import parse_species_data
 from parse_tree_input import csv_file_to_list
-from plot_trees_random import init_trees, init_trees_dont_write_yet
+from plot_trees_random import init_trees_dont_write_yet
 import csv
 import random
 import itertools
@@ -61,9 +61,9 @@ mean_vpd = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and
 """
 
 # Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
-init_wf = 1. #7.
-init_wr = 1. #9.
-init_ws = 1. #20.
+init_foliage_biomass = 1. #7.
+init_root_biomass = 1. #9.
+init_stem_biomass = 1. #20.
 
 init_dbh = 0. #9 # initial dbh-- was 18
 #init_sw = 0. #200   # initial available soil water
@@ -82,7 +82,7 @@ conversion_ratio = 0.47 # conversion ratio for making GPP into NPP
 
 """
     ==================== 3PG OUTPUTS ========================
-n = trees per square hectare
+num_trees = trees per square hectare
 gpp = gross primary production
 npp = net primary production
 wf = foliage biomass (Mg/ha which is megagramme/hectare, a megagramme is a tonne)
@@ -267,9 +267,9 @@ def compute(environment_data_filename, speciesdata_filename, t):
         #print(f"SPECIES: {species.name}, max soil water = {species.max_soil_water}, soil_water = {species.soil_water}")
         month_data, _ = read_climate_data(environment_data_filename)
         # values of biomass pools that will be used throughout the incremental calculations
-        last_wf = init_wf
-        last_ws = init_ws
-        last_wr = init_wr
+        last_wf = init_foliage_biomass
+        last_ws = init_stem_biomass
+        last_wr = init_root_biomass
 
         num_trees_died = 0 # number of trees that died last month TODO mess with this
 
