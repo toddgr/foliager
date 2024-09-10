@@ -29,6 +29,26 @@ class TreeViz:
         self.draw = draw                # Bool -- either draw or don't draw the tree
 
 
+class Tree:
+    """
+        For holding the data for each individual tree in the simulation.
+    """
+    def __init__(self, name:str, bark_texture:str, bark_color:str, height:float, dbh:float, lcl:float, c_diam:float, 
+                 x:float=None, z:float=None, is_dead:bool=None, masting_cycle:int=None, age:int=None, stage:str=None):
+        self.name = name
+        self.bark_texture = bark_texture
+        self.bark_color = bark_color
+        self.position = (x,z)
+        self.height = height
+        self.dbh = dbh
+        self.lcl = lcl
+        self.c_diam = c_diam
+        self.is_dead = is_dead
+        self.masting_cycle = masting_cycle
+        self.age = age
+        self.stage = stage
+
+
 """
     CLIMATE DATA
 """
@@ -264,6 +284,7 @@ def compute(environment_data_filename, speciesdata_filename, t):
     speciesdata_list = parse_species_data(speciesdata_filename)
     #environment = parse_env_data(environment_data_filename)
     height_dbh_list = []
+    tree_list = []
     for species in speciesdata_list:
         #print(f"SPECIES: {species.name}, max soil water = {species.max_soil_water}, soil_water = {species.soil_water}")
         month_data, _ = read_climate_data(environment_data_filename)
@@ -457,10 +478,8 @@ def compute(environment_data_filename, speciesdata_filename, t):
             nvbh = species.nvbh
 
             # calculating b from mean individual stem mass (inversion of A65 of user manual)
-            print(f"last_ws: {last_stem_biomass}, n: {num_trees}")
-            iws = last_stem_biomass / num_trees # individual stem mass
-            b = pow(iws/aws, (1.0/nws)) *100
-            #print(f"b: {b}, iws: {iws}, aws: {aws}, nws: {nws}")
+            ind_stem_mass_iws = last_stem_biomass / num_trees # individual stem mass
+            b = pow(ind_stem_mass_iws/aws, (1.0/nws)) *100
 
             # bias correction to adjust b
             # TODO implement later?
@@ -480,33 +499,24 @@ def compute(environment_data_filename, speciesdata_filename, t):
             ba = (PI * b * b)/40000
 
             # stand volume
-            vs = av * pow(b, nvb) * pow(mean_tree_height, nvh) * pow(b * b * mean_tree_height, nvbh) * num_trees
+            stand_volume = av * pow(b, nvb) * pow(mean_tree_height, nvh) * pow(b * b * mean_tree_height, nvbh) * num_trees
 
             total_height = mean_tree_height # mean tree height
-            print(f"BA: {ba}")
             dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
             # TODO: approximate masting cycle here
+            # TODO: create an individual tree class (maybe from treeviz?)
             height_dbh_list.append([inc_t, species.name, species.q_bark_texture, species.q_bark_color, total_height, dbh, live_crown_length, crown_diameter])
-
-        # setting final biomass values
-        wf = last_foliage_biomass
-        ws = last_stem_biomass
-        wr = last_root_biomass
+            tree_list.append(Tree(species.name, species.q_bark_texture, species.q_bark_color, height=total_height, dbh=dbh, lcl=live_crown_length, c_diam=crown_diameter))
 
         # some test prints
         print(f"\n=== t={t} for {species.name} ===")
-        #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
-        print(f"Live crown length: {live_crown_length}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
-        #plot the trees
-        # total_height = h # mean tree height
-        # live_crown_length = hl # distance between the top live foliage and the lowest live foliage
-        # dbh = math.sqrt((4 * ba) / math.pi) # trunk of the standing tree
-        # height_dbh_list.append([species.name, species.q_tree_form, total_height, dbh, live_crown_length, crown_diameter])
+        print(f"Live crown length: {live_crown_length}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {stand_volume}")
+
     return height_dbh_list
             
 
 def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
-    """ Creates a unique dictionary key based on what tree we're iterating through"""
+    """ Creates a unique dictionary key for tree children of original trees """
     # Generate all combinations of three letters from 'a' to 'z'
     three_letter_strings = [''.join(letters) for letters in itertools.product('abcdefghijklmnopqrstuvwxyz', repeat=3)]
 
@@ -517,6 +527,11 @@ def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
 
 
 def randomize_tree_factors(species):
+    """ 
+        Slightly randomizes various dimensions of trees to add visual
+        differentiation
+        TODO implement Gaussian randomization and tree class 
+    """
     i = 0
     # Randomized offsets -- different for each tree
     #print(f"=====SPECIES:==== {species} \n ==== ")
@@ -533,8 +548,11 @@ def randomize_tree_factors(species):
     random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
     i += 1
 
+    # TODO return something more dynamic
     return [random_height_offset, random_dbh_offset, random_lcl_offset, random_c_diam_offset]
     
+# =============================================================================================
+# End Debug
 
 def create_tree_list(tree_coordinates, tree_species, t):
     """ Creates the list/dict of tree information for every single tree in the forest. 
@@ -546,6 +564,8 @@ def create_tree_list(tree_coordinates, tree_species, t):
 
         Then, once ALL of the data has been written for all the trees at all the times, then we can write
         it in CSV form, where each tree for each line is written in chronological order.
+
+        TODO instead of a big array like this as the value, have the tree object
     """
     tree_dict = {'tree_key':[['t', 'name', 'bark_texture', 'bark_color', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
     key_counter = -1
