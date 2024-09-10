@@ -18,3 +18,34 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
              5. Take the final state of the forest and write to Blender
 """
 
+class Forest:
+    """
+    Holds information about the environment, climate, and collection of trees found in the forest.
+    Also might store a list of species found in the environment
+    """
+    def __init__(self):
+        pass
+
+
+class Species:
+    """
+    Holds information about a specific species.
+    TODO implement 3-PG calculations here
+    """
+    def __init__(self):
+        pass
+
+
+class Tree(Species):
+    """
+    Holds information about each individual tree in the forest.
+    Inherits information about its species
+    Calculates unique dimensions on initialization
+    Initialization occurs when the (x,y) coordinates are generated
+    """
+    def __init__(self, species, x, y):
+        pass
+
+if __name__ == '__main__':
+    # example usage here
+    pass
