@@ -52,7 +52,7 @@ class Month:
 co2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
 
 # VPD 
-d = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
+mean_vpd = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
 # kd defines the stomatal response to VPD
 
 """
@@ -65,20 +65,20 @@ init_wf = 1. #7.
 init_wr = 1. #9.
 init_ws = 1. #20.
 
-init_b = 0. #9 # initial dbh-- was 18
-init_sw = 0. #200   # initial available soil water
+init_dbh = 0. #9 # initial dbh-- was 18
+#init_sw = 0. #200   # initial available soil water
 
 # general for GPP
-fr = 1 # fertility rating, ranges from 0 to 1
+fertility_rating = 1 # fertility rating, ranges from 0 to 1
 
-age0 = 5 # this is the stand's age in years at t = 0
+start_age = 5 # this is the stand's age in years at t = 0
 start_month = 5 # this is the number of the month in which the simulation is beginning
 start_year = 2024 # this is the year the simulation was started. Used for prints only?
 
 #physmod_method = 0 # this denotes the method used to calculate physmod. 0 = combo 1= limiting
 #agemod_method = 0 # 0 = agemod not used, 1 = agemod used
 
-cr = 0.47 # conversion ratio for making GPP into NPP
+conversion_ratio = 0.47 # conversion ratio for making GPP into NPP
 
 """
     ==================== 3PG OUTPUTS ========================
@@ -248,36 +248,30 @@ def parse_env_data(file_path):
 """
     ================= COMPUTE THE OUTPUTS ====================
     Need to break this up a little bit, we'll see if that's possible.
-    We're basically just assigning and calculating values for all of the globals that we defined above. 
-    Now that I think of it... breaking this up might help to optimize the proces. Maybe.
+    Assigns and calculates values for all of the globals defined above. 
+    Now that I think of it... breaking this up might help to optimize the process. Maybe.
 """
 def compute(environment_data_filename, speciesdata_filename, t):
     """
         Takes in climate data, species data, time in months since beginning of simulation
-        Computes the outputs for the 3PG algorithm
+        Computes the outputs for the 3-PG algorithm
     """
     E = 2.718
     PI = 3.1415
-    #sd = 0.8
-    n = 1200 # number of trees per square hectare
+
+    num_trees = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
-    environment = parse_env_data(environment_data_filename)
+    #environment = parse_env_data(environment_data_filename)
     height_dbh_list = []
     for species in speciesdata_list:
         #print(f"SPECIES: {species.name}, max soil water = {species.max_soil_water}, soil_water = {species.soil_water}")
-        month_data, init_month_data = read_climate_data(environment_data_filename)
+        month_data, _ = read_climate_data(environment_data_filename)
         # values of biomass pools that will be used throughout the incremental calculations
         last_wf = init_wf
         last_ws = init_ws
         last_wr = init_wr
 
-        last_sw = init_sw
-
-        delta_n = 0 # number of trees that died last month
-
-        # setting initial b from user input initial b so that it can be used to compute WF
-        # Fix this so no user input?
-        b = 1
+        num_trees_died = 0 # number of trees that died last month TODO mess with this
 
         for inc_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
             current_month = ((start_month + inc_t) % 12)-1
@@ -286,14 +280,14 @@ def compute(environment_data_filename, speciesdata_filename, t):
 
             # compute the PAR/aC mods
             # temperature mod
-            ft = 1.
-            ta = (month_data[current_month].tmax + month_data[current_month].tmin)/2. # getting mean monthly temp from site data
-            if (ta > species.t_max) or (ta < species.t_min):
+            #ft = 1.
+            mean_monthly_temp = (month_data[current_month].tmax + month_data[current_month].tmin)/2. # getting mean monthly temp from site data
+            if (mean_monthly_temp > species.t_max) or (mean_monthly_temp < species.t_min):
                 # outside of growth range -> 0
                 ft = 0.
             else:
                 # inside of growth range
-                base = (ta - species.t_min / (species.t_opt - species.t_min) * (species.t_max - ta)/(species.t_max - species.t_opt))
+                base = (mean_monthly_temp - species.t_min / (species.t_opt - species.t_min) * (species.t_max - mean_monthly_temp)/(species.t_max - species.t_opt))
                 exp = (species.t_max - species.t_opt)/(species.t_opt - species.t_min)
                 ft = pow(base, exp)
 
@@ -302,17 +296,16 @@ def compute(environment_data_filename, speciesdata_filename, t):
             ff = 1. - species.kf * (df/30.) 
 
             # nutrition mod
-            fn = 1. - (1. - species.fn0) * pow((1. - fr), species.nfn)
+            fn = 1. - (1. - species.fn0) * pow((1. - fertility_rating), species.nfn)
 
             # C02 mod
             fc = 1
             fcax = species.fcax_700/(2. - species.fcax_700) # we're not exactly sure that this does
-            fc = fcax * co2/(350. * (fcax - 1.) + co2) #TODO fix this later
+            fc = fcax * co2/(350. * (fcax - 1.) + co2) # TODO fix this later
 
-            # phys mod stuff --> made from a combo of fd, ftheta, and age mod that can be changed in glui
-            # TODO change this so that it can't be modified from the GLUI
+            # phys mod stuff --> made from a combo of fd, ftheta, and age mod
             # vapor pressure deficit (VPD) mod
-            fd = pow(E, (-species.kd * d))
+            fd = pow(E, (-species.kd * mean_vpd))
 
             # soil water mod
             base1 = ((1. - month_data[current_month].soil_water)/month_data[current_month].max_soil_water)/species.c_theta
@@ -336,15 +329,15 @@ def compute(environment_data_filename, speciesdata_filename, t):
             physmod = fa * fd * ftheta
             
             # SLA -- specific leaf area
-            exp1 = pow(((age0 * 12.) + inc_t)/species.t_sla_mid, 2.)
+            exp1 = pow(((start_age * 12.) + inc_t)/species.t_sla_mid, 2.)
             sla = species.sla_1 + (species.sla_0 - species.sla_1) * pow(E, (-1 * math.log(2.) * exp1))
 
             # leaf area index (m^2 / m^2)
             l = 0.1 * sla * last_wf
 
             # GAC --> percentage of ground area covered by canopy
-            if age0 + inc_t / 12 < species.tc:
-                gac = (age0 + inc_t / 12) / species.tc
+            if start_age + inc_t / 12 < species.tc:
+                gac = (start_age + inc_t / 12) / species.tc
             else:
                 gac = 1.
             print(f"GAC: {gac}")
@@ -357,11 +350,11 @@ def compute(environment_data_filename, speciesdata_filename, t):
         
             # Computing GPP and NPP
             gpp = ft * ff * fn * fc * physmod * species.acx * par
-            npp = gpp * cr
+            npp = gpp * conversion_ratio
 
             # Partitioning ratios
             # computing m --> linear function of FR (fertility rating)
-            m = species.m_0 + ((1. - species.m_0) * fr)
+            m = species.m_0 + ((1. - species.m_0) * fertility_rating)
 
             # computing the root partitioning ratio
             nr = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * physmod))
@@ -382,18 +375,18 @@ def compute(environment_data_filename, speciesdata_filename, t):
 
             # mortality
             # max individual tree stem mass (wsx)
-            wsx = species.wsx1000 * pow((1000.0/n), species.nm)
+            wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm)
 
             # print("last_ws:", last_ws)
             # seeing if we need to thin
-            while last_ws / n > wsx and n > 0:
+            while last_ws / num_trees > wsx and num_trees > 0:
                 # need to thin
-                n -= 1  # decreasing n
-                delta_n += 1 # increasing delta_n counter
-                wsx = species.wsx1000 * pow((1000.0/n), species.nm) # recalculating wsx
+                num_trees -= 1  # decreasing n
+                num_trees_died += 1 # increasing delta_n counter
+                wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm) # recalculating wsx
 
             # litterfall
-            current_age = age0 + t/12
+            current_age = start_age + t/12
             # according to 3-PG manual, page 33:
                 # For deciduous species, the litterfall rates yf0 and yfx may be considered 
                 # to be 0 because all of the foliage is lost at the end of the growing season anyway.
@@ -418,12 +411,12 @@ def compute(environment_data_filename, speciesdata_filename, t):
             #print(f"curr_ws (part 1): {curr_ws}")
 
             # incrementing the current using last month's values
-            curr_wf += (nf * npp) - (yf * last_wf) - (species.mf * (last_wf / n) * delta_n)
-            curr_wr += (nr * npp) - (species.yr * last_wr) - (species.mr * (last_wr / n) * delta_n)
+            curr_wf += (nf * npp) - (yf * last_wf) - (species.mf * (last_wf / num_trees) * num_trees_died)
+            curr_wr += (nr * npp) - (species.yr * last_wr) - (species.mr * (last_wr / num_trees) * num_trees_died)
             
             
             #print(f"the complexificaiton may begin.\nns:{ns}, npp:{npp}, species.yr:{species.yr}, last_wr:{last_wr},species.mr:{species.mr},n:{n}, delta_n:{delta_n}")
-            curr_ws += (ns * npp) - (species.ms * (last_ws / n) * delta_n)
+            curr_ws += (ns * npp) - (species.ms * (last_ws / num_trees) * num_trees_died)
 
             #print(f"curr_ws (part 2): {curr_ws}")
 
@@ -436,7 +429,7 @@ def compute(environment_data_filename, speciesdata_filename, t):
             if curr_wr > 0.:
                 last_wr = curr_wr
 
-            delta_n = 0 # resetting delta_n
+            num_trees_died = 0 # resetting 
 
             # Computing miscellaneous parameters
             # these are all just for printing out, not viz...
@@ -447,6 +440,7 @@ def compute(environment_data_filename, speciesdata_filename, t):
                 in the future, as described in section 11.11 of Forrester's User Manual. rh (relative
                 height) has also been left out for the same reason.
                 TODO: Add in the C parameter here
+                TODO implement relative height
             """
 
             # These are all empirical parameters and are species-specific. They are only used here.
@@ -474,8 +468,8 @@ def compute(environment_data_filename, speciesdata_filename, t):
             nvbh = species.nvbh
 
             # calculating b from mean individual stem mass (inversion of A65 of user manual)
-            print(f"last_ws: {last_ws}, n: {n}")
-            iws = last_ws / n # individual stem mass
+            print(f"last_ws: {last_ws}, n: {num_trees}")
+            iws = last_ws / num_trees # individual stem mass
             b = pow(iws/aws, (1.0/nws)) *100
             print(f"b: {b}, iws: {iws}, aws: {aws}, nws: {nws}")
 
@@ -483,24 +477,23 @@ def compute(environment_data_filename, speciesdata_filename, t):
             # TODO implement later?
 
             # mean tree height
-            h = 1.3 + ah * pow(E, (-nhb/b)) + nhc * b # for single tree species
+            mean_tree_height = 1.3 + ah * pow(E, (-nhb/b)) + nhc * b # for single tree species
             #h = ah * pow(b, nhb) # for data from individual tree data, not used
 
             # live crown length
-            hl = 1.3 + ahl * pow(E, (-nhlb/b)) + nhlc * b # for single tree species
+            live_crown_length = 1.3 + ahl * pow(E, (-nhlb/b)) + nhlc * b # for single tree species
             #hl = ahl * pow(b, nhlb) * pow(hl, nhll) # for data from individual tree data, not used
 
             # crown diameter
-            crown_diameter = ak * pow(b, nkb) * pow(h, nkh)
+            crown_diameter = ak * pow(b, nkb) * pow(mean_tree_height, nkh)
 
             # basal area
             ba = (PI * b * b)/40000
 
             # stand volume
-            vs = av * pow(b, nvb) * pow(h, nvh) * pow(b * b * h, nvbh) * n
+            vs = av * pow(b, nvb) * pow(mean_tree_height, nvh) * pow(b * b * mean_tree_height, nvbh) * num_trees
 
-            total_height = h # mean tree height
-            live_crown_length = hl # distance between the top live foliage and the lowest live foliage
+            total_height = mean_tree_height # mean tree height
             print(f"BA: {ba}")
             dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
             # TODO: approximate masting cycle here
@@ -514,7 +507,7 @@ def compute(environment_data_filename, speciesdata_filename, t):
         # some test prints
         print(f"\n=== t={t} for {species.name} ===")
         #print(f"FINAL BIOMASS VALUES\nwf: {wf}\nws: {ws}\nwr: {wr}")
-        print(f"Live crown length: {hl}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
+        print(f"Live crown length: {live_crown_length}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {vs}")
         #plot the trees
         # total_height = h # mean tree height
         # live_crown_length = hl # distance between the top live foliage and the lowest live foliage
