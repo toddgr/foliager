@@ -233,7 +233,8 @@ def parse_env_data(file_path):
     """ Parses through the environment data for the forest
         (inlcudes both climate data and stand data) to be 
         used in 3-PG 
-        TODO Not being used at the moment"""
+        TODO Not being used at the moment
+    """
     # Parse the CSV line into a list
     env_list = csv_file_to_list(file_path)
     # Put those values into an Environment class
@@ -267,9 +268,9 @@ def compute(environment_data_filename, speciesdata_filename, t):
         #print(f"SPECIES: {species.name}, max soil water = {species.max_soil_water}, soil_water = {species.soil_water}")
         month_data, _ = read_climate_data(environment_data_filename)
         # values of biomass pools that will be used throughout the incremental calculations
-        last_wf = init_foliage_biomass
-        last_ws = init_stem_biomass
-        last_wr = init_root_biomass
+        last_foliage_biomass = init_foliage_biomass
+        last_stem_biomass = init_stem_biomass
+        last_root_biomass = init_root_biomass
 
         num_trees_died = 0 # number of trees that died last month TODO mess with this
 
@@ -333,20 +334,20 @@ def compute(environment_data_filename, speciesdata_filename, t):
             sla = species.sla_1 + (species.sla_0 - species.sla_1) * pow(E, (-1 * math.log(2.) * exp1))
 
             # leaf area index (m^2 / m^2)
-            l = 0.1 * sla * last_wf
+            leaf_area_index = 0.1 * sla * last_foliage_biomass
 
             # GAC --> percentage of ground area covered by canopy
             if start_age + inc_t / 12 < species.tc:
-                gac = (start_age + inc_t / 12) / species.tc
+                ground_area_coverage = (start_age + inc_t / 12) / species.tc
             else:
-                gac = 1.
+                ground_area_coverage = 1.
             #print(f"GAC: {gac}")
             
             # light absorption --> absorption photosynthetically active radiation (PAR)
             # Often called o/pa
             #print(f"e_exp = (-{species.k} *  {l} / {gac})")
-            e_exp = (-species.k * l)/gac
-            par = (1. - pow(E, e_exp)) * 2.3 * gac * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
+            e_exp = (-species.k * leaf_area_index)/ground_area_coverage
+            par = (1. - pow(E, e_exp)) * 2.3 * ground_area_coverage * month_data[current_month].solar_rad # the delta t is excluded because it will always be 1
         
             # Computing GPP and NPP
             gpp = ft * ff * fn * fc * physmod * species.acx * par
@@ -357,7 +358,7 @@ def compute(environment_data_filename, speciesdata_filename, t):
             m = species.m_0 + ((1. - species.m_0) * fertility_rating)
 
             # computing the root partitioning ratio
-            nr = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * physmod))
+            root_partition_ratio = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * physmod))
 
             # computing np and ap, which are used to calculate pfs
             np = (math.log(species.p20/species.p2))/math.log(10.) # equation A29
@@ -366,24 +367,21 @@ def compute(environment_data_filename, speciesdata_filename, t):
             # computing pfs
             b = 1
             pfs = ap * pow(b, np)
-            #print(f"pfs:{pfs}, ap:{ap}, b:{b}, np:{np}\npfs = ap * pow(b, np)")
 
             # getting remaining partitioning ratios
-            nf = (pfs * (1. - nr))/(1. + pfs)
-            ns = (1. - nr)/(1. + pfs)
-            #print(f"nr:{nr}, pfs:{pfs}")
+            nf = (pfs * (1. - root_partition_ratio))/(1. + pfs)
+            ns = (1. - root_partition_ratio)/(1. + pfs)
 
             # mortality
             # max individual tree stem mass (wsx)
-            wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm)
+            max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm)
 
-            # print("last_ws:", last_ws)
-            # seeing if we need to thin
-            while last_ws / num_trees > wsx and num_trees > 0:
+            # check if we need to thin
+            while last_stem_biomass / num_trees > max_ind_tree_stem_mass_wsx and num_trees > 0:
                 # need to thin
                 num_trees -= 1  # decreasing n
                 num_trees_died += 1 # increasing delta_n counter
-                wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm) # recalculating wsx
+                max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm) # recalculating wsx
 
             # litterfall
             current_age = start_age + t/12
@@ -391,43 +389,34 @@ def compute(environment_data_filename, speciesdata_filename, t):
                 # For deciduous species, the litterfall rates yf0 and yfx may be considered 
                 # to be 0 because all of the foliage is lost at the end of the growing season anyway.
             if species.q_deciduous_evergreen == ['deciduous'] and (species.yf0 == 0 or species.yfx == 0):
-                yf = 0  # otherwise we get a divide by zero
+                litterfall_rate = 0  # otherwise we get a divide by zero
             else: 
                 lf_exp = -(current_age/species.tyf) * math.log(1.0 + species.yfx/species.yf0)
-                yf = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(E, lf_exp))
+                litterfall_rate = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(E, lf_exp))
 
             # Computing biomass
-            # using init_wx and just plain n here because this is designed to be 
+            # using init_wx and just plain num_trees here because this is designed to be 
             # calculated from any point in the simulation.
 
             # doing this on a monthly time step
 
             # setting current = to last month's
-            curr_wf = last_wf
-            curr_ws = last_ws
-            #print(f"curr_ws = last_ws: {last_ws}")
-            curr_wr = last_wr
+            curr_foliage_biomass = last_foliage_biomass
+            curr_stem_biomass = last_stem_biomass
+            curr_root_biomass = last_root_biomass
 
-            #print(f"curr_ws (part 1): {curr_ws}")
-
-            # incrementing the current using last month's values
-            curr_wf += (nf * npp) - (yf * last_wf) - (species.mf * (last_wf / num_trees) * num_trees_died)
-            curr_wr += (nr * npp) - (species.yr * last_wr) - (species.mr * (last_wr / num_trees) * num_trees_died)
-            
-            
-            #print(f"the complexificaiton may begin.\nns:{ns}, npp:{npp}, species.yr:{species.yr}, last_wr:{last_wr},species.mr:{species.mr},n:{n}, delta_n:{delta_n}")
-            curr_ws += (ns * npp) - (species.ms * (last_ws / num_trees) * num_trees_died)
-
-            #print(f"curr_ws (part 2): {curr_ws}")
+            # increment the current using last month's values
+            curr_foliage_biomass += (nf * npp) - (litterfall_rate * last_foliage_biomass) - (species.mf * (last_foliage_biomass / num_trees) * num_trees_died)
+            curr_root_biomass += (root_partition_ratio * npp) - (species.yr * last_root_biomass) - (species.mr * (last_root_biomass / num_trees) * num_trees_died)
+            curr_stem_biomass += (ns * npp) - (species.ms * (last_stem_biomass / num_trees) * num_trees_died)
 
             # making the current into last month's for the next month
-            if curr_wf > 0.:
-                last_wf = curr_wf
-            if curr_ws > 0.:
-                last_ws = curr_ws
-            #print(f"last_ws = curr_ws (cannot be negative): {last_ws}")
-            if curr_wr > 0.:
-                last_wr = curr_wr
+            if curr_foliage_biomass > 0.:
+                last_foliage_biomass = curr_foliage_biomass
+            if curr_stem_biomass > 0.:
+                last_stem_biomass = curr_stem_biomass
+            if curr_root_biomass > 0.:
+                last_root_biomass = curr_root_biomass
 
             num_trees_died = 0 # resetting 
 
@@ -468,8 +457,8 @@ def compute(environment_data_filename, speciesdata_filename, t):
             nvbh = species.nvbh
 
             # calculating b from mean individual stem mass (inversion of A65 of user manual)
-            print(f"last_ws: {last_ws}, n: {num_trees}")
-            iws = last_ws / num_trees # individual stem mass
+            print(f"last_ws: {last_stem_biomass}, n: {num_trees}")
+            iws = last_stem_biomass / num_trees # individual stem mass
             b = pow(iws/aws, (1.0/nws)) *100
             #print(f"b: {b}, iws: {iws}, aws: {aws}, nws: {nws}")
 
@@ -500,9 +489,9 @@ def compute(environment_data_filename, speciesdata_filename, t):
             height_dbh_list.append([inc_t, species.name, species.q_bark_texture, species.q_bark_color, total_height, dbh, live_crown_length, crown_diameter])
 
         # setting final biomass values
-        wf = last_wf
-        ws = last_ws
-        wr = last_wr
+        wf = last_foliage_biomass
+        ws = last_stem_biomass
+        wr = last_root_biomass
 
         # some test prints
         print(f"\n=== t={t} for {species.name} ===")
