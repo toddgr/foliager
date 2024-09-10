@@ -18,6 +18,8 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
              5. Take the final state of the forest and write to Blender
 """
 
+import csv
+
 """
 =====================================================================
                                 CLASSES
@@ -37,8 +39,7 @@ class Forest:
             - Trees : [Tree]
         """
         # create climate list
-        # read in climate_filepath
-            # for each row, create climatebymonth and append to climate list
+        self.climate = self.read_climate_data(climate_filepath)
 
         # initialize list of trees
         self.trees = []
@@ -53,7 +54,15 @@ class Forest:
         TODO I'm separating this out so that in the future I can easily change the
         climate input -- CSV implementation is temporary
         """
-        pass
+        climate_data = []
+        with open(climate_filepath, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                climate_this_month = self.ClimateByMonth(month=row['month'], tmax=row['tmax'], tmin=row['tmin'],
+                                                    rain=row['rain'], sr=row['solar_rad'],fd=row['frost_days'],
+                                                    st=row['soil_texture'])
+                climate_data.append(climate_this_month)
+        return climate_data
 
     def add_tree(self, tree):
         self.trees.append(tree)
