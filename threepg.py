@@ -33,8 +33,9 @@ class Tree:
     """
         For holding the data for each individual tree in the simulation.
     """
-    def __init__(self, name:str, bark_texture:str, bark_color:str, height:float, dbh:float, lcl:float, c_diam:float, 
+    def __init__(self, t:int, name:str, bark_texture:list, bark_color:list, height:float, dbh:float, lcl:float, c_diam:float, 
                  x:float=None, z:float=None, is_dead:bool=None, masting_cycle:int=None, age:int=None, stage:str=None):
+        self.t = t
         self.name = name
         self.bark_texture = bark_texture
         self.bark_color = bark_color
@@ -272,7 +273,7 @@ def parse_env_data(file_path):
     Assigns and calculates values for all of the globals defined above. 
     Now that I think of it... breaking this up might help to optimize the process. Maybe.
 """
-def compute(environment_data_filename, speciesdata_filename, t):
+def compute(environment_data_filename, speciesdata_filename, t, num_trees=1200):
     """
         Takes in climate data, species data, time in months since beginning of simulation
         Computes the outputs for the 3-PG algorithm
@@ -280,7 +281,7 @@ def compute(environment_data_filename, speciesdata_filename, t):
     E = 2.718
     PI = 3.1415
 
-    num_trees = 1200 # number of trees per square hectare
+    #num_trees = 1200 # number of trees per square hectare
     speciesdata_list = parse_species_data(speciesdata_filename)
     #environment = parse_env_data(environment_data_filename)
     height_dbh_list = []
@@ -506,13 +507,13 @@ def compute(environment_data_filename, speciesdata_filename, t):
             # TODO: approximate masting cycle here
             # TODO: create an individual tree class (maybe from treeviz?)
             height_dbh_list.append([inc_t, species.name, species.q_bark_texture, species.q_bark_color, total_height, dbh, live_crown_length, crown_diameter])
-            tree_list.append(Tree(species.name, species.q_bark_texture, species.q_bark_color, height=total_height, dbh=dbh, lcl=live_crown_length, c_diam=crown_diameter))
+            tree_list.append(Tree(inc_t, species.name, species.q_bark_texture, species.q_bark_color, height=total_height, dbh=dbh, lcl=live_crown_length, c_diam=crown_diameter))
 
         # some test prints
         print(f"\n=== t={t} for {species.name} ===")
         print(f"Live crown length: {live_crown_length}\ncrown diameter: {crown_diameter}\nbasal area: {ba}\nstand volume: {stand_volume}")
 
-    return height_dbh_list
+    return height_dbh_list, tree_list
             
 
 def create_tree_key(tree_count=-1, tree_key=None, spawn_count=0):
@@ -535,16 +536,16 @@ def randomize_tree_factors(species):
     i = 0
     # Randomized offsets -- different for each tree
     #print(f"=====SPECIES:==== {species} \n ==== ")
-    factor_height = float(species[4]) / 4
+    factor_height = float(species.height) / 4
     random_height_offset = random.uniform(-factor_height, factor_height)
 
-    factor_dbh = float(species[5]) / 4
+    factor_dbh = float(species.dbh) / 4
     random_dbh_offset = random.uniform(-factor_dbh, factor_dbh)
     
-    factor_lcl = float(species[6]) / 4
+    factor_lcl = float(species.lcl) / 4
     random_lcl_offset = random.uniform(-factor_lcl, factor_lcl)
     
-    factor_c_diam = float(species[7]) / 4
+    factor_c_diam = float(species.c_diam) / 4
     random_c_diam_offset = random.uniform(-factor_c_diam, factor_c_diam)
     i += 1
 
@@ -598,7 +599,7 @@ def create_species_information(species, tree_dict, masting_cycle, tree, tree_key
     random_factors = randomize_tree_factors(species) # [height, dbh, lcl, c_diam]
 
     #t, species.name, species.bark_texture, species.bark_color, x, z, total_height, dbh, live_crown_length, crown_diameter, is_dead, masting_cycle
-    species_name = species[1]
+    species_name = species.name
     if name == species_name:
         add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t)
         inc_t += 1
@@ -608,18 +609,18 @@ def create_species_information(species, tree_dict, masting_cycle, tree, tree_key
 def add_to_tree_dict(species, tree_dict, tree_key, random_factors, tree, name, masting_cycle, age, inc_t, is_dead=False):
     found = False
     stage = determine_tree_stage(age)
-    bark_texture = species[2]
-    bark_color = species[3]
+    bark_texture = species.bark_texture
+    bark_color = species.bark_color
 
-    if inc_t == species[0]: # if it's the correct t value we're looking for
+    if inc_t == species.t: # if it's the correct t value we're looking for
         # if inc_t > 0 and not tree_dict[tree_key][inc_t-1][9]:# If the previous t value of the tree is dead
         #     return #TODO fix
 
         # assign slightly randomized values to the height and dbh
-        new_height = float(species[4]) + random_factors[0]
-        new_dbh = float(species[5]) + random_factors[1]
-        new_lcl = float(species[6]) + random_factors[2]
-        new_c_diam = float(species[7]) + random_factors[3]
+        new_height = float(species.height) + random_factors[0]
+        new_dbh = float(species.dbh) + random_factors[1]
+        new_lcl = float(species.lcl) + random_factors[2]
+        new_c_diam = float(species.c_diam) + random_factors[3]
         
         # append it to the entry
         tree_entry = [inc_t, name, bark_texture, bark_color, tree[1], tree[2], new_height, new_dbh, new_lcl, new_c_diam, is_dead, masting_cycle, age, stage]
@@ -699,6 +700,7 @@ def random_coordinate():
 def tree_dict_to_csv(tree_dict, output_csv_filepath):
     """ 
     Takes in the dictionary of tree data, outputs it as a csv 
+    
     """
     with open(output_csv_filepath, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
@@ -714,15 +716,16 @@ def tree_dict_to_csv(tree_dict, output_csv_filepath):
 def threepg(climatedata_filename, speciesdata_filename, outputdata_filename="output.csv", t=60):
 
     #outputdata_filename = 'test_data/TEST_THREEPG_OUTPUT.csv'
-    height_dbh = compute(climatedata_filename, speciesdata_filename, t)
-    print(f"height_dbh: {height_dbh}")
+    num_trees = 100
+    height_dbh, tree_list = compute(climatedata_filename, speciesdata_filename, t, num_trees)
+    print(f"height_dbh: {tree_list}")
     # so we have the height, the dbh for each species, and now we need to plot the trees and combine the two.
     # We'll need to randomize the actual height and dbh for each individual tree
     
     print("\n===== PLOTTING TREE COORDINATES =====\nExit the scatter plot window to continue...\n")
-    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=False) # returns [name, x, z]
-    
-    tree_output = create_tree_list(tree_coordinates, height_dbh,t)
+    tree_coordinates = init_trees_dont_write_yet(speciesdata_filename, plot=False, num_trees=num_trees) # returns [name, x, z]
+
+    tree_output = create_tree_list(tree_coordinates, tree_list,t)
     # for each of the 3-PG data entries in the height_dbh
 
     tree_dict_to_csv(tree_output, outputdata_filename)
