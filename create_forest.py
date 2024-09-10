@@ -19,6 +19,7 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
 """
 
 import csv
+import random
 
 """
 =====================================================================
@@ -44,7 +45,6 @@ class Forest:
         # initialize list of trees
         self.trees = []
 
-        pass
 
     def read_climate_data(self, climate_filepath):
         """
@@ -59,13 +59,15 @@ class Forest:
             reader = csv.DictReader(file)
             for row in reader:
                 climate_this_month = self.ClimateByMonth(month=row['month'], tmax=row['tmax'], tmin=row['tmin'],
-                                                    rain=row['rain'], sr=row['solar_rad'],fd=row['frost_days'],
+                                                    r=row['rain'], sr=row['solar_rad'],fd=row['frost_days'],
                                                     st=row['soil_texture'])
                 climate_data.append(climate_this_month)
         return climate_data
 
+
     def add_tree(self, tree):
         self.trees.append(tree)
+
 
     class ClimateByMonth:
         """
@@ -73,7 +75,7 @@ class Forest:
         A ClimateByMonth instance is initialized for each month of the year.
         """
         
-        def __init__(self, month:str, tmax:int, tmin:int, r:float, sr, fd, st):
+        def __init__(self, month:str, tmax:int, tmin:int, r:float, sr:float, fd:int, st:str):
             """
             Attributes:
                 - month : str
@@ -92,15 +94,97 @@ class Forest:
             self.rain = r               # Average rainfall (cm)
             self.solar_rad = sr         # Average solar radiation (kwh/m2)
             self.frost_days = fd        # Average number of frost days (int)
-            self.estimate_soil_water(st)
+            
+            self.soil_water, self.max_soil_water = self.estimate_soil_water(st)
         
+
         def estimate_soil_water(self, soil_texture):
             """
-            Uses soil texture input to estimate soil water
+            Uses soil texture input to estimate soil water.
 
-            TODO use approximate_soil_data() here
+            LLM categorizes the type of soil for the area,
+            and we approximate its values based on the category
+            data from https://ucanr.edu/sites/UrbanHort/files/80243.pdf
+            and converted to metric units from in. per ft. of soil
+            to cm per ft. of soil
+
+            |-----------------------------------------------|
+            | === soil texture ===  | holding capacity (cm) |
+            |-----------------------|-----------------------|
+            | very coarse sand      | 1.016 - 1.905         |   A
+            |-----------------------|-----------------------|
+            | coarse sand           |                       |
+            | fine sand             | 1.905 - 3.175         |   B
+            | loamy sand            |                       |
+            |-----------------------|-----------------------|
+            | sandy loams           |                       |   C
+            | fine sandy loams      | 3.175 - 4.445         |
+            |-----------------------|-----------------------|
+            | very fine sandy loams |                       |
+            | loams                 | 3.81 - 5.842          |   D
+            | silt loams            |                       |
+            |-----------------------|-----------------------|
+            | clay loams            |                       |
+            | silt clay loams       | 4.445 - 6.35          |   E
+            | sandy clay loams      |                       |
+            |-----------------------|-----------------------|
+            | sandy clays           |                       |
+            | silty clays           | 4.064 - 6.35          |   F
+            | clays                 |                       |
+            |-----------------------------------------------|
             """
-            pass
+            # Holding capacity A
+            if soil_texture == "very_coarse_sand":
+                # capacity range
+                min = 1.016
+                max = 1.905
+
+            # Holding capacity B
+            elif soil_texture == "coarse_sand" or \
+                soil_texture == "fine_sand" or \
+                soil_texture == "loamy_sand":
+                # capacity range - lowest in B
+                min = 1.905
+                max = 3.175
+                # TODO refine the categories and apply different
+                # sections for each subcategory
+                #max = ((max - min) / 3) + min
+
+            # Holding capacity C
+            elif soil_texture == "sandy_loams" or \
+                soil_texture == "fine_sandy_loams":
+                min = 3.175
+                max = 4.445
+            
+            # Holding capacity D
+            elif soil_texture == "very_fine_sandy_loams" or \
+                soil_texture == "loams" or \
+                soil_texture == "silt_loams":
+                min = 3.81
+                max = 5.842
+
+            # Holding capacity E
+            elif soil_texture == "clay_loams" or \
+                soil_texture == "silt_clay_loams" or \
+                soil_texture == "sandy_clay_loams":
+                min = 4.445
+                max = 6.35
+
+            # Holding capacity F
+            elif soil_texture == "sandy_clays" or \
+                soil_texture == "silty_clays" or \
+                soil_texture == "clays":
+                min = 4.064
+                max = 6.35
+            else:
+                print(f"ERROR Invalid soil texture: {soil_texture}")
+                return None
+            
+            
+            soil_water = random.uniform(min,max)
+            max_soil_water = max
+            return soil_water, max_soil_water
+
 
 class Species:
     """
@@ -128,11 +212,12 @@ class Tree(Species):
 =====================================================================
 """
 
-def create_forest():
+def create_forest(climate_fp):
     # 1. Initialize forest
     # read in the climate data
     # initialize the forest based on climate data
-    
+    forest = Forest(climate_fp)
+
     # 2. Compute data for each species
 
     # 3. Create indivisual trees from species data
@@ -144,4 +229,4 @@ def create_forest():
 
 if __name__ == '__main__':
     # example usage here
-    create_forest()
+    create_forest("test_data/prineville_oregon_climate.csv")
