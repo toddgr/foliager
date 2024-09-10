@@ -32,7 +32,7 @@ class Forest:
     Holds information about the environment, climate, and collection of trees found in the forest.
     Also might store a list of species found in the environment
     """
-    def __init__(self, climate_filepath):
+    def __init__(self, climate, species=None):
         """
         Input: A list of climate conditions for each month of the year
         Attributes:
@@ -40,10 +40,13 @@ class Forest:
             - Trees : [Tree]
         """
         # create climate list
-        self.climate = self.read_climate_data(climate_filepath)
+        self.climate = self.read_climate_data(climate)
 
         # initialize list of trees
         self.trees = []
+
+        # create species list
+        #self.species_list = self.create_species_list(species)
 
 
     def read_climate_data(self, climate_filepath):
@@ -54,16 +57,51 @@ class Forest:
         TODO I'm separating this out so that in the future I can easily change the
         climate input -- CSV implementation is temporary
         """
+
+        climate_csv = self.read_csv(climate_filepath)
         climate_data = []
-        with open(climate_filepath, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                climate_this_month = self.ClimateByMonth(month=row['month'], tmax=row['tmax'], tmin=row['tmin'],
-                                                    r=row['rain'], sr=row['solar_rad'],fd=row['frost_days'],
-                                                    st=row['soil_texture'])
-                climate_data.append(climate_this_month)
+
+        for month in climate_csv:
+            month_instance = self.ClimateByMonth(*month)
+            climate_data.append(month_instance)
+        # with open(climate_filepath, 'r') as file:
+        #     reader = csv.DictReader(file)
+        #     for row in reader:
+        #         climate_this_month = self.ClimateByMonth(month=row['month'], tmax=row['tmax'], tmin=row['tmin'],
+        #                                             r=row['rain'], sr=row['solar_rad'],fd=row['frost_days'],
+        #                                             st=row['soil_texture'])
+        #         climate_data.append(climate_this_month)
+
+
         return climate_data
 
+    def create_species_list(self, species_file):
+        """
+        Input: Species CSV filepath
+        Output: A list of Species class instances, one for each species of tree.
+        """
+        # convert CSV to list
+        species_csv = self.read_csv(species_file)
+
+        # Create a new Species instance for each listed species
+        species_list = []
+        for species in species_csv:
+            species_instance = Species(*species)
+            species_list.append(species_instance)
+
+        return species_list
+    
+    def read_csv(self, file):
+        list = []
+        with open(file, 'r') as file:
+            reader = csv.reader(file)
+            next(reader) # skip the header row
+            for row in reader:
+                # Exclude lines starting with a comment character (e.g., #)
+                if not row or row[0].startswith("#"):
+                    continue
+                list.append(row)
+        return list
 
     def add_tree(self, tree):
         self.trees.append(tree)
@@ -198,9 +236,14 @@ class Forest:
 class Species:
     """
     Holds information about a specific species.
+    Takes in data collected by parameter estimator
+
     TODO implement 3-PG calculations here
     """
     def __init__(self):
+        """
+        
+        """
         pass
 
 

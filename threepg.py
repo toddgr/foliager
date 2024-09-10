@@ -568,7 +568,7 @@ def create_tree_list(tree_coordinates, tree_species, t):
 
         TODO instead of a big array like this as the value, have the tree object
     """
-    tree_dict = {'tree_key':[['t', 'name', 'bark_texture', 'bark_color', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
+    tree_dict = {'# tree_key':[['t', 'name', 'bark_texture', 'bark_color', 'x', 'z', 'height', 'dbh', 'lcl', 'c_diameter', 'is_dead', 'masting_cycle', 'age', 'stage']]}
     key_counter = -1
     is_dead = False
     # TODO: create a parameter estimation for this
