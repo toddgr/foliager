@@ -72,7 +72,7 @@ def generate_species_prompt(location):
     return species_prompt
 
 if __name__ == '__main__':
-    asknlp = False       # If we want to generate new data --> usage is limited
+    asknlp = True       # If we want to generate new data --> usage is limited
 
     param_est_output = "test_data/param_est_output.csv"                 # in-between file for parameter estimation
     threepg_output_filepath = "test_data/OUTPUT_DATA.csv"
