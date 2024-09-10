@@ -64,14 +64,6 @@ class Forest:
         for month in climate_csv:
             month_instance = self.ClimateByMonth(*month)
             climate_data.append(month_instance)
-        # with open(climate_filepath, 'r') as file:
-        #     reader = csv.DictReader(file)
-        #     for row in reader:
-        #         climate_this_month = self.ClimateByMonth(month=row['month'], tmax=row['tmax'], tmin=row['tmin'],
-        #                                             r=row['rain'], sr=row['solar_rad'],fd=row['frost_days'],
-        #                                             st=row['soil_texture'])
-        #         climate_data.append(climate_this_month)
-
 
         return climate_data
 
