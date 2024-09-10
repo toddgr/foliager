@@ -46,7 +46,7 @@ class Forest:
         self.trees = []
 
         # create species list
-        #self.species_list = self.create_species_list(species)
+        self.species_list = self.create_species_list(species)
 
 
     def read_climate_data(self, climate_filepath):
@@ -67,6 +67,7 @@ class Forest:
 
         return climate_data
 
+
     def create_species_list(self, species_file):
         """
         Input: Species CSV filepath
@@ -83,7 +84,12 @@ class Forest:
 
         return species_list
     
+
     def read_csv(self, file):
+        """
+        Input: CSV file for either species or climate
+        Output: A list of all information in the CSV
+        """
         list = []
         with open(file, 'r') as file:
             reader = csv.reader(file)
@@ -95,12 +101,14 @@ class Forest:
                 list.append(row)
         return list
 
+
     def add_tree(self, tree):
         self.trees.append(tree)
 
+
     def get_climate(self):
-        print("=== GETTING CLIMATE FOR THIS FOREST ===")
-        print("Month, tmax (C), tmin (C), rain (cm), solar radiation (kwh/m2), num frost days,\
+        print("========== GETTING CLIMATE FOR THIS FOREST ==========")
+        print("month, tmax (C), tmin (C), rain (cm), solar radiation (kwh/m2), num frost days,\
  soil water (cm/ft), max soil water (cm/ft), soil texture")
         for month in self.climate:
             print(f'{month.month}, {month.tmax}, {month.tmin}, {month.rain}, {month.solar_rad},\
@@ -232,11 +240,92 @@ class Species:
 
     TODO implement 3-PG calculations here
     """
-    def __init__(self):
+    def __init__(self, name, name_scientific, 
+                 q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, 
+                 q_tree_roots, q_habitat, q_bark_texture, q_bark_color, 
+                 t_min=0, t_opt=0, t_max=0, kf=0, fcax_700=0, kd=0, n_theta=0, c_theta=0, p2=0, p20=0, 
+                 acx=0, sla_1=0, sla_0=0, t_sla_mid=0, fn0=0, nfn=0, tc=0, max_age=0, r_age=0, n_age=0, 
+                 mf=0, mr=0, ms=0, yfx=0, yf0=0, tyf=0, yr=0, nr_max=0, nr_min=0, m_0=0, wsx1000=0, nm=0, 
+                 k=0, aws=0, nws=0, ah=0, nhb=0, nhc=0, ahl=0, nhlb=0, nhlc=0, ak=0, nkb=0, nkh=0, av=0, 
+                 nvb=0, nvh=0, nvbh=0, ):
         """
-        
+        Attributes are a combination of LLM responses (qualitative) and parameter estimation (quantitative)
+        Input from parameter estimation function output
         """
+        self.name = name
+
+        # Obtained from LLM:
+        self.name_scientific = name_scientific
+        self.q_leaf_shape = q_leaf_shape.split('/')
+        self.q_canopy_density = q_canopy_density.split('/')
+        self.q_deciduous_evergreen = q_deciduous_evergreen.split('/')
+        self.q_leaf_color = q_leaf_color.split('/')
+        self.q_tree_form = q_tree_form.split('/')
+        self.q_tree_roots = q_tree_roots.split('/')
+        self.q_habitat = q_habitat.split('/')
+        self.q_bark_texture = q_bark_texture.split('/')
+        self.q_bark_color = q_bark_color.split('/')
+
+        # Estimated from knowledge base:
+        self.t_min = float(t_min)
+        self.t_opt = float(t_opt)
+        self.t_max = float(t_max)
+        self.kf = float(kf)
+        self.fcax_700 = float(fcax_700)
+        self.kd = float(kd)
+        self.n_theta = float(n_theta)
+        self.c_theta = float(c_theta)
+        self.p2 = float(p2)
+        self.p20 = float(p20)
+        self.acx = float(acx)
+        self.sla_1 = float(sla_1)
+        self.sla_0 = float(sla_0)
+        self.t_sla_mid = float(t_sla_mid)
+        self.fn0 = float(fn0)
+        self.nfn = float(nfn)
+        self.tc = float(tc)
+        self.max_age = float(max_age)
+        self.r_age = float(r_age)
+        self.n_age = float(n_age)
+        self.mf = float(mf)
+        self.mr = float(mr)
+        self.ms = float(ms)
+        self.yfx = float(yfx)
+        self.yf0 = float(yf0)
+        self.tyf = float(tyf)
+        self.yr = float(yr)
+        self.nr_max = float(nr_max)
+        self.nr_min = float(nr_min)
+        self.m_0 = float(m_0)
+        self.wsx1000 = float(wsx1000)
+        self.nm = float(nm)
+        self.k = float(k)
+        self.aws = float(aws)
+        self.nws = float(nws)
+        self.ah = float(ah)
+        self.nhb = float(nhb)
+        self.nhc = float(nhc)
+        self.ahl = float(ahl)
+        self.nhlb = float(nhlb)
+        self.nhlc = float(nhlc)
+        self.ak = float(ak)
+        self.nkb = float(nkb)
+        self.nkh = float(nkh)
+        self.av = float(av)
+        self.nvb = float(nvb)
+        self.nvh = float(nvh)
+        self.nvbh = float(nvbh)
         pass
+
+    def get_basic_info(self):
+        """
+        Prints the qualitative data about a tree species. Just for fun, but also for fact checking.
+        """
+        print(f'========== {self.name} ===========')
+        print(f'a.k.a {self.name_scientific}')
+        print(f'{self.name} are a {self.q_deciduous_evergreen[0]} species, and are commonly found in {", ".join(self.q_habitat)} climates.')
+        print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.q_tree_form)} form, with {", ".join(self.q_leaf_color)}, {", ".join(self.q_leaf_shape)} leaves.')
+        print(f'WOOD: The bark of {self.name} have a {", ".join(self.q_bark_texture)} texture and tend to be {", ".join(self.q_bark_color)} in color.\n')
 
 
 class Tree(Species):
@@ -256,12 +345,14 @@ class Tree(Species):
 =====================================================================
 """
 
-def create_forest(climate_fp):
+def create_forest(climate_fp, species_fp):
     # 1. Initialize forest
     # read in the climate data
     # initialize the forest based on climate data
-    forest = Forest(climate_fp)
+    forest = Forest(climate_fp, species_fp)
     forest.get_climate()
+    for species in forest.species_list:
+        species.get_basic_info()
 
     # 2. Compute data for each species
 
@@ -274,4 +365,4 @@ def create_forest(climate_fp):
 
 if __name__ == '__main__':
     # example usage here
-    create_forest("test_data/prineville_oregon_climate.csv")
+    create_forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv")
