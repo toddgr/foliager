@@ -141,11 +141,11 @@ class Forest:
                 - max_soil_water : float
             """
             self.month = month          # January, February, etc.
-            self.tmax = tmax            # Average maximum temperature (celsius)
-            self.tmin = tmin            # Average minimum temperature (celsius)
-            self.rain = r               # Average rainfall (cm)
-            self.solar_rad = sr         # Average solar radiation (kwh/m2)
-            self.frost_days = fd        # Average number of frost days (int)
+            self.tmax = int(tmax)       # Average maximum temperature (celsius)
+            self.tmin = int(tmin)       # Average minimum temperature (celsius)
+            self.rain = float(r)        # Average rainfall (cm)
+            self.solar_rad = float(sr)         # Average solar radiation (kwh/m2)
+            self.frost_days = int(fd)        # Average number of frost days (int)
             self.soil_texture = st
             
             self.soil_water, self.max_soil_water = self.estimate_soil_water(st)
@@ -249,11 +249,11 @@ class Species:
     def __init__(self, name, name_scientific, 
                  leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, 
                  tree_roots, habitat, bark_texture, bark_color, 
-                 t_min=0, t_opt=0, t_max=0, kf=0, fcax_700=0, kd=0, n_theta=0, c_theta=0, p2=0, p20=0, 
-                 acx=0, sla_1=0, sla_0=0, t_sla_mid=0, fn0=0, nfn=0, tc=0, max_age=0, r_age=0, n_age=0, 
-                 mf=0, mr=0, ms=0, yfx=0, yf0=0, tyf=0, yr=0, nr_max=0, nr_min=0, m_0=0, wsx1000=0, nm=0, 
-                 k=0, aws=0, nws=0, ah=0, nhb=0, nhc=0, ahl=0, nhlb=0, nhlc=0, ak=0, nkb=0, nkh=0, av=0, 
-                 nvb=0, nvh=0, nvbh=0, ):
+                 t_min=0, t_opt=0, t_max=0, kf=0, fcax_700=0, kd=0, n_theta=0, c_theta=0, 
+                 p2=0, p20=0, acx=0, sla_1=0, sla_0=0, t_sla_mid=0, fn0=0, nfn=0, tc=0, 
+                 max_age=0, r_age=0, n_age=0, mf=0, mr=0, ms=0, yfx=0, yf0=0, tyf=0, yr=0, 
+                 nr_max=0, nr_min=0, m_0=0, wsx1000=0, nm=0, k=0, aws=0, nws=0, ah=0, nhb=0, 
+                 nhc=0, ahl=0, nhlb=0, nhlc=0, ak=0, nkb=0, nkh=0, av=0, nvb=0, nvh=0, nvbh=0,):
         """
         Attributes are a combination of LLM responses (qualitative) and parameter estimation (quantitative)
         Input from parameter estimation function output, quantitative values default to 0 if not found
@@ -280,7 +280,8 @@ class Species:
         self.t_opt = float(t_opt)
         self.t_max = float(t_max)
         self.kf = float(kf)
-        self.fcax_700 = float(fcax_700) #  assimilation enhancement factor at 700 ppm
+        self.fcax_700 = float(fcax_700)
+        self.kd = float(kd)
         self.n_theta = float(n_theta)
         self.c_theta = float(c_theta)
         self.p2 = float(p2)
@@ -576,18 +577,18 @@ def threepg(forest:Forest, t:int):
             # mortality
             # max individual tree stem mass (wsx)
             max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/forest.num_trees), species.nm)
-            while last_stem_biomass / num_trees > max_ind_tree_stem_mass_wsx and num_trees > 0:
+            while last_stem_biomass / forest.num_trees > max_ind_tree_stem_mass_wsx and forest.num_trees > 0:
                 # need to thin
-                num_trees -= 1  # decreasing n
+                forest.num_trees -= 1  # decreasing n
                 num_trees_died += 1 # increasing delta_n counter
-                max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm) # recalculating wsx
+                max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/forest.num_trees), species.nm) # recalculating wsx
 
             # === compute dimensions based on parameters ===
             # TODO add C index here
             # TODO implement relative height
 
             # calculating b from mean individual stem mass (inversion of A65 of user manual)
-            ind_stem_mass_iws = last_stem_biomass / num_trees # individual stem mass
+            ind_stem_mass_iws = last_stem_biomass / forest.num_trees # individual stem mass
             b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) *100
 
             # bias correction to adjust b TODO implement later?
@@ -615,7 +616,8 @@ def threepg(forest:Forest, t:int):
             species.lcl = live_crown_length
             species.c_diam = crown_diameter
             species.dbh = dbh
-    pass
+    
+    return forest
 
 def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     # 1. Initialize forest
@@ -624,6 +626,8 @@ def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     forest = Forest(climate_fp, species_fp, num_trees)
 
     # 2. Compute 3-PG data for each species
+    forest.get_climate()
+    forest = threepg(forest, t)
 
     # 3. Create individual trees from species data
 
@@ -642,5 +646,5 @@ if __name__ == '__main__':
     for species in forest.species_list:
         species.get_basic_info()
 
-    tree = Tree(forest.species_list[0], 0.234323432, 0.123219347093)
+    tree = Tree(forest.species_list[1], 0.234323432, 0.123219347093)
     tree.get_tree_info()

@@ -296,8 +296,8 @@ def compute(environment_data_filename, speciesdata_filename, t, num_trees=1200):
 
         num_trees_died = 0 # number of trees that died last month TODO mess with this
 
-        for inc_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
-            current_month = ((start_month + inc_t) % 12)-1
+        for month_t in range(t+1): # t that will be used as an iterator throughout the incremental calculations
+            current_month = ((start_month + month_t) % 12)-1
             if current_month == 0:
                 current_month = 11
 
@@ -352,15 +352,15 @@ def compute(environment_data_filename, speciesdata_filename, t, num_trees=1200):
             physmod = fa * fd * ftheta
             
             # SLA -- specific leaf area
-            exp1 = pow(((start_age * 12.) + inc_t)/species.t_sla_mid, 2.)
+            exp1 = pow(((start_age * 12.) + month_t)/species.t_sla_mid, 2.)
             sla = species.sla_1 + (species.sla_0 - species.sla_1) * pow(E, (-1 * math.log(2.) * exp1))
 
             # leaf area index (m^2 / m^2)
             leaf_area_index = 0.1 * sla * last_foliage_biomass
 
             # GAC --> percentage of ground area covered by canopy
-            if start_age + inc_t / 12 < species.tc:
-                ground_area_coverage = (start_age + inc_t / 12) / species.tc
+            if start_age + month_t / 12 < species.tc:
+                ground_area_coverage = (start_age + month_t / 12) / species.tc
             else:
                 ground_area_coverage = 1.
             #print(f"GAC: {gac}")
@@ -506,8 +506,8 @@ def compute(environment_data_filename, speciesdata_filename, t, num_trees=1200):
             dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
             # TODO: approximate masting cycle here
             # TODO: create an individual tree class (maybe from treeviz?)
-            height_dbh_list.append([inc_t, species.name, species.q_bark_texture, species.q_bark_color, total_height, dbh, live_crown_length, crown_diameter])
-            tree_list.append(Tree(inc_t, species.name, species.q_bark_texture, species.q_bark_color, height=total_height, dbh=dbh, lcl=live_crown_length, c_diam=crown_diameter))
+            height_dbh_list.append([month_t, species.name, species.q_bark_texture, species.q_bark_color, total_height, dbh, live_crown_length, crown_diameter])
+            tree_list.append(Tree(month_t, species.name, species.q_bark_texture, species.q_bark_color, height=total_height, dbh=dbh, lcl=live_crown_length, c_diam=crown_diameter))
 
         # some test prints
         print(f"\n=== t={t} for {species.name} ===")
