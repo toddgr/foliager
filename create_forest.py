@@ -20,7 +20,11 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
 
 import csv
 import random
+import math
 from gauss import Gaussian
+
+E = 2.718
+PI = 3.1415
 
 """
 =====================================================================
@@ -33,7 +37,7 @@ class Forest:
     Holds information about the environment, climate, and collection of trees found in the forest.
     Also might store a list of species found in the environment
     """
-    def __init__(self, climate, species=None):
+    def __init__(self, climate, species=None, num_trees=None):
         """
         Input: A list of climate conditions for each month of the year
         Attributes:
@@ -41,10 +45,11 @@ class Forest:
             - Trees : [Tree]
         """
         # create climate list
-        self.climate = self.read_climate_data(climate)
+        self.climate_list = self.read_climate_data(climate)
 
         # initialize list of trees
-        self.trees = []
+        self.trees_list = []
+        self.num_trees = num_trees
 
         # create species list
         self.species_list = self.create_species_list(species)
@@ -104,14 +109,14 @@ class Forest:
 
 
     def add_tree(self, tree):
-        self.trees.append(tree)
+        self.trees_list.append(tree)
 
 
     def get_climate(self):
         print("========== GETTING CLIMATE FOR THIS FOREST ==========")
         print("month, tmax (C), tmin (C), rain (cm), solar radiation (kwh/m2), num frost days,\
  soil water (cm/ft), max soil water (cm/ft), soil texture")
-        for month in self.climate:
+        for month in self.climate_list:
             print(f'{month.month}, {month.tmax}, {month.tmin}, {month.rain}, {month.solar_rad},\
  {month.frost_days}, {month.soil_water}, {month.max_soil_water}, {month.soil_texture}')
 
@@ -275,8 +280,7 @@ class Species:
         self.t_opt = float(t_opt)
         self.t_max = float(t_max)
         self.kf = float(kf)
-        self.fcax_700 = float(fcax_700)
-        self.kd = float(kd)
+        self.fcax_700 = float(fcax_700) #  assimilation enhancement factor at 700 ppm
         self.n_theta = float(n_theta)
         self.c_theta = float(c_theta)
         self.p2 = float(p2)
@@ -384,10 +388,10 @@ class Tree(Species):
                 using gaussian randomization
         """
         average = dimension
-        stddev = 2
+        stddev = 1 # TODO make this var more accurate
 
         new_dimension = Gaussian(average, stddev)
-        return new_dimension
+        return abs(new_dimension) # dimension can't be negative
     
 
     def create_tree_key(self):
@@ -416,15 +420,146 @@ class Tree(Species):
 =====================================================================
 """
 
-def create_forest(climate_fp, species_fp):
+def threepg(forest:Forest, t:int):
+    """
+    Input: Forest (climate, species), time interval (in months)
+    Output: Updated forest, with specific dimensions for each species
+            at the time interval?
+    """
+    # Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
+    # TODO need to figure out what these values should be, and if they should be 
+    #       different for each species
+    init_foliage_biomass = 1. #7.
+    init_root_biomass = 1. #9.
+    init_stem_biomass = 1. #20.
+
+    # for each of the species in the list:
+    for species in forest.species_list:
+        # initialize biomass
+        last_foliage_biomass = init_foliage_biomass
+        last_stem_biomass = init_stem_biomass
+        last_root_biomass = init_root_biomass
+
+        init_dbh = 0. #9 initial dbh-- was 18 TODO determine init_dbh
+
+        co2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
+        mean_vpd = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
+
+        # general for GPP
+        fertility_rating = 1 # fertility rating, ranges from 0 to 1
+        conversion_ratio = 0.47 # for making GPP into NPP
+
+        start_age = 5 # this is the stand's age in years at t = 0
+        start_month = 5 # this is the number of the month in which the simulation is beginning
+        start_year = 2024 # this is the year the simulation was started. TODO Used for prints only?
+        
+        num_trees_died = 0 # number of trees that died last month. TODO Use this for killing trees
+
+        # for each month in the time interval:
+        for month_t in range(t+1):
+            # get the current month, mean temp for the month
+            climate = forest.climate_list
+            current_month = ((start_month + month_t) % 12)-1 # jan - dec
+            if current_month == 0:
+                current_month = 11
+
+            mean_monthly_temp = (climate[current_month].tmax + climate[current_month].tmin)/2.
+
+            # === calculate mods (can be its own independent function i think) ===
+            # temperature mod (ft)
+            if (mean_monthly_temp > species.t_max) or (mean_monthly_temp < species.t_min):
+                # outside of growth range -> 0
+                ft = 0. # TODO temp mod
+            else:
+                # inside of growth range
+                base = (mean_monthly_temp - species.t_min / (species.t_opt - species.t_min) * (species.t_max - mean_monthly_temp)/(species.t_max - species.t_opt))
+                exp = (species.t_max - species.t_opt)/(species.t_opt - species.t_min)
+                ft = pow(base, exp) #TODO temp mod
+            
+            # frost mod
+            frost_days = climate[current_month].frost_days # aka df
+            ff = 1. - species.kf * (frost_days/30.) #TODO frost mod
+
+            # nutrition mod
+            fn = 1. - (1. - species.fn0) * pow((1. - fertility_rating), species.nfn) # TODO nutrition mod
+
+            # CO2 mod
+            fcax = species.fcax_700/(2. - species.fcax_700) # the species specific repsonses to changes in atmospheric co2
+            fc = fcax * co2/(350. * (fcax - 1.) + co2) # TODO c02 mod - is '350' need to be changed to co2? Research this formula
+
+            # physical mod - derived from fd, ftheta
+            # vapor pressure deficit (VPD) mod
+            fd = pow(E, (-species.kd * mean_vpd)) # TODO VPD mod
+
+            # soil water mod
+            base1 = ((1. - climate[current_month].soil_water)/climate[current_month].max_soil_water)/species.c_theta
+            ftheta = 1./(1. + pow(base1, species.n_theta))
+
+            physmod = fd * ftheta # TODO verify we don't need fa
+
+            # specific leaf area (SLA)
+            exp1 = pow(((start_age * 12.) + month_t)/species.t_sla_mid, 2.)
+            sla = species.sla_1 + (species.sla_0 - species.sla_1) * pow(E, (-1 * math.log(2.) * exp1))
+
+            # leaf area index (m^2 / m^2)
+            leaf_area_index = 0.1 * sla * last_foliage_biomass
+
+            # ground area coverage (GAC) by canopy
+            if start_age + month_t / 12 < species.tc:
+                ground_area_coverage = (start_age + month_t / 12) / species.tc
+            else:
+                ground_area_coverage = 1. # TODO verify this makes sense
+
+            # light absorption --> absorption photosynthetically active radiation (PAR)
+            # Often called o/pa
+            e_exp = (-species.k * leaf_area_index)/ground_area_coverage
+            par = (1 - pow(E, e_exp)) * 2.3 * ground_area_coverage * climate[current_month].solar_rad
+
+            # computing GPP and NPP
+            gpp = ft * ff * fn * fc * physmod * species.acx * par
+            npp = gpp * conversion_ratio
+
+            # partitioning ratios
+            # computing m --> linear function of FR (fertility rating)
+            m = species.m_0 + ((1. - species.m_0) * fertility_rating)
+
+            # root partitioning ratio
+            root_partition_ratio = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * physmod))
+
+            # compute np and ap, which are used to calculate pfs TODO what are these
+            np = (math.log(species.p20/species.p2))/math.log(10.) # equation A29
+            ap = species.p2/(pow(2., np)) # equation A29
+
+            b = 1 # TODO what is b?
+            pfs = ap * pow(b, np)
+
+            # getting remaining partitioning ratios
+            nf = (pfs * (1. - root_partition_ratio))/(1. + pfs) # TODO foliage partition
+            ns = (1. - root_partition_ratio)/(1. + pfs) # TODO soil partition
+
+            # mods, sla, gac, light absorption, gpp, npp, partitioning ratios, 
+            # litterfall, biomass
+
+            # ======================================================================
+
+            # check if we need to thin/kill some trees
+            # mortality
+            # max individual tree stem mass (wsx)
+            max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm)
+            # === compute dimensions based on parameters ===
+            # assign height, lcl, c_diameter, basal_area, dbh, all that
+
+    pass
+
+def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     # 1. Initialize forest
     # read in the climate data
     # initialize the forest based on climate data
-    forest = Forest(climate_fp, species_fp)
+    forest = Forest(climate_fp, species_fp, num_trees)
 
     # 2. Compute 3-PG data for each species
 
-    # 3. Create indivisual trees from species data
+    # 3. Create individual trees from species data
 
     # 4. Repeat for spawned/killed trees
 
@@ -434,7 +569,7 @@ def create_forest(climate_fp, species_fp):
 
 if __name__ == '__main__':
     # example usage here
-    forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv")
+    forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv", num_trees=1200)
     
     forest.get_climate()
     
