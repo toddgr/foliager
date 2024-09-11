@@ -20,6 +20,7 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
 
 import csv
 import random
+from gauss import Gaussian
 
 """
 =====================================================================
@@ -267,7 +268,7 @@ class Species:
         self.habitat = habitat.split('/')
 
         self.bark_texture = bark_texture.split('/')
-        self.q_bark_color = bark_color.split('/')
+        self.bark_color = bark_color.split('/')
 
         # Estimated from knowledge base:
         self.t_min = float(t_min)
@@ -334,7 +335,7 @@ class Species:
         print(f'\n========== {self.name} ({self.name_scientific}) ===========')
         print(f'{self.name} are a {self.q_deciduous_evergreen[0]} species, and are commonly found in {", ".join(self.habitat)} climates.')
         print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.tree_form)} form, with {", ".join(self.leaf_color)}, {", ".join(self.leaf_shape)}-type leaves.')
-        print(f'WOOD: The bark of {self.name} have a {" or ".join(self.bark_texture)} texture and tend to be {" and ".join(self.q_bark_color)} in color.\n')
+        print(f'WOOD: The bark of {self.name} have a {" or ".join(self.bark_texture)} texture and tend to be {" and ".join(self.bark_color)} in color.\n')
 
 
 class Tree(Species):
@@ -372,15 +373,42 @@ class Tree(Species):
         self.lcl = self.generate_from(species.lcl)
         self.c_diam = self.generate_from(species.c_diam)
 
+        self.key = self.create_tree_key() # e.g. Ponderosa243123
+
         pass
 
-    def generate_from(dimension):
+    def generate_from(self, dimension):
         """
         Input: Some dimension from the species
         Output: A slightly randomized variation of that dimension for the tree
+                using gaussian randomization
+        """
+        average = dimension
+        stddev = 2
+
+        new_dimension = Gaussian(average, stddev)
+        return new_dimension
+    
+
+    def create_tree_key(self):
+        """
+        Input: Unique position of the tree
+        Output: A string that will uniquely represent the tree.
+                First word of the name + x + y
+                i.e. Ponderosa184339
         """
 
-        return
+        name = self.name.split()[0] # First word of the species name
+        x = str(int(self.position[0] * 1000)) # ex. 0.183444 -> '183'
+        y = str(int(self.position[1] * 1000)) # ex. 0.234950 -> '234'
+
+        return name + x + y
+
+
+    def get_tree_info(self):
+        print(f'========== {self.key} ==========')
+        print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
+        print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
 
 """
 =====================================================================
@@ -412,3 +440,6 @@ if __name__ == '__main__':
     
     for species in forest.species_list:
         species.get_basic_info()
+
+    tree = Tree(forest.species_list[0], 0.234323432, 0.123219347093)
+    tree.get_tree_info()
