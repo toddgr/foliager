@@ -241,8 +241,8 @@ class Species:
     TODO implement 3-PG calculations here
     """
     def __init__(self, name, name_scientific, 
-                 q_leaf_shape, q_canopy_density, q_deciduous_evergreen, q_leaf_color, q_tree_form, 
-                 q_tree_roots, q_habitat, q_bark_texture, q_bark_color, 
+                 leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, 
+                 tree_roots, habitat, bark_texture, bark_color, 
                  t_min=0, t_opt=0, t_max=0, kf=0, fcax_700=0, kd=0, n_theta=0, c_theta=0, p2=0, p20=0, 
                  acx=0, sla_1=0, sla_0=0, t_sla_mid=0, fn0=0, nfn=0, tc=0, max_age=0, r_age=0, n_age=0, 
                  mf=0, mr=0, ms=0, yfx=0, yf0=0, tyf=0, yr=0, nr_max=0, nr_min=0, m_0=0, wsx1000=0, nm=0, 
@@ -256,18 +256,18 @@ class Species:
         self.name_scientific:str = name_scientific
 
         # Obtained from LLM (all are lists of strings):
-        self.leaf_shape = q_leaf_shape.split('/')
-        self.leaf_color = q_leaf_color.split('/')
+        self.leaf_shape = leaf_shape.split('/')
+        self.leaf_color = leaf_color.split('/')
 
-        self.tree_form = q_tree_form.split('/')
-        self.tree_roots = q_tree_roots.split('/')
+        self.tree_form = tree_form.split('/')
+        self.tree_roots = tree_roots.split('/')
 
-        self.canopy_density = q_canopy_density.split('/')
-        self.q_deciduous_evergreen = q_deciduous_evergreen.split('/')
-        self.habitat = q_habitat.split('/')
+        self.canopy_density = canopy_density.split('/')
+        self.q_deciduous_evergreen = deciduous_evergreen.split('/')
+        self.habitat = habitat.split('/')
 
-        self.bark_texture = q_bark_texture.split('/')
-        self.q_bark_color = q_bark_color.split('/')
+        self.bark_texture = bark_texture.split('/')
+        self.q_bark_color = bark_color.split('/')
 
         # Estimated from knowledge base:
         self.t_min = float(t_min)
@@ -321,6 +321,10 @@ class Species:
         
         # Data calculated from 3-PG:
         # species height, species dbh, species live crown length, species crown diameter
+        self.height = 0
+        self.dbh = 0
+        self.lcl = 0
+        self.c_diam = 0
 
 
     def get_basic_info(self):
@@ -356,8 +360,27 @@ class Tree(Species):
             - lcl
             - c_diam
         """
+        self.name = species.name
+        self.bark_texture = species.bark_texture
+        self.bark_color = species.bark_color
+        self.leaf_shape = species.leaf_shape
+        self.tree_form = species.tree_form
+
+        self.position = (x,y)
+        self.height = self.generate_from(species.height)
+        self.dbh = self.generate_from(species.dbh)
+        self.lcl = self.generate_from(species.lcl)
+        self.c_diam = self.generate_from(species.c_diam)
+
         pass
 
+    def generate_from(dimension):
+        """
+        Input: Some dimension from the species
+        Output: A slightly randomized variation of that dimension for the tree
+        """
+
+        return
 
 """
 =====================================================================
@@ -370,9 +393,6 @@ def create_forest(climate_fp, species_fp):
     # read in the climate data
     # initialize the forest based on climate data
     forest = Forest(climate_fp, species_fp)
-    forest.get_climate()
-    for species in forest.species_list:
-        species.get_basic_info()
 
     # 2. Compute 3-PG data for each species
 
@@ -381,8 +401,14 @@ def create_forest(climate_fp, species_fp):
     # 4. Repeat for spawned/killed trees
 
     # 5. Write to Blender
-    pass
+    
+    return forest
 
 if __name__ == '__main__':
     # example usage here
-    create_forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv")
+    forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv")
+    
+    forest.get_climate()
+    
+    for species in forest.species_list:
+        species.get_basic_info()
