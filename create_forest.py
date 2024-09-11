@@ -537,18 +537,84 @@ def threepg(forest:Forest, t:int):
             nf = (pfs * (1. - root_partition_ratio))/(1. + pfs) # TODO foliage partition
             ns = (1. - root_partition_ratio)/(1. + pfs) # TODO soil partition
 
-            # mods, sla, gac, light absorption, gpp, npp, partitioning ratios, 
-            # litterfall, biomass
+            # computer litterfall
+            current_age = start_age + t/12 # TODO start_age is in years? This feels wrong
+            # according to 3-PG manual, page 33:
+                # For deciduous species, the litterfall rates yf0 and yfx may be considered 
+                # to be 0 because all of the foliage is lost at the end of the growing season anyway.
+            if species.q_deciduous_evergreen == ['deciduous'] and (species.yf0 == 0 or species.yfx == 0):
+                litterfall_rate = 0  # otherwise we get a divide by zero
+            else: 
+                lf_exp = -(current_age/species.tyf) * math.log(1.0 + species.yfx/species.yf0)
+                litterfall_rate = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(E, lf_exp))
+
+            # compute biomass
+            # setting current = to last month's
+            curr_foliage_biomass = last_foliage_biomass
+            curr_stem_biomass = last_stem_biomass
+            curr_root_biomass = last_root_biomass
+            
+            # increment the current using last month's values
+            curr_foliage_biomass += (nf * npp) - (litterfall_rate * last_foliage_biomass) - (species.mf * (last_foliage_biomass / forest.num_trees) * num_trees_died)
+            curr_root_biomass += (root_partition_ratio * npp) - (species.yr * last_root_biomass) - (species.mr * (last_root_biomass / forest.num_trees) * num_trees_died)
+            curr_stem_biomass += (ns * npp) - (species.ms * (last_stem_biomass / forest.num_trees) * num_trees_died)
+
+            # making the current into last month's for the next month
+            if curr_foliage_biomass > 0.:
+                last_foliage_biomass = curr_foliage_biomass
+            if curr_stem_biomass > 0.:
+                last_stem_biomass = curr_stem_biomass
+            if curr_root_biomass > 0.:
+                last_root_biomass = curr_root_biomass
+
+            # resetting TODO should we reset this here?
+            num_trees_died = 0
 
             # ======================================================================
 
             # check if we need to thin/kill some trees
             # mortality
             # max individual tree stem mass (wsx)
-            max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm)
-            # === compute dimensions based on parameters ===
-            # assign height, lcl, c_diameter, basal_area, dbh, all that
+            max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/forest.num_trees), species.nm)
+            while last_stem_biomass / num_trees > max_ind_tree_stem_mass_wsx and num_trees > 0:
+                # need to thin
+                num_trees -= 1  # decreasing n
+                num_trees_died += 1 # increasing delta_n counter
+                max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/num_trees), species.nm) # recalculating wsx
 
+            # === compute dimensions based on parameters ===
+            # TODO add C index here
+            # TODO implement relative height
+
+            # calculating b from mean individual stem mass (inversion of A65 of user manual)
+            ind_stem_mass_iws = last_stem_biomass / num_trees # individual stem mass
+            b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) *100
+
+            # bias correction to adjust b TODO implement later?
+
+            # mean tree height TODO what is the difference between species formula and individual tree formula?
+            mean_tree_height = 1.3 + species.ah * pow(E, (-species.nhb/b)) + species.nhc * b # for single tree species
+
+            # live crown length TODO same thing
+            live_crown_length = 1.3 + species.ahl * pow(E, (-species.nhlb/b)) + species.nhlc * b
+
+            # crown diameter
+            crown_diameter = species.ak * pow(b, species.nkb) * pow(mean_tree_height, species.nkh)
+
+            # basal area
+            ba = (PI * b * b)/40000
+
+            # stand volume TODO not used
+            stand_volume = species.av * pow(b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(b * b * mean_tree_height, species.nvbh) * forest.num_trees
+    
+            # diameter at breast height
+            dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
+
+            # Assign to species
+            species.height = mean_tree_height
+            species.lcl = live_crown_length
+            species.c_diam = crown_diameter
+            species.dbh = dbh
     pass
 
 def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
