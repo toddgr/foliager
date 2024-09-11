@@ -250,20 +250,23 @@ class Species:
                  nvb=0, nvh=0, nvbh=0, ):
         """
         Attributes are a combination of LLM responses (qualitative) and parameter estimation (quantitative)
-        Input from parameter estimation function output
+        Input from parameter estimation function output, quantitative values default to 0 if not found
         """
-        self.name = name
+        self.name:str = name
+        self.name_scientific:str = name_scientific
 
-        # Obtained from LLM:
-        self.name_scientific = name_scientific
-        self.q_leaf_shape = q_leaf_shape.split('/')
-        self.q_canopy_density = q_canopy_density.split('/')
+        # Obtained from LLM (all are lists of strings):
+        self.leaf_shape = q_leaf_shape.split('/')
+        self.leaf_color = q_leaf_color.split('/')
+
+        self.tree_form = q_tree_form.split('/')
+        self.tree_roots = q_tree_roots.split('/')
+
+        self.canopy_density = q_canopy_density.split('/')
         self.q_deciduous_evergreen = q_deciduous_evergreen.split('/')
-        self.q_leaf_color = q_leaf_color.split('/')
-        self.q_tree_form = q_tree_form.split('/')
-        self.q_tree_roots = q_tree_roots.split('/')
-        self.q_habitat = q_habitat.split('/')
-        self.q_bark_texture = q_bark_texture.split('/')
+        self.habitat = q_habitat.split('/')
+
+        self.bark_texture = q_bark_texture.split('/')
         self.q_bark_color = q_bark_color.split('/')
 
         # Estimated from knowledge base:
@@ -315,16 +318,19 @@ class Species:
         self.nvb = float(nvb)
         self.nvh = float(nvh)
         self.nvbh = float(nvbh)
-        pass
+        
+        # Data calculated from 3-PG:
+        # species height, species dbh, species live crown length, species crown diameter
+
 
     def get_basic_info(self):
         """
         Prints the qualitative data about a tree species. Just for fun, but also for fact checking.
         """
-        print(f'========== {self.name} ({self.name_scientific}) ===========')
-        print(f'{self.name} are a {self.q_deciduous_evergreen[0]} species, and are commonly found in {", ".join(self.q_habitat)} climates.')
-        print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.q_tree_form)} form, with {", ".join(self.q_leaf_color)}, {", ".join(self.q_leaf_shape)}-type leaves.')
-        print(f'WOOD: The bark of {self.name} have a {" or ".join(self.q_bark_texture)} texture and tend to be {" and ".join(self.q_bark_color)} in color.\n')
+        print(f'\n========== {self.name} ({self.name_scientific}) ===========')
+        print(f'{self.name} are a {self.q_deciduous_evergreen[0]} species, and are commonly found in {", ".join(self.habitat)} climates.')
+        print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.tree_form)} form, with {", ".join(self.leaf_color)}, {", ".join(self.leaf_shape)}-type leaves.')
+        print(f'WOOD: The bark of {self.name} have a {" or ".join(self.bark_texture)} texture and tend to be {" and ".join(self.q_bark_color)} in color.\n')
 
 
 class Tree(Species):
@@ -335,6 +341,21 @@ class Tree(Species):
     Initialization occurs when the (x,y) coordinates are generated
     """
     def __init__(self, species, x, y):
+        """
+        Attributes:
+            Inherited
+            - name
+            - bark_texture
+            - bark_color
+            - leaf_shape
+            - tree_form
+            Calculated
+            - position (x, y) -> from coordinate generator
+            - height -> from species, with randomization
+            - dbh
+            - lcl
+            - c_diam
+        """
         pass
 
 
@@ -353,7 +374,7 @@ def create_forest(climate_fp, species_fp):
     for species in forest.species_list:
         species.get_basic_info()
 
-    # 2. Compute data for each species
+    # 2. Compute 3-PG data for each species
 
     # 3. Create indivisual trees from species data
 
