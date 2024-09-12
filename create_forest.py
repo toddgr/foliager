@@ -399,7 +399,7 @@ class Tree(Species):
         """
         Input: Unique position of the tree
         Output: A string that will uniquely represent the tree.
-                First word of the name + x + y
+                First word of the species name + x + y
                 i.e. Ponderosa184339
         """
 
@@ -421,6 +421,19 @@ class Tree(Species):
 =====================================================================
 """
 
+init_dbh = 0. #9 initial dbh-- was 18 TODO determine init_dbh
+
+co2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
+mean_vpd = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
+
+# general for GPP
+fertility_rating = 1 # fertility rating, ranges from 0 to 1
+conversion_ratio = 0.47 # for making GPP into NPP
+
+start_age = 5 # this is the stand's age in years at t = 0
+start_month = 5 # this is the number of the month in which the simulation is beginning
+start_year = 2024 # this is the year the simulation was started. TODO Used for prints only?
+
 def threepg(forest:Forest, t:int):
     """
     Input: Forest (climate, species), time interval (in months)
@@ -440,19 +453,6 @@ def threepg(forest:Forest, t:int):
         last_foliage_biomass = init_foliage_biomass
         last_stem_biomass = init_stem_biomass
         last_root_biomass = init_root_biomass
-
-        init_dbh = 0. #9 initial dbh-- was 18 TODO determine init_dbh
-
-        co2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
-        mean_vpd = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
-
-        # general for GPP
-        fertility_rating = 1 # fertility rating, ranges from 0 to 1
-        conversion_ratio = 0.47 # for making GPP into NPP
-
-        start_age = 5 # this is the stand's age in years at t = 0
-        start_month = 5 # this is the number of the month in which the simulation is beginning
-        start_year = 2024 # this is the year the simulation was started. TODO Used for prints only?
         
         num_trees_died = 0 # number of trees that died last month. TODO Use this for killing trees
 
@@ -464,39 +464,9 @@ def threepg(forest:Forest, t:int):
             if current_month == 0:
                 current_month = 11
 
-            mean_monthly_temp = (climate[current_month].tmax + climate[current_month].tmin)/2.
-
-            # === calculate mods (can be its own independent function i think) ===
-            # temperature mod (ft)
-            if (mean_monthly_temp > species.t_max) or (mean_monthly_temp < species.t_min):
-                # outside of growth range -> 0
-                ft = 0. # TODO temp mod
-            else:
-                # inside of growth range
-                base = (mean_monthly_temp - species.t_min / (species.t_opt - species.t_min) * (species.t_max - mean_monthly_temp)/(species.t_max - species.t_opt))
-                exp = (species.t_max - species.t_opt)/(species.t_opt - species.t_min)
-                ft = pow(base, exp) #TODO temp mod
-            
-            # frost mod
-            frost_days = climate[current_month].frost_days # aka df
-            ff = 1. - species.kf * (frost_days/30.) #TODO frost mod
-
-            # nutrition mod
-            fn = 1. - (1. - species.fn0) * pow((1. - fertility_rating), species.nfn) # TODO nutrition mod
-
-            # CO2 mod
-            fcax = species.fcax_700/(2. - species.fcax_700) # the species specific repsonses to changes in atmospheric co2
-            fc = fcax * co2/(350. * (fcax - 1.) + co2) # TODO c02 mod - is '350' need to be changed to co2? Research this formula
-
-            # physical mod - derived from fd, ftheta
-            # vapor pressure deficit (VPD) mod
-            fd = pow(E, (-species.kd * mean_vpd)) # TODO VPD mod
-
-            # soil water mod
-            base1 = ((1. - climate[current_month].soil_water)/climate[current_month].max_soil_water)/species.c_theta
-            ftheta = 1./(1. + pow(base1, species.n_theta))
-
-            physmod = fd * ftheta # TODO verify we don't need fa
+            # ========== calculate mods (can be its own independent function i think) ====================================
+            env_mods, phys_mod = calculate_mods(climate[current_month], species) # env_mods = ft * ff * fn * fc
+            # ============================================================================================================
 
             # specific leaf area (SLA)
             exp1 = pow(((start_age * 12.) + month_t)/species.t_sla_mid, 2.)
@@ -517,7 +487,7 @@ def threepg(forest:Forest, t:int):
             par = (1 - pow(E, e_exp)) * 2.3 * ground_area_coverage * climate[current_month].solar_rad
 
             # computing GPP and NPP
-            gpp = ft * ff * fn * fc * physmod * species.acx * par
+            gpp = env_mods * phys_mod * species.acx * par
             npp = gpp * conversion_ratio
 
             # partitioning ratios
@@ -525,7 +495,7 @@ def threepg(forest:Forest, t:int):
             m = species.m_0 + ((1. - species.m_0) * fertility_rating)
 
             # root partitioning ratio
-            root_partition_ratio = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * physmod))
+            root_partition_ratio = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * phys_mod))
 
             # compute np and ap, which are used to calculate pfs TODO what are these
             np = (math.log(species.p20/species.p2))/math.log(10.) # equation A29
@@ -618,6 +588,46 @@ def threepg(forest:Forest, t:int):
             species.dbh = dbh
     
     return forest
+
+
+def calculate_mods(curr_climate, species):
+    """
+    Input: Current climate conditions
+    """
+    mean_monthly_temp = (curr_climate.tmax + curr_climate.tmin)/2.
+    # temperature mod (ft)
+    if (mean_monthly_temp > species.t_max) or (mean_monthly_temp < species.t_min):
+        # outside of growth range -> 0
+        ft = 0. # TODO temp mod
+    else:
+        # inside of growth range
+        base = (mean_monthly_temp - species.t_min / (species.t_opt - species.t_min) * (species.t_max - mean_monthly_temp)/(species.t_max - species.t_opt))
+        exp = (species.t_max - species.t_opt)/(species.t_opt - species.t_min)
+        ft = pow(base, exp) #TODO temp mod
+    
+    # frost mod
+    frost_days = curr_climate.frost_days # aka df
+    frost_mod = 1. - species.kf * (frost_days/30.) #TODO frost mod
+
+    # nutrition mod
+    nutrition_mod = 1. - (1. - species.fn0) * pow((1. - fertility_rating), species.nfn) # TODO nutrition mod
+
+    # CO2 mod
+    fcax = species.fcax_700/(2. - species.fcax_700) # the species specific repsonses to changes in atmospheric co2
+    co2_mod = fcax * co2/(350. * (fcax - 1.) + co2) # TODO c02 mod - is '350' need to be changed to co2? Research this formula
+
+    # physical mod - derived from fd, ftheta
+    # vapor pressure deficit (VPD) mod
+    vpd_mod = pow(E, (-species.kd * mean_vpd)) # TODO VPD mod
+
+    # soil water mod
+    base1 = ((1. - curr_climate.soil_water)/curr_climate.max_soil_water)/species.c_theta
+    soil_water_mod = 1./(1. + pow(base1, species.n_theta))
+
+    phys_mod = vpd_mod * soil_water_mod # TODO verify we don't need fa (age_mod)
+
+    return ft * frost_mod * nutrition_mod * co2_mod, phys_mod
+
 
 def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     # 1. Initialize forest
