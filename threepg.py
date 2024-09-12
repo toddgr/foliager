@@ -388,7 +388,7 @@ def compute(environment_data_filename, speciesdata_filename, t, num_trees=1200):
 
             # computing pfs
             b = 1
-            pfs = ap * pow(b, np)
+            pfs = ap * pow(b, np) # Ratio of soil biomass : foliage biomass
 
             # getting remaining partitioning ratios
             nf = (pfs * (1. - root_partition_ratio))/(1. + pfs)

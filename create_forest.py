@@ -286,7 +286,7 @@ class Species:
         self.bark_color = bark_color.split('/')
 
         # Estimated from knowledge base:
-        self.t_min = float(t_min)
+        self.t_min = float(t_min) # Minimum temperature for growth
         self.t_opt = float(t_opt)
         self.t_max = float(t_max)
         self.kf = float(kf)
@@ -337,6 +337,8 @@ class Species:
 
         # Data calculated from 3-PG:
         # species height, species dbh, species live crown length, species crown diameter
+        self.b = 0
+        self.ba = 0
         self.height = 0
         self.dbh = 0
         self.lcl = 0
@@ -402,7 +404,7 @@ class Tree():
                 using gaussian randomization
         """
         average = dimension
-        stddev = 1 # TODO make this var more accurate
+        stddev = (dimension + 0.005) / 4 # TODO make this var more accurate
 
         new_dimension = Gaussian(average, stddev)
         return abs(new_dimension) # dimension can't be negative
@@ -447,7 +449,7 @@ FERTILITY_RATING = 1 # fertility rating, ranges from 0 to 1
 CONVERSION_RATIO = 0.47 # for making GPP into NPP
 
 START_AGE = 5 # this is the stand's age in years at t = 0
-START_MONTH = 5 # this is the number of the month in which the simulation is beginning
+START_MONTH = 1 # this is the number of the month in which the simulation is beginning
 START_YEAR = 2024 # this is the year the simulation was started. TODO Used for prints only?
 
 def threepg(forest:Forest, t:int):
@@ -458,10 +460,10 @@ def threepg(forest:Forest, t:int):
     """
     # Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
     # TODO need to figure out what these values should be, and if they should be
-    #       different for each species
-    init_foliage_biomass = 1. #7.
-    init_root_biomass = 1. #9.
-    init_stem_biomass = 1. #20.
+    #       different for each species or even each tree
+    init_foliage_biomass = 7.
+    init_root_biomass = 9.
+    init_stem_biomass = 20.
 
     # for each of the species in the list:
     for species in forest.species_list:
@@ -480,9 +482,7 @@ def threepg(forest:Forest, t:int):
             if current_month == 0:
                 current_month = 11
 
-            # ========== calculate mods (can be its own independent function i think) ====================================
             env_mods, phys_mod = calculate_mods(climate[current_month], species) # env_mods = ft * ff * fn * fc
-            # ============================================================================================================
 
             # specific leaf area (SLA)
             exp1 = pow(((START_AGE * 12.) + month_t)/species.t_sla_mid, 2.)
@@ -557,8 +557,6 @@ def threepg(forest:Forest, t:int):
             # resetting TODO should we reset this here?
             num_trees_died = 0
 
-            # ======================================================================
-
             # check if we need to thin/kill some trees
             # mortality
             # max individual tree stem mass (wsx)
@@ -569,39 +567,20 @@ def threepg(forest:Forest, t:int):
                 num_trees_died += 1 # increasing delta_n counter
                 max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/forest.num_trees), species.nm) # recalculating wsx
 
-            # === compute dimensions based on parameters ===
-            # TODO add C index here
-            # TODO implement relative height
-
-            # calculating b from mean individual stem mass (inversion of A65 of user manual)
+                # calculating b from mean individual stem mass (inversion of A65 of user manual)
             ind_stem_mass_iws = last_stem_biomass / forest.num_trees # individual stem mass
-            b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) *100
-
-            # bias correction to adjust b TODO implement later?
-
-            # mean tree height TODO what is the difference between species formula and individual tree formula?
-            mean_tree_height = 1.3 + species.ah * pow(E, (-species.nhb/b)) + species.nhc * b # for single tree species
-
-            # live crown length TODO same thing
-            live_crown_length = 1.3 + species.ahl * pow(E, (-species.nhlb/b)) + species.nhlc * b
-
-            # crown diameter
-            crown_diameter = species.ak * pow(b, species.nkb) * pow(mean_tree_height, species.nkh)
+            species.b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) * 100 # TODO what is b?
 
             # basal area
-            ba = (PI * b * b)/40000
+            species.ba = (PI * species.b * species.b)/40000
 
-            # stand volume TODO not used
-            stand_volume = species.av * pow(b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(b * b * mean_tree_height, species.nvbh) * forest.num_trees
+    # TODO compute competition index here
 
-            # diameter at breast height
-            dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
 
-            # Assign to species
-            species.height = mean_tree_height
-            species.lcl = live_crown_length
-            species.c_diam = crown_diameter
-            species.dbh = dbh
+    for species in forest.species_list:
+        # calculate height, dbh, live crown length, crown diameter for species
+        # TODO using C
+        compute_dimensions(species)
 
     return forest
 
@@ -615,12 +594,12 @@ def calculate_mods(curr_climate, species):
     # temperature mod (ft)
     if (mean_monthly_temp > species.t_max) or (mean_monthly_temp < species.t_min):
         # outside of growth range -> 0
-        ft = 0. # TODO temp mod
+        temp_mod = 0. # TODO temp mod
     else:
         # inside of growth range
         base = (mean_monthly_temp - species.t_min / (species.t_opt - species.t_min) * (species.t_max - mean_monthly_temp)/(species.t_max - species.t_opt))
         exp = (species.t_max - species.t_opt)/(species.t_opt - species.t_min)
-        ft = pow(base, exp) #TODO temp mod
+        temp_mod = pow(base, exp) #TODO temp mod
 
     # frost mod
     frost_days = curr_climate.frost_days # aka df
@@ -643,7 +622,41 @@ def calculate_mods(curr_climate, species):
 
     phys_mod = vpd_mod * soil_water_mod # TODO verify we don't need fa (age_mod)
 
-    return ft * frost_mod * nutrition_mod * co2_mod, phys_mod
+    return temp_mod * frost_mod * nutrition_mod * co2_mod, phys_mod
+
+
+def compute_dimensions(species):
+    """
+    Input: 
+    Output:
+    TODO the dimensions outputted don't always make sense...
+    """
+    # === compute dimensions based on parameters ===
+    # TODO add C index here
+    # TODO implement relative height
+
+    # bias correction to adjust b TODO implement later?
+
+    # mean tree height TODO what is the difference between species formula and individual tree formula?
+    mean_tree_height = 1.3 + species.ah * pow(E, (-species.nhb/species.b)) + species.nhc * species.b # for single tree species
+
+    # live crown length TODO same thing
+    live_crown_length = 1.3 + species.ahl * pow(E, (-species.nhlb/species.b)) + species.nhlc * species.b
+
+    # crown diameter
+    crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
+
+    # stand volume TODO not used
+    #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
+
+    # diameter at breast height
+    dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
+
+    # Assign to species
+    species.height = mean_tree_height
+    species.lcl = live_crown_length
+    species.c_diam = crown_diameter
+    species.dbh = dbh
 
 
 def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
@@ -652,15 +665,15 @@ def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     Output: File containing tree specifications for use in Blender.
     """
     # 1. Initialize forest
-    # read in the climate data
-    # initialize the forest based on climate data
+    #    read in the climate data
+    #    initialize the forest based on climate data
     forest = Forest(climate_fp, species_fp, num_trees)
 
     # 2. Compute 3-PG data for each species
-    forest.get_climate()
     forest = threepg(forest, t)
 
     # 3. Create individual trees from species data
+
 
     # 4. Repeat for spawned/killed trees
 
@@ -679,5 +692,5 @@ if __name__ == '__main__':
     for each_species in example_forest.species_list:
         each_species.get_basic_info()
 
-    single_tree = Tree(example_forest.species_list[1], 0.234323432, 0.123219347093)
+    single_tree = Tree(example_forest.species_list[3], 0.234323432, 0.123219347093)
     single_tree.get_tree_info()
