@@ -650,7 +650,7 @@ def compute_dimensions(species):
     #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
 
     # diameter at breast height
-    dbh = math.sqrt((4 * ba) / PI) # trunk of the standing trees
+    dbh = math.sqrt((4 * species.ba) / PI) # trunk of the standing trees
 
     # Assign to species
     species.height = mean_tree_height
