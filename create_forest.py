@@ -219,8 +219,6 @@ def compute_dimensions(forest):
         species = tree.species
 
         # === compute dimensions based on parameters ===
-        # TODO implement relative height
-        # ==============================================
 
         # bias correction to adjust b TODO implement later?
 
