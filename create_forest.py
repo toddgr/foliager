@@ -41,7 +41,7 @@ CONVERSION_RATIO = 0.47 # for making GPP into NPP
 
 START_AGE = 5 # this is the stand's age in years at t = 0
 START_MONTH = 1 # this is the number of the month in which the simulation is beginning
-START_YEAR = 2024 # this is the year the simulation was started. TODO Used for prints only?
+START_YEAR = 1960 # this is the year the simulation was started. TODO Used for prints only?
 
 def threepg(forest:Forest, t:int):
     """
@@ -73,7 +73,12 @@ def threepg(forest:Forest, t:int):
             if current_month == 0:
                 current_month = 11
 
-            env_mods, phys_mod = calculate_mods(climate[current_month], species) # env_mods = ft * ff * fn * fc
+            # function to calculate co2 levels on earth based on the season and year.
+            # estimated from NASA data on Global Climate Change TODO cite source here
+            x = START_YEAR + ((START_MONTH + month_t) / 12) # TODO verify this is correct
+            co2 = ((98/60) * x - 2885.33) + 3 * math.sin(7 * x)
+
+            env_mods, phys_mod = calculate_mods(climate[current_month], species, co2) # env_mods = ft * ff * fn * fc
 
             # specific leaf area (SLA)
             exp1 = pow(((START_AGE * 12.) + month_t)/species.t_sla_mid, 2.)
@@ -162,18 +167,10 @@ def threepg(forest:Forest, t:int):
             ind_stem_mass_iws = last_stem_biomass / forest.num_trees # individual stem mass
             species.b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) * 100 # TODO what is b?
 
-            # basal area
-            # species.ba = (PI * species.b * species.b)/40000 TODO remove this
-
-    #for species in forest.species_list:
-        # calculate height, dbh, live crown length, crown diameter for species
-        # TODO using C
-        #compute_dimensions(species)
-
     return forest
 
 
-def calculate_mods(curr_climate, species):
+def calculate_mods(curr_climate, species, co2):
     """
     Input: Current climate conditions
     Output: Computed modifiers for use in GPP/NPP computation.
@@ -198,7 +195,7 @@ def calculate_mods(curr_climate, species):
 
     # CO2 mod
     fcax = species.fcax_700/(2. - species.fcax_700) # the species specific repsonses to changes in atmospheric co2
-    co2_mod = fcax * CO2/(350. * (fcax - 1.) + CO2) # TODO c02 mod - is '350' need to be changed to co2? Research this formula
+    co2_mod = fcax * co2/(350. * (fcax - 1.) + co2) # TODO c02 mod - is '350' need to be changed to co2? Research this formula
 
     # physical mod - derived from fd, ftheta
     # vapor pressure deficit (VPD) mod
