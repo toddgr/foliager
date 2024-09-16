@@ -116,6 +116,11 @@ class Forest:
         self.trees_list.append(tree)
 
 
+    def print_tree_list(self):
+        for tree in self.trees_list:
+            print(f'{tree.key}: {tree.position}')
+
+
     def get_climate(self):
         """
         Prints a list of climate information for each month.
