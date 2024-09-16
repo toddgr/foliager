@@ -34,7 +34,6 @@ PI = 3.1415
 INIT_DBH = 0. #9 initial dbh-- was 18 TODO determine init_dbh
 
 CO2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
-MEAN_VPD = 1. # mean daytime VPD (kPa) TODO Implement estimated VPD function and put this in monthly climate data
 
 # general for GPP
 FERTILITY_RATING = 1 # fertility rating, ranges from 0 to 1
@@ -203,7 +202,7 @@ def calculate_mods(curr_climate, species):
 
     # physical mod - derived from fd, ftheta
     # vapor pressure deficit (VPD) mod
-    vpd_mod = pow(E, (-species.kd * MEAN_VPD)) # TODO VPD mod
+    vpd_mod = pow(E, (-species.kd * curr_climate.vpd)) # TODO VPD mod
 
     # soil water mod
     base1 = ((1. - curr_climate.soil_water)/curr_climate.max_soil_water)/species.c_theta
@@ -222,16 +221,12 @@ def compute_dimensions(forest):
     """
 
     forest.compute_competition_indices()
-
     for tree in forest.trees_list:
         species = tree.species
 
         # === compute dimensions based on parameters ===
-        # TODO compute competition index here
         # TODO implement relative height
         # ==============================================
-
-        # 
 
         # bias correction to adjust b TODO implement later?
 
@@ -241,11 +236,11 @@ def compute_dimensions(forest):
 
         # live crown length TODO same thing
         # live_crown_length = 1.3 + species.ahl * pow(np.e, (-species.nhlb/species.b)) + species.nhlc * species.b
-        live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(species.l, species.nhll) * pow(tree.c, species.nhlc) # A.62
+        live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(tree.c, species.nhlc) # A.62
 
         # crown diameter
         #crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
-        crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh) * pow(tree.c, species.nkc) # A.63
+        crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh) * pow(tree.c, 0) # A.63
 
         # stand volume TODO not used
         #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
@@ -277,7 +272,6 @@ def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     forest = plot_trees(forest, num_trees=num_trees) # TODO clean up parameterization
     # Compute dimensions for each tree based on competition index
     compute_dimensions(forest)
-    forest.print_tree_list()
 
     # 4. Repeat for spawned/killed trees
 
@@ -290,9 +284,9 @@ if __name__ == '__main__':
     # example usage here
     example_forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv", num_trees=100)
 
-    example_forest.get_climate()
-    example_forest.climate_list[0].get_month_climate()
+    #example_forest.get_climate()
+    #example_forest.climate_list[0].get_month_climate()
 
-    for each_species in example_forest.species_list:
-        each_species.get_basic_info()
+    #for each_species in example_forest.species_list:
+        #each_species.get_basic_info()
 

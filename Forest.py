@@ -113,10 +113,6 @@ class Forest:
         total_basal_area = sum(tree.ba for tree in self.trees_list)
         basal_area_list = sorted(self.trees_list, key=lambda tree: tree.ba)
         
-        print("BASAL AREA LIST:")
-        for tree in basal_area_list:
-            print(tree.ba)
-
         # get the sum of the basal area for all the trees greater than the current tree
         i = 1
         for tree in self.trees_list:
@@ -130,7 +126,7 @@ class Forest:
         A class that holds information on the climate for one month of the year.
         A ClimateByMonth instance is initialized for each month of the year.
         """
-        def __init__(self, month:str, tmax:int, tmin:int, r:float, sr:float, fd:int, st:str):
+        def __init__(self, month:str, tmax:int, tmin:int, r:float, sr:float, fd:int, st:str, vpd:float):
             """
             Attributes:
                 - month : str
@@ -142,6 +138,7 @@ class Forest:
                 - soil_texture : str
                 - soil_water : float        Estimated with estimate_soil_water
                 - max_soil_water : float
+                - vpd: float
             """
             self.month = month          # January, February, etc.
             self.tmax = int(tmax)       # Average maximum temperature (celsius)
@@ -150,6 +147,7 @@ class Forest:
             self.solar_rad = float(sr)         # Average solar radiation (kwh/m2)
             self.frost_days = int(fd)        # Average number of frost days (int)
             self.soil_texture = st
+            self.vpd = float(vpd)
 
             self.soil_water, self.max_soil_water = self.estimate_soil_water(st)
 
