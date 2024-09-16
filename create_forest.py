@@ -24,6 +24,7 @@ import random
 import math
 from gauss import Gaussian
 
+
 E = 2.718
 PI = 3.1415
 
@@ -337,6 +338,7 @@ class Species:
 
         # Data calculated from 3-PG:
         # species height, species dbh, species live crown length, species crown diameter
+        # TODO delete these we don't need them
         self.b = 0
         self.ba = 0
         self.height = 0
@@ -574,9 +576,6 @@ def threepg(forest:Forest, t:int):
             # basal area
             species.ba = (PI * species.b * species.b)/40000
 
-    # TODO compute competition index here
-
-
     for species in forest.species_list:
         # calculate height, dbh, live crown length, crown diameter for species
         # TODO using C
@@ -632,7 +631,7 @@ def compute_dimensions(species):
     TODO the dimensions outputted don't always make sense...
     """
     # === compute dimensions based on parameters ===
-    # TODO add C index here
+    # TODO compute competition index here
     # TODO implement relative height
 
     # bias correction to adjust b TODO implement later?
@@ -673,7 +672,8 @@ def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     forest = threepg(forest, t)
 
     # 3. Create individual trees from species data
-
+    for tree_pos in range(num_trees):
+        pass
 
     # 4. Repeat for spawned/killed trees
 
