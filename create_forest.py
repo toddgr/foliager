@@ -31,7 +31,7 @@ PI = 3.1415
 =====================================================================
 """
 
-INIT_DBH = 0. #9 initial dbh-- was 18 TODO determine init_dbh
+INIT_DBH = 0. #9 initial dbh-- was 18 TODO determine init_dbh, and what units?
 
 CO2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
 
@@ -149,9 +149,6 @@ def threepg(forest:Forest, t:int):
                 last_stem_biomass = curr_stem_biomass
             if curr_root_biomass > 0.:
                 last_root_biomass = curr_root_biomass
-
-            # resetting TODO should we reset this here?
-            num_trees_died = 0
 
             # check if we need to thin/kill some trees
             # mortality
