@@ -23,7 +23,7 @@ from parse_tree_input import  csv_file_to_string
 from junk_drawer.plot_trees_random import init_trees
 from junk_drawer.threepg_species_data import parse_species_data, get_tree_names
 from parse_csv_file import *
-from threepg import threepg
+from junk_drawer.threepg import threepg
 from param_estimator import estimate_tree_list
 #from blender_place_trees import gen_trees_in_blender
 

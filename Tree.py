@@ -8,7 +8,84 @@ Description: Initializes the coordinates for generated trees using scatter plot 
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import distance
-from create_forest import Forest, Tree # TODO This is gonna cause problems I just know it
+
+from gauss import Gaussian
+from Forest import Forest
+
+class Tree():
+    """
+    Holds information about each individual tree in the forest.
+    Inherits information about its species
+    Calculates unique dimensions on initialization
+    Initialization occurs when the (x,y) coordinates are generated
+    TODO break up into two classes, Qualities and dimensions?
+    """
+    def __init__(self, species, x, y):
+        """
+        Attributes:
+            Inherited
+            - name
+            - bark_texture
+            - bark_color
+            - leaf_shape
+            - tree_form
+            Calculated
+            - position (x, y) -> from coordinate generator
+            - height -> from species, with randomization
+            - dbh
+            - lcl
+            - c_diam
+        """
+        self.name = species.name
+        self.bark_texture = species.bark_texture
+        self.bark_color = species.bark_color
+        self.leaf_shape = species.leaf_shape
+        self.tree_form = species.tree_form
+
+        self.position = (x,y)
+        self.height = self.generate_from(species.height)
+        self.dbh = self.generate_from(species.dbh)
+        self.lcl = self.generate_from(species.lcl)
+        self.c_diam = self.generate_from(species.c_diam)
+
+        self.key = self.create_tree_key() # e.g. Ponderosa243123
+
+
+    def generate_from(self, dimension):
+        """
+        Input: Some dimension from the species
+        Output: A slightly randomized variation of that dimension for the tree
+                using gaussian randomization
+        """
+        average = dimension
+        stddev = (dimension + 0.005) / 4 # TODO make this var more accurate
+
+        new_dimension = Gaussian(average, stddev)
+        return abs(new_dimension) # dimension can't be negative
+
+
+    def create_tree_key(self):
+        """
+        Input: Unique position of the tree
+        Output: A string that will uniquely represent the tree.
+                First word of the species name + x + y
+                i.e. Ponderosa184339
+        """
+
+        name = self.name.split()[0] # First word of the species name
+        x = str(int(self.position[0] * 1000)) # ex. 0.183444 -> '183'
+        y = str(int(self.position[1] * 1000)) # ex. 0.234950 -> '234'
+
+        return name + x + y
+
+
+    def get_tree_info(self):
+        """
+        Prints basic information about a tree's dimensions.
+        """
+        print(f'========== {self.key} ==========')
+        print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
+        print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
 
 def plot_trees(forest:Forest, plot=False, num_trees=50, min_distance=0.05):
     """
