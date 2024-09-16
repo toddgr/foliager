@@ -192,11 +192,11 @@ def calculate_mods(curr_climate, species, co2):
 
     # CO2 mod
     fcax = species.fcax_700/(2. - species.fcax_700) # the species specific repsonses to changes in atmospheric co2
-    co2_mod = fcax * co2/(350. * (fcax - 1.) + co2) # TODO c02 mod - is '350' need to be changed to co2? Research this formula
+    co2_mod = fcax * co2/(350. * (fcax - 1.) + co2)
 
     # physical mod - derived from fd, ftheta
     # vapor pressure deficit (VPD) mod
-    vpd_mod = pow(E, (-species.kd * curr_climate.vpd)) # TODO VPD mod
+    vpd_mod = pow(E, (-species.kd * curr_climate.vpd)) # TODO VPD mod may be causing issues
 
     # soil water mod
     base1 = ((1. - curr_climate.soil_water)/curr_climate.max_soil_water)/species.c_theta
