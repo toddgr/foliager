@@ -102,6 +102,29 @@ class Forest:
  {month.frost_days}, {month.soil_water}, {month.max_soil_water}, {month.soil_texture}')
 
 
+    def compute_competition_indices(self):
+        """
+        Calculates the competition index for each tree in the forest using the BAL theorem.
+        """
+
+        # Sort the list of trees by basal area (smallest to largest)
+        # That way the competition index calculation can be quick and easy
+
+        total_basal_area = sum(tree.ba for tree in self.trees_list)
+        basal_area_list = sorted(self.trees_list, key=lambda tree: tree.ba)
+        
+        print("BASAL AREA LIST:")
+        for tree in basal_area_list:
+            print(tree.ba)
+
+        # get the sum of the basal area for all the trees greater than the current tree
+        i = 1
+        for tree in self.trees_list:
+            greater_tree_sum = sum(tree.ba for tree in basal_area_list[i:]) # IF index is greater than tree in basal_area_list 
+            tree.c = greater_tree_sum / total_basal_area
+            i+=1
+
+
     class ClimateByMonth:
         """
         A class that holds information on the climate for one month of the year.

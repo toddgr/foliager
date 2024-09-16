@@ -37,16 +37,20 @@ class Tree():
             - c_diam
         """
         self.name = species.name
+        self.species = species
+        self.ba = (np.pi * species.b * species.b)/40000 # TODO should b be species specific?
+        self.c = 1. # competition index -> computed later
         self.bark_texture = species.bark_texture
         self.bark_color = species.bark_color
         self.leaf_shape = species.leaf_shape
         self.tree_form = species.tree_form
 
         self.position = (x,y)
-        self.height = self.generate_from(species.height)
-        self.dbh = self.generate_from(species.dbh)
-        self.lcl = self.generate_from(species.lcl)
-        self.c_diam = self.generate_from(species.c_diam)
+        #self.compute_dimensions()
+        # self.height = self.generate_from(species.height)
+        # self.dbh = self.generate_from(species.dbh)
+        # self.lcl = self.generate_from(species.lcl)
+        # self.c_diam = self.generate_from(species.c_diam)
 
         self.key = self.create_tree_key() # e.g. Ponderosa243123
 
@@ -86,6 +90,43 @@ class Tree():
         print(f'========== {self.key} ==========')
         print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
         print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
+
+    # def compute_dimensions(self):
+    #     """
+    #     Input: Tree class object
+    #     Output: Computed and slightly randomized dimensions for the tree
+    #     TODO the dimensions outputted don't always make sense...
+    #     """
+
+    #     species = self.species
+
+    #     # === compute dimensions based on parameters ===
+    #     # TODO compute competition index here
+    #     # TODO implement relative height
+
+    #     # bias correction to adjust b TODO implement later?
+
+    #     # mean tree height TODO what is the difference between species formula and individual tree formula?
+    #     mean_tree_height = 1.3 + species.ah * pow(np.e, (-species.nhb/species.b)) + species.nhc * species.b # for single tree species
+
+    #     # live crown length TODO same thing
+    #     live_crown_length = 1.3 + species.ahl * pow(np.e, (-species.nhlb/species.b)) + species.nhlc * species.b
+
+    #     # crown diameter
+    #     crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
+
+    #     # stand volume TODO not used
+    #     #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
+
+    #     # diameter at breast height
+    #     dbh = np.sqrt((4 * species.ba) / np.pi) # trunk of the standing trees
+
+    #     # Assign to tree
+    #     self.height = self.generate_from(mean_tree_height)
+    #     self.lcl = self.generate_from(live_crown_length)
+    #     self.c_diam = self.generate_from(crown_diameter)
+    #     self.dbh = self.generate_from(dbh)
+
 
 def plot_trees(forest:Forest, plot=False, num_trees=50, min_distance=0.05):
     """
