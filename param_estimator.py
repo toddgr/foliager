@@ -6,7 +6,7 @@ Description: A parameter estimation prototype for generating realistic
             tree data for trees that aren't in the knowledge base
 """
 
-from threepg_species_data import SpeciesData, parse_species_data, csv_file_to_list
+from junk_drawer.threepg_species_data import SpeciesData, parse_species_data, csv_file_to_list
 import csv
 
 knowledge_base_filepath = "test_data/species_data_kb.csv"

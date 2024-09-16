@@ -8,7 +8,7 @@ Description: This file tests out the 3-PG implementation in threepg.py using Dou
 """
 
 #from threepg import read_climate_data, parse_species_data, compute
-from threepg import *
+from junk_drawer.threepg import *
 #from plot_trees_random import init_trees
 
 speciesdata_filename = 'test_data/douglas_fir_species_data.csv'

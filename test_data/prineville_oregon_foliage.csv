@@ -2,4 +2,5 @@ Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linea
 Ponderosa Pine,Pinus ponderosa,needle,medium,evergreen,green,pyramidal,deep,temperate,furrows,gray
 Douglas Fir,Pseudotsuga menziesii,needle,medium,evergreen,green,pyramidal,shallow,temperate,furrows,gray
 Western Juniper,Juniperus occidentalis,needle,medium,evergreen,green,irregular,shallow,arid,furrows,gray
-Quaking Aspen,Populus tremuloides,round,thin,deciduous,green,pyramidal,shallow,temperate,smooth,white
+Quaking Aspen,Populus tremuloides,round,medium,deciduous,green,pyramidal,shallow,temperate,smooth,white
+Oregon White Oak,Quercus garryana,oval,medium,deciduous,green,round,deep,temperate,ridges,brown
