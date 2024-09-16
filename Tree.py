@@ -20,7 +20,7 @@ class Tree():
     Initialization occurs when the (x,y) coordinates are generated
     TODO break up into two classes, Qualities and dimensions?
     """
-    def __init__(self, species, x, y):
+    def __init__(self, species, x, y, age=0):
         """
         Attributes:
             Inherited
@@ -46,6 +46,7 @@ class Tree():
         self.tree_form = species.tree_form
 
         self.position = (x,y)
+        self.age = age
         #self.compute_dimensions()
         # self.height = self.generate_from(species.height)
         # self.dbh = self.generate_from(species.dbh)
@@ -91,42 +92,6 @@ class Tree():
         print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
         print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
 
-    # def compute_dimensions(self):
-    #     """
-    #     Input: Tree class object
-    #     Output: Computed and slightly randomized dimensions for the tree
-    #     TODO the dimensions outputted don't always make sense...
-    #     """
-
-    #     species = self.species
-
-    #     # === compute dimensions based on parameters ===
-    #     # TODO compute competition index here
-    #     # TODO implement relative height
-
-    #     # bias correction to adjust b TODO implement later?
-
-    #     # mean tree height TODO what is the difference between species formula and individual tree formula?
-    #     mean_tree_height = 1.3 + species.ah * pow(np.e, (-species.nhb/species.b)) + species.nhc * species.b # for single tree species
-
-    #     # live crown length TODO same thing
-    #     live_crown_length = 1.3 + species.ahl * pow(np.e, (-species.nhlb/species.b)) + species.nhlc * species.b
-
-    #     # crown diameter
-    #     crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
-
-    #     # stand volume TODO not used
-    #     #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
-
-    #     # diameter at breast height
-    #     dbh = np.sqrt((4 * species.ba) / np.pi) # trunk of the standing trees
-
-    #     # Assign to tree
-    #     self.height = self.generate_from(mean_tree_height)
-    #     self.lcl = self.generate_from(live_crown_length)
-    #     self.c_diam = self.generate_from(crown_diameter)
-    #     self.dbh = self.generate_from(dbh)
-
 
 def plot_trees(forest:Forest, plot=False, num_trees=50, min_distance=0.05):
     """
@@ -148,7 +113,7 @@ def plot_trees(forest:Forest, plot=False, num_trees=50, min_distance=0.05):
     np.random.seed(np.random.randint(0,100))
     points = []
     
-    # Generate the random coordinates
+    # Generate the random initial coordinates
     for _ in range(num_trees):
         x, z = generate_random_point(points, min_distance)
         points.append([x, z])
@@ -189,8 +154,128 @@ def plot_trees(forest:Forest, plot=False, num_trees=50, min_distance=0.05):
     return forest
 
 
+def generate_random_point(existing_points, parent_tree=None):
+        """
+        Ensures that there are no overlapping trees to start
+        Makes sure they're evenly spaced
+        """
+        min_distance = 0.05
+        max_tries = 100
+        for _ in range(max_tries):
+            if parent_tree:
+                print("Trying to fit a tree here ...")
+                # tree should be generated within range of the parent tree
+                max_distance = 0.2
+
+                # Calculate initial range values
+                x_low = parent_tree.position[0] - max_distance
+                x_high = parent_tree.position[0] + max_distance
+                z_low = parent_tree.position[1] - max_distance
+                z_high = parent_tree.position[1] + max_distance
+
+                # Clip values to be within [0, 1]
+                x_low = max(0, x_low)
+                x_high = min(1, x_high)
+                z_low = max(0, z_low)
+                z_high = min(1, z_high)
+
+                x_random = np.random.rand()
+                z_random = np.random.rand()
+
+                # Scale and shift the values to the desired ranges
+                x = x_low + (x_high - x_low) * x_random
+                z = z_low + (z_high - z_low) * z_random
+
+            else:
+                x, z = np.random.rand(), np.random.rand()
+
+            if all(distance.euclidean([x, z], p) >= min_distance for p in existing_points):
+                return x, z
+            else:
+                print("trying again")
+            
+        print("We can't fit a tree here! Cancelling ...")
+        return None, None
+
+
+def plot_trees_differently(forest:Forest, plot=False):
+
+    coordinate_list = []
+    # randomly create coordinates and assign a species to it
+    for _ in range(forest.num_trees):
+        x, y = generate_random_point(coordinate_list)
+        species = np.random.choice(forest.species_list)  # Randomly choose a species name
+        forest.add_tree(Tree(species, x, y, forest.t))
+        coordinate_list.append([x, y])
+
+    # =========== PLOT INITIAL TREES ========================
+    # Create a colormap for the names
+    unique_names = list(set(tree.name for tree in forest.trees_list))  # Get unique tree names
+    colors = plt.cm.get_cmap('viridis', len(unique_names))  # Get a colormap with as many colors as names
+
+    # Create a scatter plot
+    for i, name in enumerate(unique_names):
+        # Get the trees with the current name
+        filtered_trees = [tree for tree in forest.trees_list if tree.name == name]
+        
+        # Plot these trees with a unique color
+        plt.scatter([tree.position[0] for tree in filtered_trees], [tree.position[1] for tree in filtered_trees], 
+                    label=name, color=colors(i))
+
+    # Add labels, legend, and show the plot
+    plt.title("Initial Tree Placement")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
+    plt.tight_layout()
+    plt.show()
+    # ==================================================================
+
+    MASTING_CYCLE = 2
+
+    for month in range(forest.t):
+        print(f'MONTH {month}/{forest.t}')
+        for tree in forest.trees_list:
+            print(f'Tree: {tree.name}, {tree.position}')
+            current_age = (tree.age - forest.t) + month + 1 # current age of the tree in the simulation
+            print(f'current_age: {current_age}')
+            if current_age % MASTING_CYCLE == 0: # if the current age of the tree is
+                # create new tree position from current tree position
+                print("===== masting time =====")
+                x, z = generate_random_point(coordinate_list, tree)
+                if x is not None:
+                    coordinate_list.append([x,z])
+                    # add to the forest
+                    forest.add_tree(Tree(tree.species, x, z, forest.t-month))
+
+    # =========== PLOT SPAWNED TREES TOO ========================
+    # Create a colormap for the names
+    unique_names = list(set(tree.name for tree in forest.trees_list))  # Get unique tree names
+    colors = plt.cm.get_cmap('viridis', len(unique_names))  # Get a colormap with as many colors as names
+
+    # Create a scatter plot
+    for i, name in enumerate(unique_names):
+        # Get the trees with the current name
+        filtered_trees = [tree for tree in forest.trees_list if tree.name == name]
+        
+        # Plot these trees with a unique color
+        plt.scatter([tree.position[0] for tree in filtered_trees], [tree.position[1] for tree in filtered_trees], 
+                    label=name, color=colors(i))
+
+    # Add labels, legend, and show the plot
+    plt.title("Spawned Tree Placement")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
+    plt.tight_layout()
+    plt.show()
+    # ==================================================================
+    pass
+
+
 if __name__ == '__main__':
     # Example usage:
     example_forest = Forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv")
-    plot_trees(example_forest, plot=True, num_trees=100)
+    #plot_trees_with_spawning(example_forest, plot=True, num_trees=1)
+    plot_trees_differently(example_forest, plot=True)
     example_forest.print_tree_list()

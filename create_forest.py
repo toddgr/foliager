@@ -43,7 +43,7 @@ START_AGE = 5 # this is the stand's age in years at t = 0
 START_MONTH = 1 # this is the number of the month in which the simulation is beginning
 START_YEAR = 1960 # this is the year the simulation was started. TODO Used for prints only?
 
-def threepg(forest:Forest, t:int):
+def threepg(forest:Forest, t:int): # TODO init biomasses here
     """
     Input: Forest (climate, species), time interval (in months)
     Output: Updated forest, with specific dimensions for each species
@@ -121,7 +121,7 @@ def threepg(forest:Forest, t:int):
             ns = (1. - root_partition_ratio)/(1. + pfs) # TODO soil partition
 
             # compute litterfall
-            current_age = START_AGE + t/12 # TODO start_age is in years? This feels wrong
+            current_age = START_AGE + t/12
             # according to 3-PG manual, page 33:
                 # For deciduous species, the litterfall rates yf0 and yfx may be considered
                 # to be 0 because all of the foliage is lost at the end of the growing season anyway.
@@ -247,7 +247,7 @@ def compute_dimensions(forest):
         tree.dbh = tree.generate_from(dbh)
 
 
-def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
+def create_forest(climate_fp, species_fp, num_trees = 100):
     """
     Input: Filepaths for climate and species
     Output: File containing tree specifications for use in Blender.
@@ -257,15 +257,18 @@ def create_forest(climate_fp, species_fp, num_trees = 100, t = 60):
     #    initialize the forest based on climate data
     forest = Forest(climate_fp, species_fp, num_trees)
 
-    # 2. Compute 3-PG data for each species
-    forest = threepg(forest, t)
+    # 2. Compute 3-PG data for each initial species
+    start_month = 0
+    end_month = 12 * 5 # the entire simulation is five years long
+    forest = threepg(forest, end_month - start_month)
 
     # 3. Create individual trees from species data
-    forest = plot_trees(forest, num_trees=num_trees) # TODO clean up parameterization
+    forest = plot_trees_with_spawning(forest, num_trees=num_trees) # TODO clean up parameterization
     # Compute dimensions for each tree based on competition index
     compute_dimensions(forest)
 
     # 4. Repeat for spawned/killed trees
+
 
     # 5. Write to Blender
 
