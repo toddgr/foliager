@@ -23,7 +23,7 @@ import csv
 import random
 import math
 from gauss import Gaussian
-
+# put plot trees in its own file and stuff
 
 E = 2.718
 PI = 3.1415

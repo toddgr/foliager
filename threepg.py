@@ -10,9 +10,9 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
 """
 
 import math # for log
-from threepg_species_data import parse_species_data
+from junk_drawer.threepg_species_data import parse_species_data
 from parse_tree_input import csv_file_to_list
-from plot_trees_random import init_trees_dont_write_yet
+from junk_drawer.plot_trees_random import init_trees_dont_write_yet
 import csv
 import random
 import itertools

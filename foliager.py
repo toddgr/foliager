@@ -20,8 +20,8 @@ initial_climate_attributes = "month,tmax(average_maximum_monthly_temperature_cel
 import re
 from parse_tree_input import  csv_file_to_string
 
-from plot_trees_random import init_trees
-from threepg_species_data import parse_species_data, get_tree_names
+from junk_drawer.plot_trees_random import init_trees
+from junk_drawer.threepg_species_data import parse_species_data, get_tree_names
 from parse_csv_file import *
 from threepg import threepg
 from param_estimator import estimate_tree_list

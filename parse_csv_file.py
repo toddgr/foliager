@@ -1,5 +1,5 @@
 
-from threepg_species_data import SpeciesData
+from junk_drawer.threepg_species_data import SpeciesData
 import csv
 
 def parse_csv_file(file_path):
