@@ -1,3 +1,13 @@
+"""
+File: Species.py
+Author: Grace Todd
+Date: September 17, 2024
+Description: A class used to hold information about a specific species.
+			This includes everything from the physical characteristics
+			described by the LLM to the tree parameters used by
+			3-PG, the forest growth model.
+"""
+
 import csv
 
 class Species:
