@@ -102,7 +102,6 @@ def generate_random_point(existing_points, parent_tree=None):
         max_tries = 100
         for _ in range(max_tries):
             if parent_tree:
-                print("Trying to fit a tree here ...")
                 # tree should be generated within range of the parent tree
                 max_distance = 0.2
 
@@ -130,10 +129,7 @@ def generate_random_point(existing_points, parent_tree=None):
 
             if all(distance.euclidean([x, z], p) >= min_distance for p in existing_points):
                 return x, z
-            else:
-                print("trying again")
-            
-        print("We can't fit a tree here! Cancelling ...")
+
         return None, None
 
 
@@ -148,37 +144,34 @@ def plot_trees(forest:Forest, plot=False):
         coordinate_list.append([x, y])
 
     # =========== PLOT INITIAL TREES ========================
-    # Create a colormap for the names
-    unique_names = list(set(tree.name for tree in forest.trees_list))  # Get unique tree names
-    colors = plt.cm.get_cmap('viridis', len(unique_names))  # Get a colormap with as many colors as names
+    if plot:
+        # Create a colormap for the names
+        unique_names = list(set(tree.name for tree in forest.trees_list))  # Get unique tree names
+        colors = plt.cm.get_cmap('viridis', len(unique_names))  # Get a colormap with as many colors as names
 
-    # Create a scatter plot
-    for i, name in enumerate(unique_names):
-        # Get the trees with the current name
-        filtered_trees = [tree for tree in forest.trees_list if tree.name == name]
-        
-        # Plot these trees with a unique color
-        plt.scatter([tree.position[0] for tree in filtered_trees], [tree.position[1] for tree in filtered_trees], 
-                    label=name, color=colors(i))
+        # Create a scatter plot
+        for i, name in enumerate(unique_names):
+            # Get the trees with the current name
+            filtered_trees = [tree for tree in forest.trees_list if tree.name == name]
+            
+            # Plot these trees with a unique color
+            plt.scatter([tree.position[0] for tree in filtered_trees], [tree.position[1] for tree in filtered_trees], 
+                        label=name, color=colors(i))
 
-    # Add labels, legend, and show the plot
-    plt.title("Initial Tree Placement")
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.xlim(0, 1)
-    plt.ylim(0, 1)
-    plt.tight_layout()
-    plt.show()
+        # Add labels, legend, and show the plot
+        plt.title("Initial Tree Placement")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        plt.tight_layout()
+        plt.show()
     # ==================================================================
 
     for month in range(forest.t):
-        print(f'MONTH {month}/{forest.t}')
         for tree in forest.trees_list:
-            print(f'Tree: {tree.name}, {tree.position}')
-            current_age = (tree.age - forest.t) + month + 1 # current age of the tree in the simulation
-            print(f'current_age: {current_age}')
-            if current_age % tree.species.masting_cycle == 0: # if the current age of the tree is
+            current_age = int((tree.age - forest.t) + month + 1) # current age in months of the tree in the simulation
+            if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= (tree.species.seeding_age * 12): # if the current age of the tree is
                 # create new tree position from current tree position
-                print("===== masting time =====")
                 x, z = generate_random_point(coordinate_list, tree)
                 if x is not None:
                     coordinate_list.append([x,z])
@@ -186,26 +179,27 @@ def plot_trees(forest:Forest, plot=False):
                     forest.add_tree(Tree(tree.species, x, z, forest.t-month)) #TODO somehow add in the start age here too
 
     # =========== PLOT SPAWNED TREES TOO ========================
-    # Create a colormap for the names
-    unique_names = list(set(tree.name for tree in forest.trees_list))  # Get unique tree names
-    colors = plt.cm.get_cmap('viridis', len(unique_names))  # Get a colormap with as many colors as names
+    if plot:
+        # Create a colormap for the names
+        unique_names = list(set(tree.name for tree in forest.trees_list))  # Get unique tree names
+        colors = plt.cm.get_cmap('viridis', len(unique_names))  # Get a colormap with as many colors as names
 
-    # Create a scatter plot
-    for i, name in enumerate(unique_names):
-        # Get the trees with the current name
-        filtered_trees = [tree for tree in forest.trees_list if tree.name == name]
-        
-        # Plot these trees with a unique color
-        plt.scatter([tree.position[0] for tree in filtered_trees], [tree.position[1] for tree in filtered_trees], 
-                    label=name, color=colors(i))
+        # Create a scatter plot
+        for i, name in enumerate(unique_names):
+            # Get the trees with the current name
+            filtered_trees = [tree for tree in forest.trees_list if tree.name == name]
+            
+            # Plot these trees with a unique color
+            plt.scatter([tree.position[0] for tree in filtered_trees], [tree.position[1] for tree in filtered_trees], 
+                        label=name, color=colors(i))
 
-    # Add labels, legend, and show the plot
-    plt.title("Spawned Tree Placement")
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.xlim(0, 1)
-    plt.ylim(0, 1)
-    plt.tight_layout()
-    plt.show()
+        # Add labels, legend, and show the plot
+        plt.title("Spawned Tree Placement")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        plt.tight_layout()
+        plt.show()
     # ==================================================================
 
     return forest

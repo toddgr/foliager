@@ -238,7 +238,7 @@ def compute_dimensions(forest):
         #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
 
         # diameter at breast height
-        dbh = np.sqrt((4 * species.ba) / np.pi) # trunk of the standing trees
+        dbh = np.sqrt((4 * tree.ba) / np.pi) # trunk of the standing trees
 
         # Assign to tree
         tree.height = tree.generate_from(mean_tree_height)
@@ -263,12 +263,9 @@ def create_forest(climate_fp, species_fp, num_trees = 100):
     forest = threepg(forest, end_month - start_month)
 
     # 3. Create individual trees from species data
-    forest = plot_trees(forest, num_trees=num_trees) # TODO clean up parameterization
+    forest = plot_trees(forest, plot=True)
     # Compute dimensions for each tree based on competition index
     compute_dimensions(forest)
-
-    # 4. Repeat for spawned/killed trees
-
 
     # 5. Write to Blender
 
@@ -277,11 +274,11 @@ def create_forest(climate_fp, species_fp, num_trees = 100):
 
 if __name__ == '__main__':
     # example usage here
-    example_forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv", num_trees=100)
+    example_forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/prineville_oregon_foliage.csv", num_trees=100)
 
-    #example_forest.get_climate()
-    #example_forest.climate_list[0].get_month_climate()
+    example_forest.get_climate()
+    example_forest.climate_list[0].get_month_climate()
 
-    #for each_species in example_forest.species_list:
-        #each_species.get_basic_info()
+    for each_species in example_forest.species_list:
+        each_species.get_basic_info()
 

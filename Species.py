@@ -125,7 +125,7 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 
 		stem_attr = self.Attributes.StemAttributes(
 			s.mr, s.ms, s.yr, s.nr_min, s.nr_max, s.m_0, s.ah, s.nhb, s.nhc, s.ahl,
-			s.nhlb, s.nhlc, s.ak, s.nkb, s.nkh, s.av, s.nvb, s.nvh, s.nvbh
+			s.nhlb, s.nhlc, s.ak, s.nkb, s.nkh, s.av, s.nvb, s.nvh, s.nvbh, s.aws, s.nws
 		)
 
 		habitat_attr = self.Attributes.HabitatAttributes(
@@ -133,7 +133,7 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 		)
 
 		general_attr = self.Attributes.GeneralAttributes(
-			g.fcax_700, g.fn0, g.nfn, g.r_age, g.n_age, g.max_age
+			g.fcax_700, g.fn0, g.nfn, g.r_age, g.n_age, g.max_age, g.kf
 		)
 
 		attributes = self.Attributes(leaf_attr, canopy_attr, stem_attr, habitat_attr, general_attr)
@@ -197,7 +197,7 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 			TODO this class is a bit big, maybe break it down?
 			"""
 			def __init__(self, mr, ms, yr, nr_min, nr_max, m_0, ah, nhb, nhc, ahl, 
-				nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh):
+				nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh, aws, nws):
 				self.mr = mr
 				self.ms = ms
 				self.yr = yr
@@ -217,6 +217,8 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 				self.nvb = nvb
 				self.nvh = nvh
 				self.nvbh = nvbh
+				self.aws = aws
+				self.nws = nws
 
 
 		class HabitatAttributes:
@@ -240,13 +242,14 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 			fcax_700, fn0, nfn, r_age, n_age, max_age
 			TODO be more concise with these docstrings
 			"""
-			def __init__(self, fcax_700, fn0, nfn, r_age, n_age, max_age):
+			def __init__(self, fcax_700, fn0, nfn, r_age, n_age, max_age, kf):
 				self.fcax_700 = fcax_700
 				self.fn0 = fn0
 				self.nfn = nfn
 				self.r_age = r_age
 				self.n_age = n_age
 				self.max_age = max_age
+				self.kf = kf
 
 	class VisualCharacteristics:
 		"""
@@ -277,8 +280,8 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 		masting_cycle, seeding_age
 		"""
 		def __init__(self, masting_cycle, seeding_age):
-			self.masting_cycle = masting_cycle
-			self.seeding_age = seeding_age
+			self.masting_cycle : int = int(masting_cycle)
+			self.seeding_age : int = seeding_age
 
 def load_knowledge_base(filepath):
 	# reads in the knowledge base csv file
@@ -326,7 +329,7 @@ def load_knowledge_base(filepath):
 			# Get the seeding characteristics
 			seeding_age = row.get('seeding_age')
 			masting_cycle = row.get('masting_cycle')
-			seeding = Species.SeedingCharacteristics(masting_cycle, seeding_age)
+			seeding = Species.SeedingCharacteristics(int(masting_cycle), int(seeding_age))
 
 			# Get the attributes
 			# Leaf attributes
@@ -339,7 +342,9 @@ def load_knowledge_base(filepath):
 			yf0 = row.get('yf0')
 			tyf = row.get('tyf')
 
-			leaf_attr = Species.Attributes.LeafAttributes(k, acx, sla_1, sla_0, t_sla_mid,yfx, yf0, tyf)
+			leaf_attr = Species.Attributes.LeafAttributes(
+				float(k), float(acx), float(sla_1), float(sla_0), float(t_sla_mid), float(yfx), float(yf0), float(tyf)
+				)
 
 			# canopy attributes
 			tc = row.get('tc')
@@ -350,7 +355,9 @@ def load_knowledge_base(filepath):
 			wsx1000 = row.get('wsx1000')
 			nm = row.get('nm')
 
-			canopy_attr = Species.Attributes.CanopyAttributes(tc, mf, p2, p20, ms, wsx1000, nm)
+			canopy_attr = Species.Attributes.CanopyAttributes(
+				float(tc), float(mf), float(p2), float(p20), float(ms), float(wsx1000), float(nm)
+				)
 
 			# stem attributes
 			mr = row.get('mr')
@@ -372,9 +379,12 @@ def load_knowledge_base(filepath):
 			nvb = row.get('nvb')
 			nvh = row.get('nvh')
 			nvbh = row.get('nvbh')
+			aws = row.get('aws')
+			nws = row.get('nws')
 
-			stem_attr = Species.Attributes.StemAttributes(mr, ms, yr, nr_min, nr_max, m_0, ah,nhb, nhc, ahl, 
-				nhlb, nhlc, ak, nkb, nkh, av, nvb, nvh, nvbh)
+			stem_attr = Species.Attributes.StemAttributes(float(mr), float(ms), float(yr), float(nr_min), float(nr_max), float(m_0), float(ah),
+												 float(nhb), float(nhc), float(ahl), float(nhlb), float(nhlc), float(ak), float(nkb), float(nkh),
+												 float(av), float(nvb), float(nvh), float(nvbh), float(aws), float(nws))
 
 			# habitat attributes
 			t_min = row.get('t_min')
@@ -384,7 +394,7 @@ def load_knowledge_base(filepath):
 			n_theta = row.get('n_theta')
 			c_theta = row.get('c_theta')
 
-			hab_attr = Species.Attributes.HabitatAttributes(t_min, t_opt, t_max, kd, n_theta, c_theta)
+			hab_attr = Species.Attributes.HabitatAttributes(float(t_min), float(t_opt), float(t_max), float(kd), float(n_theta), float(c_theta))
 
 			# general attributes
 			fcax_700 = row.get('fcax_700')
@@ -393,8 +403,9 @@ def load_knowledge_base(filepath):
 			r_age = row.get('r_age')
 			n_age = row.get('n_age')
 			max_age = row.get('max_age')
+			kf = row.get('kf')
 
-			gen_attr = Species.Attributes.GeneralAttributes(fcax_700, fn0, nfn, r_age, n_age, max_age)
+			gen_attr = Species.Attributes.GeneralAttributes(float(fcax_700), float(fn0), float(nfn), float(r_age), float(n_age), float(max_age), float(kf))
 
 			attributes = Species.Attributes(leaf_attr, canopy_attr, stem_attr, hab_attr, gen_attr)
 			species = Species(name, scientific_name, visual_characteristics, seeding, attributes)

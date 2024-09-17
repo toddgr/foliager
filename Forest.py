@@ -30,7 +30,7 @@ class Forest:
         self.num_trees = num_trees
 
         # create species list
-        self.species_list = self.create_species_list(species)
+        self.create_species_from(species)
 
 
     def read_climate_data(self, climate_filepath):
@@ -67,6 +67,51 @@ class Forest:
             species_list.append(species_instance)
         return species_list
 
+    def create_species_from(self, filepath):
+
+        """
+        requires a CSV with the following heading:
+        name,scientific_name,leaf_shape,canopy_density,deciduous_evergreen,leaf_color,tree_form,tree_roots,habitat,bark_texture,bark_color,masting_cycle,seeding_age
+        """
+
+        self.species_list = []
+
+        with open(filepath, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)  # Use DictReader to read the CSV as a dictionary
+            for row in reader:
+                # Exclude lines starting with a comment character (e.g., #)
+                if not row or row.get('name', '').startswith("#"):
+                    continue
+                
+                # Get the name and scientific name
+                name = row.get('name')
+                scientific_name = row.get('scientific_name')
+
+                # Get the visual characteristics
+                leaf_shape = row.get('leaf_shape')
+                leaf_color = row.get('leaf_color')
+                tree_form = row.get('tree_form')
+                deciduous_evergreen = row.get('deciduous_evergreen')
+                habitat = row.get('habitat')
+                bark_texture = row.get('bark_texture')
+                bark_color = row.get('bark_color')
+                tree_roots = row.get('tree_roots')
+                canopy_density = row.get('canopy_density')
+
+                visual_characteristics = Species.VisualCharacteristics(
+                    leaf_shape, leaf_color, tree_form, deciduous_evergreen, habitat, bark_texture, bark_color,
+                    tree_roots, canopy_density
+                    )
+
+                # Get the seeding characteristics
+                seeding_age = row.get('seeding_age')
+                masting_cycle = row.get('masting_cycle')
+                seeding = Species.SeedingCharacteristics(masting_cycle, seeding_age)
+
+                species = Species(name, scientific_name, visual_characteristics, seeding)
+
+                self.species_list.append(species)
+
 
     def read_csv(self, filepath):
         """
@@ -93,7 +138,7 @@ class Forest:
 
 
     def print_tree_list(self):
-        print("======= LIST OF TREES IN THIS FOREST: =======")
+        print("\n======= LIST OF TREES IN THIS FOREST: =======")
         for tree in self.trees_list:
             print(f'{tree.key}: {tree.position}')
 
@@ -102,7 +147,7 @@ class Forest:
         """
         Prints a list of climate information for each month.
         """
-        print("========== GETTING CLIMATE FOR THIS FOREST ==========")
+        print("\n========== GETTING CLIMATE FOR THIS FOREST ==========")
         print("month, tmax (C), tmin (C), rain (cm), solar radiation (kwh/m2), num frost days,\
  soil water (cm/ft), max soil water (cm/ft), soil texture")
         for month in self.climate_list:
@@ -243,7 +288,7 @@ class Forest:
             """
             Prints this month's climate data.
             """
-            print(f'============ Climate data for {self.month} ============')
+            print(f'\n============ Climate data for {self.month} ============')
             print(f'Temperature: between {self.tmin} and {self.tmax} degrees Celsius.')
             print(f'Average rainfall: {self.rain} days this month.')
             print(f'Solar radiation: about {self.solar_rad} kwh/m2.')
