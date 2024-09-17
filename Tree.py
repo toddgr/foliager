@@ -93,67 +93,6 @@ class Tree():
         print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
 
 
-def plot_trees(forest:Forest, plot=False, num_trees=50, min_distance=0.05):
-    """
-    Input: Forest class object
-    Output: Forest, but with a populated tree list using tree class objects
-    Used for initial placement of trees
-    """
-    
-    def generate_random_point(existing_points, min_distance):
-        """
-        Ensures that there are no overlapping trees to start
-        Makes sure they're evenly spaced
-        """
-        while True:
-            x, z = np.random.rand(), np.random.rand()
-            if all(distance.euclidean([x, z], p) >= min_distance for p in existing_points):
-                return x, z
-
-    np.random.seed(np.random.randint(0,100))
-    points = []
-    
-    # Generate the random initial coordinates
-    for _ in range(num_trees):
-        x, z = generate_random_point(points, min_distance)
-        points.append([x, z])
-    
-    x_values, z_values = np.array(points).T  # Split the points into x and z coordinates
-
-    tree_names = [species.name for species in forest.species_list] # Get species names from the forest
-    
-    tree_name = np.random.choice(tree_names, num_trees)  # Randomly select tree names
-
-    # Sort tree_name and corresponding x_values and z_values by tree_name
-    sorted_indices = np.argsort(tree_name)
-    tree_name = tree_name[sorted_indices]
-    x_values = x_values[sorted_indices]
-    z_values = z_values[sorted_indices]
-
-    # ============ PLOTTING STUFF ===============
-    # Used mostly for debug
-    if plot:
-        label_colors = {label: plt.colormaps.get_cmap('viridis')(i / len(tree_names)) for i, label in enumerate(tree_names)}
-
-        for label, color in label_colors.items():
-            plt.scatter(x_values[tree_name == label], z_values[tree_name == label], label=label, color=color)
-
-        plt.title('Initial Tree Placement')
-        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.tight_layout()
-        plt.show()
-    # ===========================================
-
-    # Create tree class objects out of the positions and tree names
-    for i in range(num_trees):
-        for species in forest.species_list:
-            if species.name == tree_name[i]:
-                forest.add_tree(Tree(species, x_values[i], z_values[i]))
-                continue
-    
-    return forest
-
-
 def generate_random_point(existing_points, parent_tree=None):
         """
         Ensures that there are no overlapping trees to start
@@ -198,7 +137,7 @@ def generate_random_point(existing_points, parent_tree=None):
         return None, None
 
 
-def plot_trees_differently(forest:Forest, plot=False):
+def plot_trees(forest:Forest, plot=False):
 
     coordinate_list = []
     # randomly create coordinates and assign a species to it
@@ -231,22 +170,20 @@ def plot_trees_differently(forest:Forest, plot=False):
     plt.show()
     # ==================================================================
 
-    MASTING_CYCLE = 2
-
     for month in range(forest.t):
         print(f'MONTH {month}/{forest.t}')
         for tree in forest.trees_list:
             print(f'Tree: {tree.name}, {tree.position}')
             current_age = (tree.age - forest.t) + month + 1 # current age of the tree in the simulation
             print(f'current_age: {current_age}')
-            if current_age % MASTING_CYCLE == 0: # if the current age of the tree is
+            if current_age % tree.species.masting_cycle == 0: # if the current age of the tree is
                 # create new tree position from current tree position
                 print("===== masting time =====")
                 x, z = generate_random_point(coordinate_list, tree)
                 if x is not None:
                     coordinate_list.append([x,z])
                     # add to the forest
-                    forest.add_tree(Tree(tree.species, x, z, forest.t-month))
+                    forest.add_tree(Tree(tree.species, x, z, forest.t-month)) #TODO somehow add in the start age here too
 
     # =========== PLOT SPAWNED TREES TOO ========================
     # Create a colormap for the names
@@ -270,12 +207,12 @@ def plot_trees_differently(forest:Forest, plot=False):
     plt.tight_layout()
     plt.show()
     # ==================================================================
-    pass
+
+    return forest
 
 
 if __name__ == '__main__':
     # Example usage:
     example_forest = Forest("test_data/prineville_oregon_climate.csv", "test_data/param_est_output.csv")
-    #plot_trees_with_spawning(example_forest, plot=True, num_trees=1)
-    plot_trees_differently(example_forest, plot=True)
+    plot_trees(example_forest, plot=True)
     example_forest.print_tree_list()

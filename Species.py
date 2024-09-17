@@ -4,9 +4,10 @@ class Species:
     Takes in data collected by parameter estimator
 
     TODO break up the local variables into smaller, identifiable classes
+    TODO adding masting cycle to this might have messed everything up
     """
     def __init__(self, name, name_scientific,leaf_shape, canopy_density, deciduous_evergreen,
-                 leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color,t_min=0,
+                 leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color, masting_cycle, t_min=0,
                  t_opt=0, t_max=0, kf=0, fcax_700=0, kd=0, n_theta=0, c_theta=0,p2=0, p20=0, acx=0,
                  sla_1=0, sla_0=0, t_sla_mid=0, fn0=0, nfn=0, tc=0, max_age=0, r_age=0, n_age=0,
                  mf=0, mr=0, ms=0, yfx=0, yf0=0, tyf=0, yr=0, nr_max=0, nr_min=0, m_0=0, wsx1000=0,
@@ -34,6 +35,8 @@ class Species:
 
         self.bark_texture = bark_texture.split('/')
         self.bark_color = bark_color.split('/')
+
+        self.masting_cycle = masting_cycle
 
         # Estimated from knowledge base:
         self.t_min = float(t_min) # Minimum temperature for growth
@@ -85,15 +88,8 @@ class Species:
         self.nvh = float(nvh)
         self.nvbh = float(nvbh)
 
-        # Data calculated from 3-PG:
-        # species height, species dbh, species live crown length, species crown diameter
-        # TODO delete these we don't need them
+        # Data calculated from 3-PG
         self.b = 0
-        self.ba = 0
-        self.height = 0
-        self.dbh = 0
-        self.lcl = 0
-        self.c_diam = 0
 
 
     def get_basic_info(self):
