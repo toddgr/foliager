@@ -263,7 +263,7 @@ def create_forest(climate_fp, species_fp, num_trees = 100):
     forest = threepg(forest, end_month - start_month)
 
     # 3. Create individual trees from species data
-    forest = plot_trees_with_spawning(forest, num_trees=num_trees) # TODO clean up parameterization
+    forest = plot_trees(forest, num_trees=num_trees) # TODO clean up parameterization
     # Compute dimensions for each tree based on competition index
     compute_dimensions(forest)
 

@@ -1,3 +1,10 @@
+"""
+File: Forest.py
+Author: Grace Todd
+Date: Sep 16, 2024
+Description: A class object to hold all the necessary details about a forest instance.
+"""
+
 import random
 from Species import Species
 import csv 
