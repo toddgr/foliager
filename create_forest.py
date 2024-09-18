@@ -166,7 +166,7 @@ def threepg(forest:Forest): # TODO init biomasses here
             # calculating b (mean tree diameter) from mean individual stem mass (inversion of A65 of user manual)
             ind_stem_mass_iws = last_stem_biomass / forest.num_trees # individual stem mass
             
-            species.b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) # Inversion of A.65
+            species.b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) # Inversion of A.65 TODO VERIFIED
 
     return forest
 

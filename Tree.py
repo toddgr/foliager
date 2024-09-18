@@ -93,7 +93,7 @@ class Tree():
         """
         print(f'========== {self.key} ==========')
         print(f'{self.species.deciduous_evergreen[0]}, about {round(self.age/12)} years old')
-        print(f'position: {self.position}\nheight: {self.height} meters\ndbh: {self.dbh} meters')
+        print(f'position: {self.position}\nheight: {self.height} meters\ndbh: {self.dbh} meters ({self.dbh*100} cm)')
         print(f'lcl: {self.lcl} meters\nc_diam: {self.c_diam} meters\n')
         pass
 
