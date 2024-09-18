@@ -47,7 +47,7 @@ class Tree():
 
         self.position = (x,y)
         self.age = age
-        #self.compute_dimensions()
+        # Assigned in create_forest/compute_dimensions():
         # self.height = self.generate_from(species.height)
         # self.dbh = self.generate_from(species.dbh)
         # self.lcl = self.generate_from(species.lcl)
@@ -63,10 +63,12 @@ class Tree():
                 using gaussian randomization
         """
         average = dimension
-        stddev = (dimension + 0.005) / 4 # TODO make this var more accurate
+        stddev = (dimension + 0.05) / 4 # TODO make this var more accurate
 
-        new_dimension = Gaussian(average, stddev)
-        return abs(new_dimension) # dimension can't be negative
+        #new_dimension = Gaussian(average, stddev)
+        #return abs(new_dimension) # dimension can't be negative
+        # TODO testing without gauss dimension
+        return round(dimension, 3)
 
 
     def create_tree_key(self):
@@ -89,8 +91,9 @@ class Tree():
         Prints basic information about a tree's dimensions.
         """
         print(f'========== {self.key} ==========')
-        #print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
-        #print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
+        print(self.species.deciduous_evergreen)
+        print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
+        print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
         pass
 
 
@@ -140,6 +143,8 @@ def plot_trees(forest:Forest, plot=False):
     # randomly create coordinates and assign a species to it
     for _ in range(forest.num_trees):
         x, y = generate_random_point(coordinate_list)
+        x = round(x, 3)
+        y = round(y, 3)
         species = np.random.choice(forest.species_list)  # Randomly choose a species name
         forest.add_tree(Tree(species, x, y, forest.t))
         coordinate_list.append([x, y])

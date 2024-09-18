@@ -31,9 +31,9 @@ PI = 3.1415
 =====================================================================
 """
 
-INIT_DBH = 0. #9 initial dbh-- was 18 TODO determine init_dbh, and what units?
+INIT_DBH = 9 #initial dbh-- was 18 TODO determine init_dbh, and what units?
 
-CO2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
+# CO2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
 
 # general for GPP
 FERTILITY_RATING = 1 # fertility rating, ranges from 0 to 1
