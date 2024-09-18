@@ -47,11 +47,11 @@ bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(
 average_masting_cycle_(one_value_in_years),minimum_seed_distribution_age_(years)'
 
     # species header: simpler column names to make the data easier to work with
-    species_header = 'name, scientific name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, \
+    species_header = 'name, scientific_name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, \
 habitat, bark_texture, bark_color, masting_cycle, seeding_age'
 
     # the full LLM prompt
-    species_prompt = "Only output an unnumbered list of tree types in CSV format that can be found in" + location + "with the \
+    species_prompt = "Only output an unnumbered list of tree types in CSV format that can be found in " + location + " with the \
 following attributes:" + species_attributes + "\n Please include the headers \"" + species_header + "\" at the beginning of the output."
     
     species_data = ask_llm(species_prompt)
@@ -71,7 +71,7 @@ rain(cm),solar_rad(kwh/m2),frost_days(average_number_of_monthly_frost_days),soil
 /sandy_loams/fine_sandy_loams/very_fine_sandy_loams/loams/silt_loams/clay_loams/silt_clay_loams/sandy_clay_loams/sandy_clays/silty_clays/clays),\
 vpd(average_monthly_vapor_pressure_deficit_kPa)"
     climate_header = "month, tmax, tmin, rain, solar_rad, frost_days, soil_texture, vpd"
-    climate_prompt = "Only output the data for monthly values for " + location + "with the following attributes in CSV format: " + \
+    climate_prompt = "Only output the data for monthly values for " + location + " with the following attributes in CSV format: " + \
         climate_attributes + "\n Please include the headers \"" + climate_header + "\" at the beginning of the output."
     
     climate_data = ask_llm(climate_prompt)
@@ -83,9 +83,11 @@ vpd(average_monthly_vapor_pressure_deficit_kPa)"
     print(clean_climate_data)
     print("\n===============================================================\n")
 
+    return clean_climate_data
+
 if __name__ == '__main__':
     # 1. Prompt user for a climate, city, or location:
-    location = input("Enter the climate, city, or area:")
+    location = input("Enter the climate, city, or area: ")
 
     # 2. LLM generates tree data, outputs two strings:
     species_data = get_species_data(location)
@@ -102,3 +104,6 @@ if __name__ == '__main__':
     
     # 4. Forest information and tree dimensions are passed on to Blender:
     # ref: https://blender.stackexchange.com/questions/1365/how-can-i-run-blender-from-command-line-or-a-python-script-without-opening-a-gui
+    print("============ TREE DATA ==============")
+    for each_tree in forest.trees_list:
+        print(each_tree.get_tree_info())

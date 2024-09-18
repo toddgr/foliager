@@ -247,7 +247,7 @@ def compute_dimensions(forest):
         tree.dbh = tree.generate_from(dbh)
 
 
-def create_forest(climate_fp, species_fp, num_trees = 100):
+def create_forest(climate, species, num_trees = 100):
     """
     Input: Filepaths for climate and species
     Output: File containing tree specifications for use in Blender.
@@ -255,7 +255,7 @@ def create_forest(climate_fp, species_fp, num_trees = 100):
     # 1. Initialize forest
     #    read in the climate data
     #    initialize the forest based on climate data
-    forest = Forest(climate_fp, species_fp, num_trees)
+    forest = Forest(climate, species, num_trees)
 
     # 2. Compute 3-PG data for each initial species
     start_month = 0
@@ -274,7 +274,31 @@ def create_forest(climate_fp, species_fp, num_trees = 100):
 
 if __name__ == '__main__':
     # example usage here
-    forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/prineville_oregon_foliage.csv", num_trees=100)
+    example_climate = "month,tmax,tmin,rain,solar_rad,frost_days,soil_texture,vpd\n\
+January,3.5,-6.1,3.8,2.5,12,loams,1.2\n\
+February,6.1,-3.9,2.5,3.0,10,loams,1.5\n\
+March,10.0,0.5,2.0,4.5,8,loams,1.8\n\
+April,14.5,2.5,1.5,5.5,5,loams,2.1\n\
+May,19.0,5.0,1.0,6.5,2,loams,2.5\n\
+June,24.0,9.0,0.5,7.5,0,loams,2.8\n\
+July,30.0,12.0,0.0,8.0,0,loams,3.0\n\
+August,29.5,11.5,0.0,7.8,0,loams,2.9\n\
+September,24.0,7.5,0.2,6.5,1,loams,2.6\n\
+October,16.0,2.0,1.5,4.5,5,loams,2.3\n\
+November,8.0,-2.0,3.0,2.5,10,loams,1.9\n\
+December,4.0,-5.0,4.0,2.0,12,loams,1.4"
+
+    example_species = "name, scientific_name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color, masting_cycle, seeding_age\n\
+Ponderosa Pine, Pinus ponderosa, linear, medium, evergreen, green, pyramidal, deep, temperate, furrows, brown, 3, 5\n\
+Western Juniper, Juniperus occidentalis, other, thin, evergreen, green, irregular, shallow, dry, scales, gray, 5, 7\n\
+Quaking Aspen, Populus tremuloides, oval, medium, deciduous, green, round, shallow, temperate, smooth, white, 2, 3\n\
+Lodgepole Pine, Pinus contorta, linear, medium, evergreen, green, conical, deep, temperate, furrows, brown, 3, 5\n\
+Black Cottonwood, Populus trichocarpa, oval, dense, deciduous, green, spreading, shallow, temperate, smooth, gray, 2, 4\n\
+Sugar Pine, Pinus lambertiana, linear, very_dense, evergreen, green, pyramidal, deep, temperate, furrows, brown, 5, 10\n\
+Red Alder, Alnus rubra, oval, medium, deciduous, green, open, shallow, temperate, smooth, gray, 2, 3\n\
+White Fir, Abies concolor, other, medium, evergreen, green, conical, deep, temperate, smooth, gray, 5, 8"
+
+    forest = create_forest(example_climate, example_species, num_trees=100)
 
     forest.get_climate()
     forest.climate_list[0].get_month_climate()
