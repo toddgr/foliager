@@ -89,8 +89,9 @@ class Tree():
         Prints basic information about a tree's dimensions.
         """
         print(f'========== {self.key} ==========')
-        print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
-        print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
+        #print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
+        #print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
+        pass
 
 
 def generate_random_point(existing_points, parent_tree=None):

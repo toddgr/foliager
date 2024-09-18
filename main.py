@@ -96,14 +96,12 @@ if __name__ == '__main__':
     # 3. A forest is created:
     forest = create_forest(climate_data, species_data)
 
-    forest.get_climate()
-    forest.climate_list[0].get_month_climate()
+    # forest.get_climate()
+    # forest.climate_list[0].get_month_climate()
 
-    for each_species in forest.species_list:
-        each_species.get_basic_info()
+    # for each_species in forest.species_list:
+    #     each_species.get_basic_info()
     
     # 4. Forest information and tree dimensions are passed on to Blender:
     # ref: https://blender.stackexchange.com/questions/1365/how-can-i-run-blender-from-command-line-or-a-python-script-without-opening-a-gui
-    print("============ TREE DATA ==============")
-    for each_tree in forest.trees_list:
-        print(each_tree.get_tree_info())
+    forest.print_tree_list()

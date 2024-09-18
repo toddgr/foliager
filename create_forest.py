@@ -247,7 +247,7 @@ def compute_dimensions(forest):
         tree.dbh = tree.generate_from(dbh)
 
 
-def create_forest(climate, species, num_trees = 100):
+def create_forest(climate, species, num_trees=100):
     """
     Input: Filepaths for climate and species
     Output: File containing tree specifications for use in Blender.
@@ -263,7 +263,7 @@ def create_forest(climate, species, num_trees = 100):
     forest = threepg(forest, end_month - start_month)
 
     # 3. Create individual trees from species data
-    forest = plot_trees(forest, plot=True)
+    forest = plot_trees(forest)
     # Compute dimensions for each tree based on competition index
     compute_dimensions(forest)
 
