@@ -38,7 +38,7 @@ class Tree():
         """
         self.name = species.name
         self.species = species
-        self.ba = (np.pi * species.b * species.b)/40000 # TODO should b be species specific?
+        self.ba = (np.pi * species.b * species.b)/40000 # in meters, A.64 TODO VERIFIED
         self.c = 1. # competition index -> computed later
         self.bark_texture = species.bark_texture
         self.bark_color = species.bark_color
@@ -47,6 +47,7 @@ class Tree():
 
         self.position = (x,y)
         self.age = age # age of the tree in months
+
         # Assigned in create_forest/compute_dimensions():
         # self.height = self.generate_from(species.height)
         # self.dbh = self.generate_from(species.dbh)

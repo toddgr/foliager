@@ -63,6 +63,7 @@ def threepg(forest:Forest): # TODO init biomasses here
         last_stem_biomass = init_stem_biomass
         last_root_biomass = init_root_biomass
 
+        print(f"species: {species.name}")
         print(f'foliage biomass: {init_foliage_biomass}\nstem biomass: {init_stem_biomass}\nroot biomass: {init_root_biomass}\n\n')
 
         num_trees_died = 0 # number of trees that died last month. TODO Use this for killing trees
@@ -126,7 +127,7 @@ def threepg(forest:Forest): # TODO init biomasses here
             current_age = ((forest.start_age * 12) + month_t) / 12 # TODO should this be in months or years?
             # according to 3-PG manual, page 33:
                 # For deciduous species, the litterfall rates yf0 and yfx may be considered
-                # to be 0 because all of the foliage is lost at the end of the growing season anyway.
+                # to be 0 because all of the foliage is lost at the end of the growing season.
             if species.deciduous_evergreen == ['deciduous'] and (species.yf0 == 0 or species.yfx == 0):
                 litterfall_rate = 0  # otherwise we get a divide by zero
             else:
@@ -162,9 +163,10 @@ def threepg(forest:Forest): # TODO init biomasses here
                 num_trees_died += 1 # increasing delta_n counter
                 max_ind_tree_stem_mass_wsx = species.wsx1000 * pow((1000.0/forest.num_trees), species.nm) # recalculating wsx
 
-                # calculating b from mean individual stem mass (inversion of A65 of user manual)
+            # calculating b (mean tree diameter) from mean individual stem mass (inversion of A65 of user manual)
             ind_stem_mass_iws = last_stem_biomass / forest.num_trees # individual stem mass
-            species.b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) * 100 # TODO what is b?
+            
+            species.b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) # Inversion of A.65
 
     return forest
 
@@ -225,17 +227,17 @@ def compute_dimensions(forest):
         # bias correction to adjust b TODO implement later?
 
         # mean tree height TODO what is the difference between species formula and individual tree formula?
-        print(f'mean_tree_height: {species.ah} * pow({species.b}, ({species.nhb})) * pow({tree.c},{species.nhc})')
         #mean_tree_height = 1.3 + species.ah * pow(math.e, (-species.nhb/species.b)) + species.nhc * species.b # for single tree species
         if species.ah <= 0:
             species.ah = 1.
             species.nhb = 0.5 # TODO change this to be Guassian, is normally between 0.7 and 0.4
-            
+
+        print(f'mean_tree_height: {species.ah} * pow({species.b}, ({species.nhb})) * pow({tree.c},{species.nhc})')
         mean_tree_height = species.ah * pow(species.b, species.nhb) * pow(tree.c, species.nhc) # A.61
 
         # live crown length TODO same thing
         #live_crown_length = 1.3 + species.ahl * pow(math.e, (-species.nhlb/species.b)) + species.nhlc * species.b
-        print(f'live_')
+        print(f'live_crown_')
         live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(tree.c, species.nhlc) # A.62
 
         # crown diameter
@@ -246,7 +248,7 @@ def compute_dimensions(forest):
         #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
 
         # diameter at breast height
-        dbh = np.sqrt((4 * tree.ba) / np.pi) # trunk of the standing trees
+        dbh = math.sqrt((4 * tree.ba) / math.pi) # trunk of the standing trees in meters TODO VERIFIED
 
         # Assign to tree
         tree.height = tree.generate_from(mean_tree_height)
