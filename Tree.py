@@ -46,7 +46,7 @@ class Tree():
         self.tree_form = species.tree_form
 
         self.position = (x,y)
-        self.age = age
+        self.age = age # age of the tree in months
         # Assigned in create_forest/compute_dimensions():
         # self.height = self.generate_from(species.height)
         # self.dbh = self.generate_from(species.dbh)
@@ -91,9 +91,9 @@ class Tree():
         Prints basic information about a tree's dimensions.
         """
         print(f'========== {self.key} ==========')
-        print(self.species.deciduous_evergreen)
-        print(f'position: {self.position}\nheight: {self.height}\ndbh: {self.dbh}')
-        print(f'lcl: {self.lcl}\nc_diam: {self.c_diam}\n')
+        print(f'{self.species.deciduous_evergreen[0]}, about {round(self.age/12)} years old')
+        print(f'position: {self.position}\nheight: {self.height} meters\ndbh: {self.dbh} meters')
+        print(f'lcl: {self.lcl} meters\nc_diam: {self.c_diam} meters\n')
         pass
 
 
@@ -146,7 +146,7 @@ def plot_trees(forest:Forest, plot=False):
         x = round(x, 3)
         y = round(y, 3)
         species = np.random.choice(forest.species_list)  # Randomly choose a species name
-        forest.add_tree(Tree(species, x, y, forest.t))
+        forest.add_tree(Tree(species, x, y, (forest.start_age * 12) + forest.t))
         coordinate_list.append([x, y])
 
     # =========== PLOT INITIAL TREES ========================
@@ -176,13 +176,13 @@ def plot_trees(forest:Forest, plot=False):
     for month in range(forest.t):
         for tree in forest.trees_list:
             current_age = int((tree.age - forest.t) + month + 1) # current age in months of the tree in the simulation
-            if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= (tree.species.seeding_age * 12): # if the current age of the tree is
+            if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= int(tree.species.seeding_age * 12): # if the current age of the tree is
                 # create new tree position from current tree position
                 x, z = generate_random_point(coordinate_list, tree)
                 if x is not None:
                     coordinate_list.append([x,z])
                     # add to the forest
-                    forest.add_tree(Tree(tree.species, x, z, forest.t-month)) #TODO somehow add in the start age here too
+                    forest.add_tree(Tree(tree.species, x, z, (forest.t - month))) #TODO somehow add in the start age here too
 
     # =========== PLOT SPAWNED TREES TOO ========================
     if plot:

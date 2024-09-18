@@ -214,7 +214,7 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 				self.nr_min = nr_min
 				self.nr_max = nr_max
 				self.m_0 = m_0
-				self.ah = ah
+				self.ah = ah			# Constant in the stem-height relationship
 				self.nhb = nhb
 				self.nhc = nhc
 				self.ahl = ahl

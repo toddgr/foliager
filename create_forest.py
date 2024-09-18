@@ -21,9 +21,8 @@ Description: Uses 3-PG to calculate various parameters of a tree, which will be 
 
 import math
 from Tree import *
+from Species import Species
 
-E = 2.718
-PI = 3.1415
 
 """
 =====================================================================
@@ -39,11 +38,11 @@ INIT_DBH = 9 #initial dbh-- was 18 TODO determine init_dbh, and what units?
 FERTILITY_RATING = 1 # fertility rating, ranges from 0 to 1
 CONVERSION_RATIO = 0.47 # for making GPP into NPP
 
-START_AGE = 5 # this is the stand's age in years at t = 0
+START_AGE = 1 # this is the stand's age in years at t = 0
 START_MONTH = 1 # this is the number of the month in which the simulation is beginning
 START_YEAR = 1960 # this is the year the simulation was started. TODO Used for prints only?
 
-def threepg(forest:Forest, t:int): # TODO init biomasses here
+def threepg(forest:Forest): # TODO init biomasses here
     """
     Input: Forest (climate, species), time interval (in months)
     Output: Updated forest, with specific dimensions for each species
@@ -66,37 +65,37 @@ def threepg(forest:Forest, t:int): # TODO init biomasses here
         num_trees_died = 0 # number of trees that died last month. TODO Use this for killing trees
 
         # for each month in the time interval:
-        for month_t in range(t+1):
+        for month_t in range(forest.t+1):
             # get the current month, mean temp for the month
             climate = forest.climate_list
-            current_month = ((START_MONTH + month_t) % 12)-1 # jan - dec
+            current_month = ((forest.start_month + month_t) % 12)-1 # jan - dec
             if current_month == 0:
                 current_month = 11
 
             # function to calculate co2 levels on earth based on the season and year.
             # estimated from NASA data on Global Climate Change TODO cite source here
-            x = START_YEAR + ((START_MONTH + month_t) / 12) # TODO verify this is correct
+            x = START_YEAR + ((forest.start_month + month_t) / 12) # TODO verify this is correct
             co2 = ((98/60) * x - 2885.33) + 3 * math.sin(7 * x)
 
             env_mods, phys_mod = calculate_mods(climate[current_month], species, co2) # env_mods = ft * ff * fn * fc
 
             # specific leaf area (SLA)
-            exp1 = pow(((START_AGE * 12.) + month_t)/species.t_sla_mid, 2.)
-            sla = species.sla_1 + (species.sla_0 - species.sla_1) * pow(E, (-1 * math.log(2.) * exp1))
+            exp1 = pow(((forest.start_age * 12.) + month_t)/species.t_sla_mid, 2.)
+            sla = species.sla_1 + (species.sla_0 - species.sla_1) * pow(math.e, (-1 * math.log(2.) * exp1))
 
             # leaf area index (m^2 / m^2)
             leaf_area_index = 0.1 * sla * last_foliage_biomass
 
             # ground area coverage (GAC) by canopy
-            if START_AGE + month_t / 12 < species.tc:
-                ground_area_coverage = (START_AGE + month_t / 12) / species.tc
+            if forest.start_age + month_t / 12 < species.tc:
+                ground_area_coverage = (forest.start_age + month_t / 12) / species.tc
             else:
                 ground_area_coverage = 1. # TODO verify this makes sense
 
             # light absorption --> absorption photosynthetically active radiation (PAR)
             # Often called o/pa
             e_exp = (-species.k * leaf_area_index)/ground_area_coverage
-            par = (1 - pow(E, e_exp)) * 2.3 * ground_area_coverage * climate[current_month].solar_rad
+            par = (1 - pow(math.e, e_exp)) * 2.3 * ground_area_coverage * climate[current_month].solar_rad
 
             # computing GPP and NPP
             gpp = env_mods * phys_mod * species.acx * par
@@ -121,7 +120,7 @@ def threepg(forest:Forest, t:int): # TODO init biomasses here
             ns = (1. - root_partition_ratio)/(1. + pfs) # TODO soil partition
 
             # compute litterfall
-            current_age = START_AGE + t/12
+            current_age = ((forest.start_age * 12) + month_t) / 12 # TODO should this be in months or years?
             # according to 3-PG manual, page 33:
                 # For deciduous species, the litterfall rates yf0 and yfx may be considered
                 # to be 0 because all of the foliage is lost at the end of the growing season anyway.
@@ -129,7 +128,7 @@ def threepg(forest:Forest, t:int): # TODO init biomasses here
                 litterfall_rate = 0  # otherwise we get a divide by zero
             else:
                 lf_exp = -(current_age/species.tyf) * math.log(1.0 + species.yfx/species.yf0)
-                litterfall_rate = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(E, lf_exp))
+                litterfall_rate = (species.yfx * species.yf0)/(species.yf0 + (species.yfx - species.yf0) * pow(math.e, lf_exp))
 
             # compute biomass
             # setting current = to last month's
@@ -176,19 +175,19 @@ def calculate_mods(curr_climate, species, co2):
     # temperature mod (ft)
     if (mean_monthly_temp > species.t_max) or (mean_monthly_temp < species.t_min):
         # outside of growth range -> 0
-        temp_mod = 0. # TODO temp mod
+        temp_mod = 0.
     else:
         # inside of growth range
         base = (mean_monthly_temp - species.t_min / (species.t_opt - species.t_min) * (species.t_max - mean_monthly_temp)/(species.t_max - species.t_opt))
         exp = (species.t_max - species.t_opt)/(species.t_opt - species.t_min)
-        temp_mod = pow(base, exp) #TODO temp mod
+        temp_mod = pow(base, exp)
 
     # frost mod
     frost_days = curr_climate.frost_days # aka df
-    frost_mod = 1. - species.kf * (frost_days/30.) #TODO frost mod
+    frost_mod = 1. - species.kf * (frost_days/30.)
 
     # nutrition mod
-    nutrition_mod = 1. - (1. - species.fn0) * pow((1. - FERTILITY_RATING), species.nfn) # TODO nutrition mod
+    nutrition_mod = 1. - (1. - species.fn0) * pow((1. - FERTILITY_RATING), species.nfn)
 
     # CO2 mod
     fcax = species.fcax_700/(2. - species.fcax_700) # the species specific repsonses to changes in atmospheric co2
@@ -196,7 +195,7 @@ def calculate_mods(curr_climate, species, co2):
 
     # physical mod - derived from fd, ftheta
     # vapor pressure deficit (VPD) mod
-    vpd_mod = pow(E, (-species.kd * curr_climate.vpd)) # TODO VPD mod may be causing issues
+    vpd_mod = pow(math.e, (-species.kd * curr_climate.vpd)) # TODO VPD mod may be causing issues
 
     # soil water mod
     base1 = ((1. - curr_climate.soil_water)/curr_climate.max_soil_water)/species.c_theta
@@ -223,16 +222,22 @@ def compute_dimensions(forest):
         # bias correction to adjust b TODO implement later?
 
         # mean tree height TODO what is the difference between species formula and individual tree formula?
-        #mean_tree_height = 1.3 + species.ah * pow(np.e, (-species.nhb/species.b)) + species.nhc * species.b # for single tree species
+        print(f'mean_tree_height: {species.ah} * pow({species.b}, ({species.nhb})) * pow({tree.c},{species.nhc})')
+        #mean_tree_height = 1.3 + species.ah * pow(math.e, (-species.nhb/species.b)) + species.nhc * species.b # for single tree species
+        if species.ah <= 0:
+            species.ah = 1.
+            species.nhb = 0.5 # TODO change this to be Guassian, is normally between 0.7 and 0.4
+            
         mean_tree_height = species.ah * pow(species.b, species.nhb) * pow(tree.c, species.nhc) # A.61
+        # TODO need to check for zero ah value
 
         # live crown length TODO same thing
-        # live_crown_length = 1.3 + species.ahl * pow(np.e, (-species.nhlb/species.b)) + species.nhlc * species.b
-        live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(tree.c, species.nhlc) # A.62
+        live_crown_length = 1.3 + species.ahl * pow(math.e, (-species.nhlb/species.b)) + species.nhlc * species.b
+        #live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(tree.c, species.nhlc) # A.62
 
         # crown diameter
-        #crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
-        crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh) * pow(tree.c, 0) # A.63
+        crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
+        #crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh) * pow(tree.c, 0) # A.63
 
         # stand volume TODO not used
         #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
@@ -258,9 +263,7 @@ def create_forest(climate, species, num_trees=100):
     forest = Forest(climate, species, num_trees)
 
     # 2. Compute 3-PG data for each initial species
-    start_month = 0
-    end_month = 12 * 5 # the entire simulation is five years long
-    forest = threepg(forest, end_month - start_month)
+    forest = threepg(forest)
 
     # 3. Create individual trees from species data
     forest = plot_trees(forest)

@@ -110,7 +110,7 @@ October,16.0,2.0,1.5,4.5,5,loams,2.3\n\
 November,8.0,-2.0,3.0,2.5,10,loams,1.9\n\
 December,4.0,-5.0,4.0,2.0,12,loams,1.4"
 
-    species_data = "name, scientific_name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color, masting_cycle, seeding_age\n\
+    species_data_old = "name, scientific_name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color, masting_cycle, seeding_age\n\
 Ponderosa Pine, Pinus ponderosa, linear, medium, evergreen, green, pyramidal, deep, temperate, furrows, brown, 3, 5\n\
 Western Juniper, Juniperus occidentalis, other, thin, evergreen, green, irregular, shallow, dry, scales, gray, 5, 7\n\
 Quaking Aspen, Populus tremuloides, oval, medium, deciduous, green, round, shallow, temperate, smooth, white, 2, 3\n\
@@ -120,8 +120,14 @@ Sugar Pine, Pinus lambertiana, linear, very_dense, evergreen, green, pyramidal, 
 Red Alder, Alnus rubra, oval, medium, deciduous, green, open, shallow, temperate, smooth, gray, 2, 3\n\
 White Fir, Abies concolor, other, medium, evergreen, green, conical, deep, temperate, smooth, gray, 5, 8"
 
+    species_data = "name, scientific_name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color, masting_cycle, seeding_age\n\
+Tasmanian blue gum,Eucalyptus globulus,lanceolate,very_dense,evergreen,green,spreading,deep,temperate,furrows/ridges/cracks,gray/white,2,4\n\
+Monterey pine,Pinus radiata,linear,medium,evergreen,green,pyramidal,shallow,mediterranean/temperate,scales/furrows,red/brown/gray,2,5\n"
+# Silver Fir,Abies alba,linear,dense,evergreen,green,conical,deep,temperate/subalpine,smooth,gray/brown,4,15\n\
+# Acacia hybrid,Acacia auriculiformis x A. mangium,pinnate/bipinnate,very_dense,evergreen,green,irregular,shallow,tropical/subtropical/arid,smooth/lenticels,brown,1,2"
+
     # 3. A forest is created:
-    forest = create_forest(climate_data, species_data, num_trees = 15)
+    forest = create_forest(climate_data, species_data, num_trees=15)
 
     # forest.get_climate()
     # forest.climate_list[0].get_month_climate()

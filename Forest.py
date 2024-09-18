@@ -15,7 +15,7 @@ class Forest:
     Holds information about the environment, climate, and collection of trees found in the forest.
     Also might store a list of species found in the environment
     """
-    def __init__(self, climate, species, num_trees=1, t=12):
+    def __init__(self, climate, species, num_trees=1):
         """
         Input: A list of climate conditions for each month of the year
         Attributes:
@@ -25,7 +25,13 @@ class Forest:
         # create climate list
         print(climate)
         self.climate_list = self.read_climate_data(climate)
-        self.t = t # number of months in the simulation
+
+        self.start_age = 5 # stand is 5 years old at the start of the simulation
+        self.start_month = 1 # starts in february?
+        self.end_month = 12 * 5 # simulation is 5 years long
+        self.start_year = 1960 # year when the simulation starts. Used mostly for Co2 calculations
+
+        self.t = self.end_month - self.start_month # number of months in the simulation
 
         # initialize list of trees
         self.trees_list = []
