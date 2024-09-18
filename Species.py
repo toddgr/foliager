@@ -284,14 +284,18 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 			self.bark_texture = bark_texture.split('/')
 			self.bark_color = bark_color.split('/')
 	
-	class SeedingCharacteristics:
+	class OtherCharacteristics:
 		"""
 		The reproductive characteristics as approximated by the LLM:
 		masting_cycle, seeding_age
 		"""
-		def __init__(self, masting_cycle, seeding_age):
+		def __init__(self, masting_cycle, seeding_age, foliage, stem, root):
 			self.masting_cycle : int = int(masting_cycle)
 			self.seeding_age : int = seeding_age
+			self.init_foliage_biomass : float = float(foliage)
+			self.init_stem_biomass : float = float(stem)
+			self.init_root_biomass : float = float(root)
+			
 
 def load_knowledge_base(filepath):
 	# reads in the knowledge base csv file
@@ -339,7 +343,10 @@ def load_knowledge_base(filepath):
 			# Get the seeding characteristics
 			seeding_age = row.get('seeding_age')
 			masting_cycle = row.get('masting_cycle')
-			seeding = Species.SeedingCharacteristics(int(masting_cycle), int(seeding_age))
+			foliage = row.get('foliage_biomass')
+			stem = row.get('stem_biomass')
+			root = row.get('root_biomass')
+			seeding = Species.OtherCharacteristics(int(masting_cycle), int(seeding_age), float(foliage), float(stem), float(root))
 
 			# Get the attributes
 			# Leaf attributes
@@ -429,7 +436,7 @@ if __name__ == '__main__':
 
 	#qualities and quantities would be read in from the LLM
 	qualities = Species.VisualCharacteristics('needle', 'green', 'pyramidal', 'evergreen', 'temperate', 'furrows', 'gray', 'shallow', 'medium')
-	quantities = Species.SeedingCharacteristics('5', '20')
+	quantities = Species.OtherCharacteristics('5', '20')
 
 	new_species = Species('Ponderosa Pine', 'Pinus ponderosa', qualities, quantities)
 

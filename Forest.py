@@ -125,7 +125,11 @@ class Forest:
             # Get the seeding characteristics
             seeding_age = row.get('seeding_age')
             masting_cycle = row.get('masting_cycle')
-            seeding = Species.SeedingCharacteristics(masting_cycle, seeding_age)
+            foliage_biomass = row.get('foliage_biomass')
+            stem_biomass = row.get('stem_biomass')
+            root_biomass = row.get('root_biomass')
+            seeding = Species.OtherCharacteristics(masting_cycle, seeding_age, foliage_biomass, stem_biomass, root_biomass)
+
 
             species = Species(name, scientific_name, visual_characteristics, seeding)
 
@@ -297,7 +301,8 @@ class Forest:
                 print(f"ERROR Invalid soil texture: {soil_texture}")
                 return None
 
-            soil_water = random.uniform(soil_min,soil_max)
+            #soil_water = random.uniform(soil_min,soil_max)
+            soil_water = (soil_max - soil_min) / 2 # TODO just taking the average for now to check 3-pg calculations 
             max_soil_water = soil_max
             return soil_water, max_soil_water
 

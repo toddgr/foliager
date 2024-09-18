@@ -30,7 +30,7 @@ from Species import Species
 =====================================================================
 """
 
-INIT_DBH = 9 #initial dbh-- was 18 TODO determine init_dbh, and what units?
+#INIT_DBH = 9 #initial dbh-- was 18 TODO determine init_dbh, and what units?
 
 # CO2 = 350 # Atmospheric CO2 (ppm) TODO Implement estimated CO2 function taken from NASA data: https://climate.nasa.gov/vital-signs/carbon-dioxide/?intent=121
 
@@ -38,9 +38,9 @@ INIT_DBH = 9 #initial dbh-- was 18 TODO determine init_dbh, and what units?
 FERTILITY_RATING = 1 # fertility rating, ranges from 0 to 1
 CONVERSION_RATIO = 0.47 # for making GPP into NPP
 
-START_AGE = 1 # this is the stand's age in years at t = 0
-START_MONTH = 1 # this is the number of the month in which the simulation is beginning
-START_YEAR = 1960 # this is the year the simulation was started. TODO Used for prints only?
+#START_AGE = 1 # this is the stand's age in years at t = 0
+#START_MONTH = 1 # this is the number of the month in which the simulation is beginning
+#START_YEAR = 1960 # this is the year the simulation was started. TODO Used for prints only?
 
 def threepg(forest:Forest): # TODO init biomasses here
     """
@@ -51,16 +51,19 @@ def threepg(forest:Forest): # TODO init biomasses here
     # Initial biomasses -- all are in tonnes of dry mass per hectare, or tDM/ha
     # TODO need to figure out what these values should be, and if they should be
     #       different for each species or even each tree
-    init_foliage_biomass = 7.
-    init_root_biomass = 9.
-    init_stem_biomass = 20.
 
     # for each of the species in the list:
     for species in forest.species_list:
+        init_foliage_biomass = species.init_foliage_biomass * forest.num_trees
+        init_root_biomass = species.init_root_biomass * forest.num_trees
+        init_stem_biomass = species.init_stem_biomass * forest.num_trees
+
         # initialize biomass
         last_foliage_biomass = init_foliage_biomass
         last_stem_biomass = init_stem_biomass
         last_root_biomass = init_root_biomass
+
+        print(f'foliage biomass: {init_foliage_biomass}\nstem biomass: {init_stem_biomass}\nroot biomass: {init_root_biomass}\n\n')
 
         num_trees_died = 0 # number of trees that died last month. TODO Use this for killing trees
 
@@ -74,7 +77,7 @@ def threepg(forest:Forest): # TODO init biomasses here
 
             # function to calculate co2 levels on earth based on the season and year.
             # estimated from NASA data on Global Climate Change TODO cite source here
-            x = START_YEAR + ((forest.start_month + month_t) / 12) # TODO verify this is correct
+            x = forest.start_year + ((forest.start_month + month_t) / 12) # TODO verify this is correct
             co2 = ((98/60) * x - 2885.33) + 3 * math.sin(7 * x)
 
             env_mods, phys_mod = calculate_mods(climate[current_month], species, co2) # env_mods = ft * ff * fn * fc
@@ -229,15 +232,15 @@ def compute_dimensions(forest):
             species.nhb = 0.5 # TODO change this to be Guassian, is normally between 0.7 and 0.4
             
         mean_tree_height = species.ah * pow(species.b, species.nhb) * pow(tree.c, species.nhc) # A.61
-        # TODO need to check for zero ah value
 
         # live crown length TODO same thing
-        live_crown_length = 1.3 + species.ahl * pow(math.e, (-species.nhlb/species.b)) + species.nhlc * species.b
-        #live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(tree.c, species.nhlc) # A.62
+        #live_crown_length = 1.3 + species.ahl * pow(math.e, (-species.nhlb/species.b)) + species.nhlc * species.b
+        print(f'live_')
+        live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(tree.c, species.nhlc) # A.62
 
         # crown diameter
-        crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
-        #crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh) * pow(tree.c, 0) # A.63
+        #crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
+        crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh) * pow(tree.c, 0) # A.63
 
         # stand volume TODO not used
         #stand_volume = species.av * pow(species.b, species.nvb) * pow(mean_tree_height, species.nvh) * pow(species.b * species.b * mean_tree_height, species.nvbh) * num_trees
