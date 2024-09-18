@@ -274,11 +274,11 @@ def create_forest(climate_fp, species_fp, num_trees = 100):
 
 if __name__ == '__main__':
     # example usage here
-    example_forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/prineville_oregon_foliage.csv", num_trees=100)
+    forest = create_forest("test_data/prineville_oregon_climate.csv", "test_data/prineville_oregon_foliage.csv", num_trees=100)
 
-    example_forest.get_climate()
-    example_forest.climate_list[0].get_month_climate()
+    forest.get_climate()
+    forest.climate_list[0].get_month_climate()
 
-    for each_species in example_forest.species_list:
+    for each_species in forest.species_list:
         each_species.get_basic_info()
 

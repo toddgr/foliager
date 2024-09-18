@@ -19,6 +19,7 @@ Description: This file prepares data for forest generation based on user input.
 """
 
 from openai import OpenAI
+from create_forest import *
 
 # Open the secret key
 with open('parameters/secret_key.txt', 'r') as file:
@@ -54,17 +55,33 @@ habitat, bark_texture, bark_color, masting_cycle, seeding_age'
 following attributes:" + species_attributes + "\n Please include the headers \"" + species_header + "\" at the beginning of the output."
     
     species_data = ask_llm(species_prompt)
-    clean_species_data = species_data.replace('```', '').strip()
+    clean_species_data = species_data.replace('csv', '').replace('```', '').strip()
     
+    print("\n======================= SPECIES PROMPT =======================\n")
     print(species_prompt)
-    print("\n===========================================\n")
+    print("\n====================== SPECIES DATA ==========================\n")
     print(clean_species_data)
+    print("\n==============================================================\n")
 
     return clean_species_data
 
 def get_climate_data(location):
-    pass
-
+    climate_attributes = "month,tmax(average_maximum_monthly_temperature_celsius),tmin(average_minimum_monthly_temperature_celsius),\
+rain(cm),solar_rad(kwh/m2),frost_days(average_number_of_monthly_frost_days),soil_texture(very_coarse_sand/coarse_sand/fine_sand/loamy_sand\
+/sandy_loams/fine_sandy_loams/very_fine_sandy_loams/loams/silt_loams/clay_loams/silt_clay_loams/sandy_clay_loams/sandy_clays/silty_clays/clays),\
+vpd(average_monthly_vapor_pressure_deficit_kPa)"
+    climate_header = "month, tmax, tmin, rain, solar_rad, frost_days, soil_texture, vpd"
+    climate_prompt = "Only output the data for monthly values for " + location + "with the following attributes in CSV format: " + \
+        climate_attributes + "\n Please include the headers \"" + climate_header + "\" at the beginning of the output."
+    
+    climate_data = ask_llm(climate_prompt)
+    clean_climate_data = climate_data.replace('csv', '').replace('```', '').strip()
+    
+    print("\n===================== CLIMATE PROMPT =========================\n")
+    print(climate_prompt)
+    print("\n===================== CLIMATE DATA ============================\n")
+    print(clean_climate_data)
+    print("\n===============================================================\n")
 
 if __name__ == '__main__':
     # 1. Prompt user for a climate, city, or location:
@@ -75,6 +92,13 @@ if __name__ == '__main__':
     climate_data = get_climate_data(location)
 
     # 3. A forest is created:
+    forest = create_forest(climate_data, species_data)
+
+    forest.get_climate()
+    forest.climate_list[0].get_month_climate()
+
+    for each_species in forest.species_list:
+        each_species.get_basic_info()
     
     # 4. Forest information and tree dimensions are passed on to Blender:
     # ref: https://blender.stackexchange.com/questions/1365/how-can-i-run-blender-from-command-line-or-a-python-script-without-opening-a-gui
