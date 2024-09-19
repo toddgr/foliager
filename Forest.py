@@ -188,6 +188,12 @@ class Forest:
         total_basal_area = sum(tree.ba for tree in self.trees_list)
         basal_area_list = sorted(self.trees_list, key=lambda tree: tree.ba)
         
+        print(f"============ BASAL AREA FOR {len(basal_area_list)} trees ============")
+        for tree in basal_area_list:
+            print(tree.ba)
+
+        print(f"sum: {total_basal_area}")
+        
         # get the sum of the basal area for all the trees greater than the current tree
         i = 1
         for tree in self.trees_list:

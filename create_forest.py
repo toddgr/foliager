@@ -91,7 +91,7 @@ def threepg(forest:Forest): # TODO init biomasses here
             leaf_area_index = 0.1 * sla * last_foliage_biomass
 
             # ground area coverage (GAC) by canopy
-            if forest.start_age + month_t / 12 < species.tc:
+            if ((forest.start_age * 12) + month_t)/ 12 < species.tc:
                 ground_area_coverage = (forest.start_age + month_t / 12) / species.tc
             else:
                 ground_area_coverage = 1. # TODO verify this makes sense
@@ -110,18 +110,19 @@ def threepg(forest:Forest): # TODO init biomasses here
             m = species.m_0 + ((1. - species.m_0) * FERTILITY_RATING)
 
             # root partitioning ratio
-            root_partition_ratio = (species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * phys_mod))
+            root_partition_ratio = round((species.nr_min * species.nr_max) / (species.nr_min + ((species.nr_max - species.nr_min) * m * phys_mod)),4)
 
             # compute np and ap, which are used to calculate pfs TODO what are these
-            np = (math.log(species.p20/species.p2))/math.log(10.) # equation A29
-            ap = species.p2/(pow(2., np)) # equation A29
+            np = (math.log(species.p20/species.p2))/math.log(10.) # equation A.29
+            ap = species.p2/(pow(2., np)) # equation A.29
 
-            b = 1 # TODO what is b?
-            pfs = ap * pow(b, np)
+            b = 1 # TODO b is the mean tree diameter, also derived as species b
+            pfs = ap * pow(b, np) # A.28
 
+            # TODO VERIFIED PARTITIONING RATIOS ADD UP TO 1
             # getting remaining partitioning ratios
-            nf = (pfs * (1. - root_partition_ratio))/(1. + pfs) # TODO foliage partition
-            ns = (1. - root_partition_ratio)/(1. + pfs) # TODO soil partition
+            nf = round((pfs * (1. - root_partition_ratio))/(1. + pfs),4) # TODO foliage partition
+            ns = round((1. - root_partition_ratio)/(1. + pfs),4) # TODO soil partition
 
             # compute litterfall
             current_age = ((forest.start_age * 12) + month_t) / 12 # TODO should this be in months or years?
@@ -230,18 +231,34 @@ def compute_dimensions(forest):
         #mean_tree_height = 1.3 + species.ah * pow(math.e, (-species.nhb/species.b)) + species.nhc * species.b # for single tree species
         if species.ah <= 0:
             species.ah = 1.
-            species.nhb = 0.5 # TODO change this to be Guassian, is normally between 0.7 and 0.4
+            species.nhb = 0.5 # TODO change this to be Gaussian, is normally between 0.7 and 0.4
+        elif species.ah > 10:
+            species.ah /= 10
+            species.nhb /= 10
 
-        print(f'mean_tree_height: {species.ah} * pow({species.b}, ({species.nhb})) * pow({tree.c},{species.nhc})')
-        mean_tree_height = species.ah * pow(species.b, species.nhb) * pow(tree.c, species.nhc) # A.61
+        print(f'mean_tree_height for {species.name}: {species.ah} * pow({species.b}, {species.nhb}) * pow({tree.c},{species.nhc})')
+        mean_tree_height = species.ah * pow(species.b, species.nhb) #* pow(tree.c, species.nhc) # A.61
 
         # live crown length TODO same thing
         #live_crown_length = 1.3 + species.ahl * pow(math.e, (-species.nhlb/species.b)) + species.nhlc * species.b
-        print(f'live_crown_')
-        live_crown_length = species.ahl * pow(species.b, species.nhlb) * pow(tree.c, species.nhlc) # A.62
+        if species.ahl <= 0:
+            species.ahl = 1.
+            species.nhlb = 0.5 # TODO change this to be Gaussian, is normally between 1.25 and 0.5
+        elif species.ahl > 10:
+            species.ahl /= 10
+            species.nhlb /= 10
+        print(f'live_crown_length: {species.ahl} * pow({species.b}, {species.nhlb}) * pow({tree.c}, {species.nhlc})')
+        live_crown_length = species.ahl * pow(species.b, species.nhlb) #* pow(tree.c, species.nhlc) # A.62
 
         # crown diameter
         #crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh)
+        if species.ak <= 0:
+            species.ak = 0.5 # TODO change this, should be less than 1 but greater than 0
+            species.nkb = 0.75 # TODO change this to be Gaussian, is normally between 0.5 and 0.9
+        elif species.ak > 10: # TODO does this condition exist?
+            species.ak /= 10
+            species.nkb /= 10
+        print(f'crown_diameter = {species.ak} * pow({species.b}, {species.nkb}) * pow({mean_tree_height}, {species.nkh}) * pow({tree.c}, 0)\n')
         crown_diameter = species.ak * pow(species.b, species.nkb) * pow(mean_tree_height, species.nkh) * pow(tree.c, 0) # A.63
 
         # stand volume TODO not used
@@ -306,7 +323,7 @@ Sugar Pine, Pinus lambertiana, linear, very_dense, evergreen, green, pyramidal, 
 Red Alder, Alnus rubra, oval, medium, deciduous, green, open, shallow, temperate, smooth, gray, 2, 3\n\
 White Fir, Abies concolor, other, medium, evergreen, green, conical, deep, temperate, smooth, gray, 5, 8"
 
-    forest = create_forest(example_climate, example_species, num_trees=100)
+    forest = create_forest(example_climate, example_species, num_trees=1000)
 
     forest.get_climate()
     forest.climate_list[0].get_month_climate()

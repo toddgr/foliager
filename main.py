@@ -124,11 +124,10 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
     species_data = "name, scientific_name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color, masting_cycle, seeding_age,foliage_biomass,stem_biomass,root_biomass\n\
 Tasmanian blue gum,Eucalyptus globulus,lanceolate,very_dense,evergreen,green,spreading,deep,temperate,furrows/ridges/cracks,gray/white,2,4,0.75,0.5,0.35\n\
 Monterey pine,Pinus radiata,linear,medium,evergreen,green,pyramidal,shallow,mediterranean/temperate,scales/furrows,red/brown/gray,2,5,0.0015,0.15,0.075\n\
-Silver Fir,Abies alba,linear,dense,evergreen,green,conical,deep,temperate/subalpine,smooth,gray/brown,4,15,0.2,0.35,0.15\n\
 Acacia hybrid,Acacia auriculiformis x A. mangium,pinnate/bipinnate,very_dense,evergreen,green,irregular,shallow,tropical/subtropical/arid,smooth/lenticels,brown,1,2,0.2,0.3,0.15"
 
     # 3. A forest is created:
-    forest = create_forest(climate_data, species_data, num_trees=15)
+    forest = create_forest(climate_data, species_data, num_trees=10)
 
     # forest.get_climate()
     # forest.climate_list[0].get_month_climate()

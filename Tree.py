@@ -20,7 +20,7 @@ class Tree():
     Initialization occurs when the (x,y) coordinates are generated
     TODO break up into two classes, Qualities and dimensions?
     """
-    def __init__(self, species, x, y, age=0):
+    def __init__(self, species, x, y, age):
         """
         Attributes:
             Inherited
@@ -38,7 +38,7 @@ class Tree():
         """
         self.name = species.name
         self.species = species
-        self.ba = (np.pi * species.b * species.b)/40000 # in meters, A.64 TODO VERIFIED
+        self.ba = (3.1415926 * species.b * species.b)/40000 # in meters squared, A.64 TODO VERIFIED
         self.c = 1. # competition index -> computed later
         self.bark_texture = species.bark_texture
         self.bark_color = species.bark_color
@@ -93,7 +93,7 @@ class Tree():
         """
         print(f'========== {self.key} ==========')
         print(f'{self.species.deciduous_evergreen[0]}, about {round(self.age/12)} years old')
-        print(f'position: {self.position}\nheight: {self.height} meters\ndbh: {self.dbh} meters ({self.dbh*100} cm)')
+        print(f'position: {self.position}\nheight: {self.height} meters\ndbh: {self.dbh} meters ({round(self.dbh*100,3)} cm)')
         print(f'lcl: {self.lcl} meters\nc_diam: {self.c_diam} meters\n')
         pass
 
@@ -176,14 +176,15 @@ def plot_trees(forest:Forest, plot=False):
 
     for month in range(forest.t):
         for tree in forest.trees_list:
-            current_age = int((tree.age - forest.t) + month + 1) # current age in months of the tree in the simulation
-            if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= int(tree.species.seeding_age * 12): # if the current age of the tree is
-                # create new tree position from current tree position
-                x, z = generate_random_point(coordinate_list, tree)
-                if x is not None:
-                    coordinate_list.append([x,z])
-                    # add to the forest
-                    forest.add_tree(Tree(tree.species, x, z, (forest.t - month))) #TODO somehow add in the start age here too
+            current_age = int((forest.start_age * 12) + month)# in months
+            if month % 12 == 0: # trees can only spawn the last month of the year -- prevents spawning monthly 
+                if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= int(tree.species.seeding_age * 12): # if the current age of the tree is
+                    # create new tree position from current tree position
+                    x, z = generate_random_point(coordinate_list, tree)
+                    if x is not None:
+                        coordinate_list.append([x,z])
+                        # add to the forest
+                        forest.add_tree(Tree(tree.species, x, z, (forest.t - month))) #TODO somehow add in the start age here too
 
     # =========== PLOT SPAWNED TREES TOO ========================
     if plot:

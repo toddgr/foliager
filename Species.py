@@ -291,7 +291,7 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 		"""
 		def __init__(self, masting_cycle, seeding_age, foliage, stem, root):
 			self.masting_cycle : int = int(masting_cycle)
-			self.seeding_age : int = seeding_age
+			self.seeding_age : int = int(seeding_age)
 			self.init_foliage_biomass : float = float(foliage)
 			self.init_stem_biomass : float = float(stem)
 			self.init_root_biomass : float = float(root)
