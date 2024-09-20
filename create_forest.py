@@ -38,11 +38,7 @@ from Species import Species
 FERTILITY_RATING = 0.5 # fertility rating, ranges from 0 to 1
 CONVERSION_RATIO = 0.47 # for making GPP into NPP
 
-#START_AGE = 1 # this is the stand's age in years at t = 0
-#START_MONTH = 1 # this is the number of the month in which the simulation is beginning
-#START_YEAR = 1960 # this is the year the simulation was started. TODO Used for prints only?
-
-def threepg(forest:Forest): # TODO init biomasses here
+def threepg(forest:Forest):
     """
     Input: Forest (climate, species), time interval (in months)
     Output: Updated forest, with specific dimensions for each species
@@ -78,7 +74,7 @@ def threepg(forest:Forest): # TODO init biomasses here
 
             # function to calculate co2 levels on earth based on the season and year.
             # estimated from NASA data on Global Climate Change TODO cite source here
-            x = forest.start_year + ((forest.start_month + month_t) / 12) # TODO verify this is correct
+            x = forest.start_year + ((forest.start_month + month_t) / 12) 
             co2 = ((98/60) * x - 2885.33) + 3 * math.sin(7 * x)
 
             env_mods, phys_mod = calculate_mods(climate[current_month], species, co2) # env_mods = ft * ff * fn * fc
