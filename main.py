@@ -127,7 +127,7 @@ Monterey pine,Pinus radiata,linear,medium,evergreen,green,pyramidal,shallow,medi
 Acacia hybrid,Acacia auriculiformis x A. mangium,pinnate/bipinnate,very_dense,evergreen,green,irregular,shallow,tropical/subtropical/arid,smooth/lenticels,brown,1,2,0.2,0.3,0.15"
 
     # 3. A forest is created:
-    forest = create_forest(climate_data, species_data, num_trees=10)
+    forest = create_forest(climate_data, species_data, num_trees=750)
 
     # forest.get_climate()
     # forest.climate_list[0].get_month_climate()
@@ -138,5 +138,5 @@ Acacia hybrid,Acacia auriculiformis x A. mangium,pinnate/bipinnate,very_dense,ev
     # 4. Forest information and tree dimensions are passed on to Blender:
     # ref: https://blender.stackexchange.com/questions/1365/how-can-i-run-blender-from-command-line-or-a-python-script-without-opening-a-gui
     forest.print_tree_list()
-    for each_tree in forest.trees_list:
-        each_tree.get_tree_info()
+    #for each_tree in forest.trees_list:
+        #each_tree.get_tree_info()

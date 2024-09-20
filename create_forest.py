@@ -290,12 +290,12 @@ def create_forest(climate, species, num_trees=100):
     forest = Forest(climate, species, num_trees)
 
     # 2. Compute 3-PG data for each initial species
-    forest = threepg(forest)
+    #forest = threepg(forest)
 
     # 3. Create individual trees from species data
-    forest = plot_trees(forest)
+    forest = plot_trees(forest, plot=True)
     # Compute dimensions for each tree based on competition index
-    compute_dimensions(forest)
+    #compute_dimensions(forest)
 
     # 5. Write to Blender
 

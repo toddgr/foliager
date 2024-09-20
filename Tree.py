@@ -12,6 +12,8 @@ from scipy.spatial import distance
 from gauss import Gaussian
 from Forest import Forest
 
+HECTARE = 10000 # meters
+
 class Tree():
     """
     Holds information about each individual tree in the forest.
@@ -103,12 +105,12 @@ def generate_random_point(existing_points, parent_tree=None):
         Ensures that there are no overlapping trees to start
         Makes sure they're evenly spaced
         """
-        min_distance = 0.05
+        min_distance = 1 # meters away from another tree
         max_tries = 100
         for _ in range(max_tries):
             if parent_tree:
                 # tree should be generated within range of the parent tree
-                max_distance = 0.2
+                max_distance = 10 # meters
 
                 # Calculate initial range values
                 x_low = parent_tree.position[0] - max_distance
@@ -116,11 +118,11 @@ def generate_random_point(existing_points, parent_tree=None):
                 z_low = parent_tree.position[1] - max_distance
                 z_high = parent_tree.position[1] + max_distance
 
-                # Clip values to be within [0, 1]
+                # Clip values to be within [0, 10000] -> 10000 meters in a hectare
                 x_low = max(0, x_low)
-                x_high = min(1, x_high)
+                x_high = min(HECTARE, x_high)
                 z_low = max(0, z_low)
-                z_high = min(1, z_high)
+                z_high = min(HECTARE, z_high)
 
                 x_random = np.random.rand()
                 z_random = np.random.rand()
@@ -130,7 +132,7 @@ def generate_random_point(existing_points, parent_tree=None):
                 z = z_low + (z_high - z_low) * z_random
 
             else:
-                x, z = np.random.rand(), np.random.rand()
+                x, z = np.random.rand() * HECTARE, np.random.rand() * HECTARE
 
             if all(distance.euclidean([x, z], p) >= min_distance for p in existing_points):
                 return x, z
@@ -168,22 +170,29 @@ def plot_trees(forest:Forest, plot=False):
         # Add labels, legend, and show the plot
         plt.title("Initial Tree Placement")
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.xlim(0, 1)
-        plt.ylim(0, 1)
+        #plt.xlim(0, HECTARE)
+        #plt.ylim(0, HECTARE)
         plt.tight_layout()
         plt.show()
     # ==================================================================
 
     for month in range(forest.t):
+        print(f'=========== MONTH {month} =============')
         for tree in forest.trees_list:
-            current_age = int((forest.start_age * 12) + month)# in months
+            #if tree.age == forest.start_age + forest.t:
+            current_age_og = int((forest.start_age * 12) + month)# in months
+            current_age = abs((forest.t - month) - tree.age)
+                
             if month % 12 == 0: # trees can only spawn the last month of the year -- prevents spawning monthly 
-                if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= int(tree.species.seeding_age * 12): # if the current age of the tree is
+                print(f'\nspecies: {tree.species.name}')
+                print(f'current_age: {current_age}, masting cycle: {tree.species.masting_cycle * 12}, seeding age: {tree.species.seeding_age * 12}')
+                if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= tree.species.seeding_age * 12: # if the current age of the tree is
                     # create new tree position from current tree position
                     x, z = generate_random_point(coordinate_list, tree)
                     if x is not None:
                         coordinate_list.append([x,z])
                         # add to the forest
+                        print("adding tree")
                         forest.add_tree(Tree(tree.species, x, z, (forest.t - month))) #TODO somehow add in the start age here too
 
     # =========== PLOT SPAWNED TREES TOO ========================
@@ -204,8 +213,8 @@ def plot_trees(forest:Forest, plot=False):
         # Add labels, legend, and show the plot
         plt.title("Spawned Tree Placement")
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.xlim(0, 1)
-        plt.ylim(0, 1)
+        #plt.xlim(0, HECTARE)
+        #plt.ylim(0, HECTARE)
         plt.tight_layout()
         plt.show()
     # ==================================================================
