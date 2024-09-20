@@ -38,7 +38,7 @@ class Tree():
         """
         self.name = species.name
         self.species = species
-        self.ba = (3.1415926 * species.b * species.b)/40000 # in meters squared, A.64 TODO VERIFIED
+        self.ba = (3.1415926 * species.b * species.b)/40000 # in meters squared, (A.64)
         self.c = 1. # competition index -> computed later
         self.bark_texture = species.bark_texture
         self.bark_color = species.bark_color
