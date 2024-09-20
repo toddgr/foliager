@@ -174,7 +174,7 @@ seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are prod
 			"""
 			def __init__(self, k, acx, sla_1, sla_0, t_sla_mid, yfx, yf0, tyf):
 				self.k = float(k) # TODO structure it like this? And then have a comment explaining what it is
-				self.acx = acx
+				self.acx = acx # Species-specific maximum potential, used for GPP calculation
 				self.sla_1 = sla_1
 				self.sla_0 = sla_0
 				self.t_sla_mid = t_sla_mid
