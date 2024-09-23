@@ -38,7 +38,7 @@ from Species import Species
 FERTILITY_RATING = 0.5 # fertility rating, ranges from 0 to 1
 CONVERSION_RATIO = 0.47 # for making GPP into NPP
 
-def threepg(forest:Forest):
+def threepg(forest:Forest, tree_spawn_age):
     """
     Input: Forest (climate, species), time interval (in months)
     Output: Updated forest, with specific dimensions for each species
@@ -65,7 +65,7 @@ def threepg(forest:Forest):
         num_trees_died = 0 # number of trees that died last month. TODO Use this for killing trees
 
         # for each month in the time interval:
-        for month_t in range(forest.t+1):
+        for month_t in range(tree_spawn_age+1):
             # get the current month, mean temp for the month
             climate = forest.climate_list
             current_month = ((forest.start_month + month_t) % 12)-1 # jan - dec
@@ -165,9 +165,9 @@ def threepg(forest:Forest):
             # calculating b (mean tree diameter) from mean individual stem mass (inversion of A65 of user manual)
             ind_stem_mass_iws = last_stem_biomass / forest.num_trees # individual stem mass
             
-            species.b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) # Inversion of (A.65)
+            b = pow(ind_stem_mass_iws/species.aws, (1.0/species.nws)) # Inversion of (A.65)
 
-    return forest
+    return b
 
 
 def calculate_mods(curr_climate, species, co2):
@@ -291,7 +291,12 @@ def create_forest(climate, species, num_trees=100):
     # 3. Create individual trees from species data
     forest = plot_trees(forest, plot=True)
     # Compute dimensions for each tree based on competition index
-    #compute_dimensions(forest)
+    for each_tree in forest.trees_list:
+        tree_age = forest.t + (forest.start_age*12) + each_tree.age
+        each_tree.b = threepg(forest, tree_age)
+        each_tree.ba = (3.1415926 * each_tree.b * each_tree.b)/40000
+    
+    compute_dimensions(forest)
 
     # 5. Write to Blender
 

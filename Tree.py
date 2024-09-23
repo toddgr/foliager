@@ -49,6 +49,7 @@ class Tree():
 
         self.position = (x,y)
         self.age = age # age of the tree in months
+        self.b = 0.
 
         # Assigned in create_forest/compute_dimensions():
         # self.height = self.generate_from(species.height)
