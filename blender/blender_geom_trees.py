@@ -21,12 +21,20 @@ def verify_units_metric():
     else:
         print("Metric units are already in use.")
 
-def create_tree_mesh(name):
+def create_geometry_node_tree(obj):
+    """Create a Geometry Nodes modifier and node tree for the given mesh object."""
+    # Create a new Geometry node group
+    bpy.ops.node.new_geometry_node_group_assign()
+    # Give the group a name
+    bpy.data.node_groups["Geometry Nodes"].name = "GenTreeScript"
+    
+
+def init_tree_mesh(name, height):
     # Make sure that everything is in meters
     verify_units_metric()
 
     # Define the vertices
-    vertices = [(0, 0, 0), (0, 0, 20)]
+    vertices = [(0, 0, 0), (0, 0, height)]
     
     # Define edges (a line connecting the two vertices)
     edges = [(0, 1)]
@@ -47,5 +55,14 @@ def create_tree_mesh(name):
     # Update the mesh with new geometry
     mesh.update()
 
+    return obj
+
+def create_tree_with_geometry_nodes(name, height):
+    # Create the mesh first
+    obj = init_tree_mesh(name, height)
+
+    # Create the geometry node tree
+    create_geometry_node_tree(obj)
+
 if __name__ == '__main__':
-    create_tree_mesh("tree")
+    create_tree_with_geometry_nodes("Douglas_Fir", 20)
