@@ -385,7 +385,7 @@ def create_axiom_and_rules(dbh, lcl, c_diam, height, branch_spacing=2, shape='di
         rules = {'T':trunk, 'B':branches, 'X':branch_iter}
         
     elif shape=="round":
-        # step length 5
+        # step length 5s
         n = 3 # number of iterations
         d = 60
         
@@ -610,7 +610,7 @@ def build_tree(name, position, dbh, lcl, trunk_height, c_diam, bark_color, bark_
     tree = create_mesh(vertices, edges, name)
     tree = add_trunk_thickness(tree, trunk_height+lcl, dbh)
     assign_texture(tree.name, bark_color, bark_texture)
-    place_leaves(leaves)
+    #place_leaves(leaves)
     tree = join_leaves_and_tree(name)
     
     # Set the 3D cursor to the origin
@@ -625,16 +625,18 @@ def build_tree(name, position, dbh, lcl, trunk_height, c_diam, bark_color, bark_
 
 if __name__ == '__main__':
     # example usage
+    
     # Input the dimensions (replace this with 3-pg stuff later)
-    dbh = 1.58402328222362
-    lcl = 14.234187202330084
-    trunk_height = 5
-    c_diam = 15
+    dbh = 3 # put in cm
+    lcl = 14.234187202330084 
+    trunk_height = 5 
+    c_diam = 20 
 
     bark_color = 'gray'
     bark_texture = 'furrows'
     
+    
     build_tree('Bigleaf Maple', (0, 0, 0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
-    #build_tree('Tree2', (0,0,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
+    #build_tree('Tree2', (10,10,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
     #build_tree('Tree3', (-10, -10,0), dbh, lcl, trunk_height, c_diam, bark_color, bark_texture)
         
