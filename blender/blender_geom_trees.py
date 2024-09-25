@@ -13,10 +13,11 @@ import bpy
 #import bmesh
 
 DBH = 0.203 # diameter at breast height for now
-CANOPY_DENSITY = 58
+HEIGHT = 20
+CANOPY_DENSITY = 80
 C_DIAM = 8
 C_RADIUS = C_DIAM / 2
-BRANCH_BEND = 6.3
+BRANCH_BEND = CANOPY_DENSITY/12.492192
 
 SPACING = 250
 
@@ -312,4 +313,4 @@ def create_tree_with_geometry_nodes(name, height):
     create_geometry_node_tree()
 
 if __name__ == '__main__':
-    create_tree_with_geometry_nodes("Douglas_Fir", 10)
+    create_tree_with_geometry_nodes("Douglas_Fir", HEIGHT)
