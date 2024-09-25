@@ -22,11 +22,9 @@ def verify_units_metric():
         print("Metric units are already in use.")
 
 def create_geometry_node_tree(obj):
-    """Create a Geometry Nodes modifier and node tree for the given mesh object."""
-    # Create a new Geometry node group
-    bpy.ops.node.new_geometry_node_group_assign()
-    # Give the group a name
-    bpy.data.node_groups["Geometry Nodes"].name = "GenTreeScript"
+    bpy.ops.node.new_geometry_nodes_modifier()
+    node_tree = bpy.data.node_groups["Geometry Nodes"]
+    node_tree.name = "ScriptTesting"
     
 
 def init_tree_mesh(name, height):
@@ -48,6 +46,9 @@ def init_tree_mesh(name, height):
 
     # Link the object to the scene collection
     bpy.context.collection.objects.link(obj)
+
+    # Set the new object as the active object
+    bpy.context.view_layer.objects.active = obj
 
     # Create the mesh from the vertices/edges/faces
     mesh.from_pydata(vertices, edges, faces)
