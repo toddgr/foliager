@@ -189,7 +189,7 @@ def create_base_branches(node_tree):
     curve_line, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveLine")
     curve_line.location.y = node_y_location
     curve_line.mode = 'DIRECTION'
-    curve_line.inputs[3].default_value = C_RADIUS
+    curve_line.inputs[3].default_value = C_RADIUS + (C_RADIUS/4)
     curve_line.parent = frame_node
 
     # resample curve
@@ -238,30 +238,29 @@ def create_base_branches(node_tree):
     map_range_radius.clamp = True
     link_nodes(node_tree, radius, "Value", map_range_radius, "Value")
     # TODO make these values dynamic, will be affected by the C_DIAM
+    # Could influence tree shape?
     map_range_radius.inputs[1].default_value = 0    # from min
-    map_range_radius.inputs[2].default_value = -2.1 # from max
-    map_range_radius.inputs[3].default_value = 0.3  # to min
-    map_range_radius.inputs[4].default_value = 1.1  # to max
+    map_range_radius.inputs[2].default_value = 0 # from max
+    map_range_radius.inputs[3].default_value = 1  # to min
+    map_range_radius.inputs[4].default_value = 1  # to max
     map_range_radius.parent = frame_node
 
-    # call branch level 2 here
-    #branch_level_two_instances, _ = create_level_two_branches()
+    # create the branches on the branches
+    branch_level_two_instances = create_level_two_branches(node_tree, node_x_location, node_y_location, set_position)
     
     # join geometry
+    #   create join geometry node
+    #   link curve to mesh to it
+    #   link bl2instances to it
     
-    # spline parameter
-    
-    # map range
-    
-    # random value
-    
-    # align euler to vector
+    rotation = rotate_branches(node_tree, node_x_location, node_y_location)
     
     # instance on points
     instance_on_points, node_x_location = create_node(node_tree, node_x_location-SPACING, "GeometryNodeInstanceOnPoints")
     instance_on_points.location.y = node_y_location
     link_nodes(node_tree, curve_to_mesh, "Mesh", instance_on_points, "Instance")
     link_nodes(node_tree, map_range_radius, "Result", instance_on_points, "Scale")
+    link_nodes(node_tree, rotation, "Rotation", instance_on_points, "Rotation")
     instance_on_points.parent = frame_node
     
     # branch trimming
@@ -306,7 +305,7 @@ def add_branch_curves(node_tree, node_x_location, node_y_location):
 
 def trim_branches(node_tree, node_x_location, node_y_location):
     node_x_location -= SPACING * 4
-    node_y_location -= SPACING * 1.75
+    node_y_location += SPACING * 2
 
     # Create a Frame node
     frame_node = node_tree.nodes.new(type='NodeFrame')
@@ -317,7 +316,7 @@ def trim_branches(node_tree, node_x_location, node_y_location):
     # subtract
     subtract, _ = create_node(node_tree, node_x_location, "ShaderNodeMath")
     subtract.operation = 'SUBTRACT'
-    subtract.inputs[0].default_value = CANOPY_DENSITY - 1
+    subtract.inputs[0].default_value = CANOPY_DENSITY - ((CANOPY_DENSITY/10) * 3)
     subtract.inputs[1].default_value = 1.0  # Set the second input to 1
     subtract.location.y = node_y_location
 
@@ -354,6 +353,43 @@ def trim_branches(node_tree, node_x_location, node_y_location):
     frame_node.height = (greater_than.location.y  - subtract.location.x) # Adjust height
     
     return equal
+
+def rotate_branches(node_tree, node_x_location, node_y_location):
+    node_x_location -= SPACING * 4
+    node_y_location -= SPACING * 2
+
+    # spline parameter
+    spline_parameter, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeSplineParameter")
+    spline_parameter.location.y = node_y_location
+    
+    # map range
+    map_range, _ = create_node(node_tree, node_x_location, "ShaderNodeMapRange")
+    map_range.location.y = node_y_location
+    map_range.clamp = True
+    # TODO make these values dynamic
+    map_range.inputs[1].default_value = 0    # from min
+    map_range.inputs[2].default_value = 0 # from max
+    map_range.inputs[3].default_value = 0  # to min
+    map_range.inputs[4].default_value = 1  # to max
+    link_nodes(node_tree, spline_parameter, "Length", map_range, "Value")
+    
+    # random value (0, 0, 0) -> (0, 0, 360)
+    random_value, node_x_location = create_node(node_tree, node_x_location, "FunctionNodeRandomValue")
+    random_value.location.y = node_y_location - SPACING
+    random_value.data_type = 'FLOAT_VECTOR'
+    random_value.inputs[1].default_value = (0, 0, 360) # set the max Z-axis rotation to 360
+
+    # align euler to vector
+    euler_to_vector, _ = create_node(node_tree, node_x_location, "FunctionNodeAlignEulerToVector")
+    euler_to_vector.location.y = node_y_location
+    euler_to_vector.axis = 'Y'
+    link_nodes(node_tree, random_value, "Value", euler_to_vector, "Rotation")
+    link_nodes(node_tree, map_range, "Result", euler_to_vector, "Factor")
+
+    return euler_to_vector
+
+def create_level_two_branches(node_tree, node_x_location, node_y_location, set_position):
+    return None
 
 
 def init_tree_mesh(name, height):
