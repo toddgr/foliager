@@ -4,10 +4,15 @@ Author: Grace Todd
 Date: September 24, 2024
 Description: This file uses Blender Geometry nodes and particle systems to generate tree
             assets based on the input dimensions of a tree.
+            create_node() and link_nodes() based on functions created by blender_plus_python:
+            https://github.com/CGArtPython/blender_plus_python/blob/main/geo_nodes/subdivided_triangulated_cube
+
 """
 
 import bpy
 #import bmesh
+
+DBH = 0.203 # diameter at breast height for now
 
 def create_node(node_tree, node_location, type_name):
     node_obj = node_tree.nodes.new(type=type_name)
@@ -19,26 +24,104 @@ def create_node(node_tree, node_location, type_name):
 def link_nodes(node_tree, from_node, from_type, to_node, to_type):
     node_tree.links.new(from_node.outputs[from_type], to_node.inputs[to_type])
 
-def create_geometry_node_tree(obj):
+def link_curve_nodes(node_tree, from_node, to_node):
+    node_tree.links.new(from_node.outputs["Curve"], to_node.inputs["Curve"])
+
+def create_geometry_node_tree():
     bpy.ops.node.new_geometry_nodes_modifier()
     node_tree = bpy.data.node_groups["Geometry Nodes"]
     node_tree.name = "ScriptTesting"
 
-    node_location = 0
-    in_node = node_tree.nodes["Group Input"]
-    in_node.location = (-300,0)
-    
-
-    # add a mesh to curve node
-    mesh_to_curve, node_location = create_node(node_tree, node_location, "GeometryNodeMeshToCurve")
-    link_nodes(node_tree, in_node, "Geometry", mesh_to_curve, "Mesh")
-    
-    curve_to_mesh, node_location = create_node(node_tree, node_location, "GeometryNodeCurveToMesh")
-    link_nodes(node_tree, mesh_to_curve, "Curve", curve_to_mesh, "Curve")
+    node_location, curve_to_mesh = create_tree_base(node_tree)
     
     out_node = node_tree.nodes["Group Output"]
     out_node.location = (node_location, 0)
     link_nodes(node_tree, curve_to_mesh, "Mesh", out_node, "Geometry")
+
+def create_tree_base(node_tree):
+    """
+    Create the base of the tree
+    Input: Group Input
+    Output: Curve to Mesh
+    """
+    node_x_location = 0
+    node_y_location = 0
+
+    in_node = node_tree.nodes["Group Input"]
+    in_node.location = (-300,0)
+
+    # mesh to curve
+    mesh_to_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeMeshToCurve")
+    link_nodes(node_tree, in_node, "Geometry", mesh_to_curve, "Mesh")
+
+    # trim curve
+    trim_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeTrimCurve")
+    link_curve_nodes(node_tree, mesh_to_curve, trim_curve)
+
+    # resample curve
+    resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
+    link_curve_nodes(node_tree, trim_curve, resample_curve)
+
+    # set curve radius
+    curve_circle_location = (node_x_location, node_y_location - 150)
+    set_curve_radius, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeSetCurveRadius")
+    link_curve_nodes(node_tree, resample_curve, set_curve_radius)
+
+    #   set trunk thickness
+    curve_radius = set_trunk_thickness(node_tree, DBH, node_x_location-(300 * 3), node_y_location + 300)
+    link_nodes(node_tree, curve_radius, "Value", set_curve_radius, "Radius")
+
+    # curve to mesh
+    curve_to_mesh, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurveToMesh")
+    link_curve_nodes(node_tree, set_curve_radius, curve_to_mesh)
+
+    #   curve circle
+    curve_circle, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveCircle")
+    curve_circle.location = curve_circle_location
+    link_nodes(node_tree, curve_circle, "Curve", curve_to_mesh, "Profile Curve")
+    
+    return node_x_location, curve_to_mesh
+
+def set_trunk_thickness(node_tree, dbh, node_x_location, node_y_location):
+    """
+    Input: Diameter at breast height (m)
+    Output: Radius value for Set Curve Radius
+    """
+    # create the group
+
+    # spline parameter
+    spline_parameter, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeSplineParameter")
+    spline_parameter.location.y = node_y_location
+
+    # float curve
+    float_curve, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeFloatCurve")
+    float_curve.location.y = node_y_location + 100
+    link_nodes(node_tree, spline_parameter, "Factor", float_curve, "Value")
+
+    # subtract from 1
+    subtract_location = (node_x_location, node_y_location)
+    subtract, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMath")
+    #subtract = node_tree.nodes.new(type="ShaderNodeMath")
+    subtract.operation = 'SUBTRACT'
+    subtract.inputs[1].default_value = 1.0  # Set the second input to 1
+    subtract.location = subtract_location
+    link_nodes(node_tree, float_curve, "Value", subtract, "Value")
+
+    # multiply
+    multiply, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMath")
+    multiply.operation = 'MULTIPLY'
+    multiply.location.y = node_y_location
+    link_nodes(node_tree, subtract, "Value", multiply, "Value")
+
+    # get the group input
+
+    # group output
+    
+    return subtract # a group
+
+
+def make_tree_base():
+    pass
 
 
 def init_tree_mesh(name, height):
@@ -75,7 +158,7 @@ def create_tree_with_geometry_nodes(name, height):
     obj = init_tree_mesh(name, height)
 
     # Create the geometry node tree
-    create_geometry_node_tree(obj)
+    create_geometry_node_tree()
 
 if __name__ == '__main__':
-    create_tree_with_geometry_nodes("Douglas_Fir", 20)
+    create_tree_with_geometry_nodes("Douglas_Fir", 10)
