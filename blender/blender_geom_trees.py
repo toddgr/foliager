@@ -90,7 +90,7 @@ def create_tree_base(node_tree, tree):
     resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
     link_curve_nodes(node_tree, trim_curve, resample_curve)
     resample_curve.mode = 'LENGTH'
-    resample_curve.inputs[3].default_value = 0.1 # canopy density!!! 0.1, 0.5, 1
+    resample_curve.inputs[3].default_value = tree.bl_canopy_factor
     resample_curve.parent = frame_node
     
     # branch trimming
@@ -236,7 +236,7 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     if base_branches:
         curve_circle.inputs[4].default_value = tree.dbh/10 # branch radius needs to be small
     else:
-        curve_circle.inputs[4].default_value = tree.dbh/4 # branch radius needs to be smaller
+        curve_circle.inputs[4].default_value = tree.dbh/40 # branch radius needs to be smaller
 
     link_nodes(node_tree, curve_circle, "Curve", curve_to_mesh, "Profile Curve")
     curve_circle.parent = frame_node
@@ -245,13 +245,13 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     map_range_radius, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMapRange")
     map_range_radius.location.y = curve_circle_location[1]
     map_range_radius.location.x = curve_circle_location[0] + SPACING
-    map_range_radius.clamp = True
+    map_range_radius.clamp = False
     link_nodes(node_tree, radius, "Value", map_range_radius, "Value")
     # TODO make these values dynamic, will be affected by the C_DIAM
     # Could influence tree shape?
     map_range_radius.inputs[1].default_value = 0    # from min
-    map_range_radius.inputs[2].default_value = 0 # from max
-    map_range_radius.inputs[3].default_value = -2  # to min
+    map_range_radius.inputs[2].default_value = 0.1 # from max
+    map_range_radius.inputs[3].default_value = 1  # to min
     map_range_radius.inputs[4].default_value = 1  # to max
     map_range_radius.parent = frame_node
 
@@ -335,7 +335,7 @@ def trim_branches(node_tree, tree, node_x_location, node_y_location, base_branch
     subtract, _ = create_node(node_tree, node_x_location, "ShaderNodeMath")
     subtract.operation = 'SUBTRACT'
     if base_branches:
-        subtract.inputs[0].default_value = tree.height / 0.1 # canopy density!!
+        subtract.inputs[0].default_value = tree.height / tree.bl_canopy_factor
         subtract.inputs[1].default_value = 0.0  # Set the second input to 1
     else:
         subtract.inputs[0].default_value = (((tree.c_diam / 2)/4) + 0.1)
@@ -360,9 +360,9 @@ def trim_branches(node_tree, tree, node_x_location, node_y_location, base_branch
     greater_than.operation = 'GREATER_THAN'
     greater_than.location.y = node_y_location - SPACING
     if base_branches:
-        greater_than.inputs[1].default_value = (tree.height - tree.lcl) / 0.1 # canopy density!!!
+        greater_than.inputs[1].default_value = (tree.height - tree.lcl) / tree.bl_canopy_factor
     else:
-        greater_than.inputs[1].default_value = (tree.c_diam / 2) - 0.1
+        greater_than.inputs[1].default_value = (tree.c_diam / 2) - tree.bl_canopy_factor
 
     link_nodes(node_tree, spline_parameter, "Index", greater_than, "A")
     greater_than.parent = frame_node
@@ -391,12 +391,12 @@ def rotate_branches(node_tree, node_x_location, node_y_location, base_branches=F
     # map range
     map_range, _ = create_node(node_tree, node_x_location, "ShaderNodeMapRange")
     map_range.location.y = node_y_location
-    map_range.clamp = True
+    map_range.interpolation_type = 'SMOOTHSTEP'
     # TODO make these values dynamic
-    map_range.inputs[1].default_value = 0    # from min
-    map_range.inputs[2].default_value = 0 # from max
-    map_range.inputs[3].default_value = 10  # to min
-    map_range.inputs[4].default_value = 1  # to max
+    map_range.inputs[1].default_value = 1    # from min
+    map_range.inputs[2].default_value = 1 # from max
+    map_range.inputs[3].default_value = 0.5  # to min
+    map_range.inputs[4].default_value = 0  # to max
     link_nodes(node_tree, spline_parameter, "Length", map_range, "Value")
     
     # random value (0, 0, 0) -> (0, 0, 360)
@@ -404,7 +404,7 @@ def rotate_branches(node_tree, node_x_location, node_y_location, base_branches=F
     random_value.location.y = node_y_location - SPACING
     random_value.data_type = 'FLOAT_VECTOR'
     if base_branches:
-        random_value.inputs[1].default_value = (0, 0, 360 * 2) # set the max Z-axis rotation to 360
+        random_value.inputs[1].default_value = (0, 0, 360) # set the max Z-axis rotation to 360
     else:
         random_value.inputs[1].default_value = (360, 360, 360) # set the max Z-axis rotation to 360
 

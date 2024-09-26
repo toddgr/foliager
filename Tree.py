@@ -56,6 +56,22 @@ class Tree():
         # self.lcl = self.generate_from(species.lcl)
         # self.c_diam = self.generate_from(species.c_diam)
 
+        # Used for blender calculations
+        #very_thin/thin/medium/dense/very_dense
+        match self.species.canopy_density:
+            case 'very_thin':
+                self.bl_canopy_factor = 0.05
+            case 'thin':
+                self.bl_canopy_factor = 0.1
+            case 'medium':
+                self.bl_canopy_factor = 0.5
+            case 'dense':
+                self.bl_canopy_factor = 0.75
+            case 'very_dense':
+                self.bl_canopy_factor = 1.
+
+
+
         self.key = self.create_tree_key() # e.g. Ponderosa243123
 
 
