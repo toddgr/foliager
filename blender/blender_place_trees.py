@@ -15,6 +15,7 @@ import sys
 sys.path.append('C:/Users/Grace/Documents/Masters_Project/foliager/')
 input_filepath ="C:/Users/Grace/Documents/Masters_Project/foliager/test_data/OUTPUT_DATA.csv"
 
+from blender.blender_geom_trees import create_tree_with_geometry_nodes
 #import foliager
 
 FOREST_FLOOR_SCALE = 20
@@ -204,8 +205,8 @@ def gen_trees_in_blender(coordinates_filepath):
             tree_form = row['q_tree_form']
 #            canopy = create_canopy(name, x, y, height, dbh, live_crown_length, crown_diameter, tree_form)
 #            trunk = create_trunk(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
-            tree = create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
-            tree_list.append(tree)
+            #tree = create_tree(name, x, y, height, dbh, live_crown_length, crown_diameter,tree_form)
+            #tree_list.append(tree)
     
     add_trees_to_collection(tree_list)
 
