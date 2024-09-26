@@ -2,6 +2,7 @@ openai
 pandas
 matplotlib
 pyarrow
+scipy
 
 bpy
 bmesh

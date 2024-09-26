@@ -44,6 +44,12 @@ class Species:
 		# Data calculated from 3-PG
 		self.b = 0
 
+		# for synthetic data purposes -> estimating dimensions for a species
+		self.height = None
+		self.dbh = None
+		self.lcl = None
+		self.c_diam = None
+
 
 	def get_basic_info(self):
 		"""

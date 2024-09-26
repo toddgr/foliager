@@ -68,8 +68,8 @@ class Tree():
         average = dimension
         stddev = (dimension + 0.05) / 4 # TODO make this var more accurate
 
-        #new_dimension = Gaussian(average, stddev)
-        #return abs(new_dimension) # dimension can't be negative
+        new_dimension = Gaussian(average, stddev)
+        return abs(new_dimension) # dimension can't be negative
         # TODO testing without gauss dimension
         return round(dimension, 3)
 
@@ -176,24 +176,24 @@ def plot_trees(forest:Forest, plot=False):
         plt.show()
     # ==================================================================
 
-    for month in range(forest.t):
-        print(f'=========== MONTH {month} =============')
-        for tree in forest.trees_list:
-            #if tree.age == forest.start_age + forest.t:
-            current_age_og = int((forest.start_age * 12) + month)# in months
-            current_age = abs((forest.t - month) - tree.age)
+    # for month in range(forest.t):
+    #     print(f'=========== MONTH {month} =============')
+    #     for tree in forest.trees_list:
+    #         #if tree.age == forest.start_age + forest.t:
+    #         current_age_og = int((forest.start_age * 12) + month)# in months
+    #         current_age = abs((forest.t - month) - tree.age)
                 
-            if month % 12 == 0: # trees can only spawn the last month of the year -- prevents spawning monthly 
-                print(f'\nspecies: {tree.species.name}')
-                print(f'current_age: {current_age}, masting cycle: {tree.species.masting_cycle * 12}, seeding age: {tree.species.seeding_age * 12}')
-                if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= tree.species.seeding_age * 12: # if the current age of the tree is
-                    # create new tree position from current tree position
-                    x, z = generate_random_point(coordinate_list, tree)
-                    if x is not None:
-                        coordinate_list.append([x,z])
-                        # add to the forest
-                        print("adding tree")
-                        forest.add_tree(Tree(tree.species, x, z, (forest.t - month))) #TODO somehow add in the start age here too
+    #         if month % 12 == 0: # trees can only spawn the last month of the year -- prevents spawning monthly 
+    #             print(f'\nspecies: {tree.species.name}')
+    #             print(f'current_age: {current_age}, masting cycle: {tree.species.masting_cycle * 12}, seeding age: {tree.species.seeding_age * 12}')
+    #             if current_age % (tree.species.masting_cycle * 12) == 0 and current_age >= tree.species.seeding_age * 12: # if the current age of the tree is
+    #                 # create new tree position from current tree position
+    #                 x, z = generate_random_point(coordinate_list, tree)
+    #                 if x is not None:
+    #                     coordinate_list.append([x,z])
+    #                     # add to the forest
+    #                     print("adding tree")
+    #                     forest.add_tree(Tree(tree.species, x, z, (forest.t - month))) #TODO somehow add in the start age here too
 
     # =========== PLOT SPAWNED TREES TOO ========================
     if plot:
