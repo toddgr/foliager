@@ -47,9 +47,9 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
     red_alder = 'Red Alder,Alnus rubra,oval,medium,deciduous,green,irregular,shallow,temperate,smooth,gray,2,4,0.9,1.1,0.3\n'
     lodgepole_pine = 'Lodgepole Pine,Pinus contorta,linear,thin,evergreen,green,conical,deep,temperate,furrows,brown,3,5,1.2,1.6,0.4\n'
     
-    example_species = header+ponderosa_pine#+western_red_cedar+quaking_aspen+black_cottonwood+sugar_maple+douglas_fir+red_alder+lodgepole_pine
+    example_species = header+ponderosa_pine+western_red_cedar+quaking_aspen+black_cottonwood+sugar_maple+douglas_fir+red_alder+lodgepole_pine
 
-    forest = Forest(example_climate, example_species, num_trees=1)
+    forest = Forest(example_climate, example_species, num_trees=8)
 
     for each_species in forest.species_list:
         each_species.get_basic_info()
@@ -63,13 +63,13 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
 
     # average known values for species at 50 years old
     populate_dimensions(forest.species_list[0], 20, 0.4, 11, 7) # Ponderosa Pine
-    # populate_dimensions(forest.species_list[1], 20, 0.4, 8, 5) # Western Red Cedar
-    # populate_dimensions(forest.species_list[2], 17, 0.3, 8, 5) # Quaking Aspen
-    # populate_dimensions(forest.species_list[3], 32, 0.85, 17, 13) # Black Cottonwood
-    # populate_dimensions(forest.species_list[4], 17, 0.35, 7, 12) # Sugar Maple
-    # populate_dimensions(forest.species_list[5], 27, 0.45, 13, 7) # Douglas Fir
-    # populate_dimensions(forest.species_list[6], 30, 0.5, 15, 10) # Red Alder
-    # populate_dimensions(forest.species_list[7], 20, 0.10, 10, 5) # Lodgepole pine
+    populate_dimensions(forest.species_list[1], 20, 0.4, 8, 5) # Western Red Cedar
+    populate_dimensions(forest.species_list[2], 17, 0.3, 8, 5) # Quaking Aspen
+    populate_dimensions(forest.species_list[3], 32, 0.85, 17, 13) # Black Cottonwood
+    populate_dimensions(forest.species_list[4], 17, 0.35, 7, 12) # Sugar Maple
+    populate_dimensions(forest.species_list[5], 27, 0.45, 13, 7) # Douglas Fir
+    populate_dimensions(forest.species_list[6], 30, 0.5, 15, 10) # Red Alder
+    populate_dimensions(forest.species_list[7], 20, 0.10, 10, 5) # Lodgepole pine
     
     # generate some trees
     plot_trees(forest)

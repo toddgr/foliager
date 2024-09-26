@@ -194,7 +194,7 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     if base_branches:
         curve_line.inputs[3].default_value = (tree.c_diam / 2) #length
     else:
-        curve_line.inputs[3].default_value = (tree.c_diam / 2)/4
+        curve_line.inputs[3].default_value = (tree.c_diam / 2)/8
     curve_line.parent = frame_node
 
     # resample curve
@@ -265,9 +265,9 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
         link_nodes(node_tree, map_range_radius, "Result", map_range_shape, "Value")
 
         map_range_shape.inputs[1].default_value = 0    # from min
-        map_range_shape.inputs[2].default_value = 6.1  # from max
+        map_range_shape.inputs[2].default_value = tree.c_diam  # from max
         map_range_shape.inputs[3].default_value = 0    # to min
-        map_range_shape.inputs[4].default_value = 3.2  # to max
+        map_range_shape.inputs[4].default_value = tree.c_diam - ((tree.lcl - tree.c_diam) / 2)  # to max
         map_range_shape.parent = frame_node
 
         # create the branches on the branches
