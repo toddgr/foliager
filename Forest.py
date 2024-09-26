@@ -1,13 +1,21 @@
+"""
+File: Forest.py
+Author: Grace Todd
+Date: Sep 16, 2024
+Description: A class object to hold all the necessary details about a forest instance.
+"""
+
 import random
 from Species import Species
 import csv 
+import io
 
 class Forest:
     """
     Holds information about the environment, climate, and collection of trees found in the forest.
     Also might store a list of species found in the environment
     """
-    def __init__(self, climate, species, num_trees=None):
+    def __init__(self, climate, species, num_trees=1):
         """
         Input: A list of climate conditions for each month of the year
         Attributes:
@@ -15,17 +23,25 @@ class Forest:
             - Trees : [Tree]
         """
         # create climate list
+        print(climate)
         self.climate_list = self.read_climate_data(climate)
+
+        self.start_age = 5 # stand is 5 years old at the start of the simulation
+        self.start_month = 1 # starts in february?
+        self.end_month = 12 * 5 # simulation is 5 years long
+        self.start_year = 1960 # year when the simulation starts. Used mostly for Co2 calculations
+
+        self.t = self.end_month - self.start_month # number of months in the simulation
 
         # initialize list of trees
         self.trees_list = []
         self.num_trees = num_trees
 
         # create species list
-        self.species_list = self.create_species_list(species)
+        self.create_species_from(species)
 
 
-    def read_climate_data(self, climate_filepath):
+    def read_climate_data(self, climate_string):
         """
         Input: Climate CSV file
         Output: A list of 12 ClimateByMonth instances, one for each month.
@@ -34,10 +50,12 @@ class Forest:
         climate input -- CSV implementation is temporary
         """
 
-        climate_csv = self.read_csv(climate_filepath)
+        rows = climate_string.split('\n')
+        climate_list = [row.split(',') for row in rows if row.strip()]  # Skip any empty rows
+        
         climate_data = []
 
-        for month in climate_csv:
+        for month in climate_list[1:]:
             month_instance = self.ClimateByMonth(*month)
             climate_data.append(month_instance)
 
@@ -50,15 +68,72 @@ class Forest:
         Output: A list of Species class instances, one for each species of tree.
         """
         # convert CSV to list
-        species_csv = self.read_csv(species_file)
+        #species_csv = self.read_csv(species_file)
+        rows = species_file.splitlines()
+        species_to_list = [row.split(',') for row in rows if row.strip()]  # Skip any empty rows
 
         # Create a new Species instance for each listed species
         species_list = []
-        for species in species_csv:
+        #for species in species_csv:
+        for species in species_to_list[1:]:
             species_instance = Species(*species)
             species_list.append(species_instance)
         return species_list
 
+
+    def create_species_from(self, species_string):
+
+        """
+        requires a CSV with the following heading:
+        name,scientific_name,leaf_shape,canopy_density,deciduous_evergreen,leaf_color,tree_form,tree_roots,habitat,bark_texture,bark_color,masting_cycle,seeding_age
+        """
+
+        self.species_list = []
+
+        # Use StringIO to convert the CSV string into a file-like object
+        species_string = species_string.replace(', ', ',')
+        print(species_string)
+
+        file = io.StringIO(species_string)
+        reader = csv.DictReader(file)  # Use DictReader to read the CSV as a dictionary
+
+        for row in reader:
+            # Exclude lines starting with a comment character (e.g., #)
+            if not row or row.get('name', '').startswith("#"):
+                continue
+            
+            # Get the name and scientific name
+            name = row.get('name')
+            scientific_name = row.get('scientific_name')
+
+            # Get the visual characteristics
+            leaf_shape = row.get('leaf_shape')
+            leaf_color = row.get('leaf_color')
+            tree_form = row.get('tree_form')
+            deciduous_evergreen = row.get('deciduous_evergreen')
+            habitat = row.get('habitat')
+            bark_texture = row.get('bark_texture')
+            bark_color = row.get('bark_color')
+            tree_roots = row.get('tree_roots')
+            canopy_density = row.get('canopy_density')
+
+            visual_characteristics = Species.VisualCharacteristics(
+                leaf_shape, leaf_color, tree_form, deciduous_evergreen, habitat, bark_texture, bark_color,
+                tree_roots, canopy_density
+            )
+
+            # Get the seeding characteristics
+            seeding_age = row.get('seeding_age')
+            masting_cycle = row.get('masting_cycle')
+            foliage_biomass = row.get('foliage_biomass')
+            stem_biomass = row.get('stem_biomass')
+            root_biomass = row.get('root_biomass')
+            seeding = Species.OtherCharacteristics(masting_cycle, seeding_age, foliage_biomass, stem_biomass, root_biomass)
+
+
+            species = Species(name, scientific_name, visual_characteristics, seeding)
+
+            self.species_list.append(species)
 
     def read_csv(self, filepath):
         """
@@ -85,7 +160,7 @@ class Forest:
 
 
     def print_tree_list(self):
-        print("======= LIST OF TREES IN THIS FOREST: =======")
+        print("\n======= LIST OF TREES IN THIS FOREST: =======")
         for tree in self.trees_list:
             print(f'{tree.key}: {tree.position}')
 
@@ -94,7 +169,7 @@ class Forest:
         """
         Prints a list of climate information for each month.
         """
-        print("========== GETTING CLIMATE FOR THIS FOREST ==========")
+        print("\n========== GETTING CLIMATE FOR THIS FOREST ==========")
         print("month, tmax (C), tmin (C), rain (cm), solar radiation (kwh/m2), num frost days,\
  soil water (cm/ft), max soil water (cm/ft), soil texture")
         for month in self.climate_list:
@@ -112,6 +187,12 @@ class Forest:
 
         total_basal_area = sum(tree.ba for tree in self.trees_list)
         basal_area_list = sorted(self.trees_list, key=lambda tree: tree.ba)
+        
+        print(f"============ BASAL AREA FOR {len(basal_area_list)} trees ============")
+        for tree in basal_area_list:
+            print(tree.ba)
+
+        print(f"sum: {total_basal_area}")
         
         # get the sum of the basal area for all the trees greater than the current tree
         i = 1
@@ -141,8 +222,8 @@ class Forest:
                 - vpd: float
             """
             self.month = month          # January, February, etc.
-            self.tmax = int(tmax)       # Average maximum temperature (celsius)
-            self.tmin = int(tmin)       # Average minimum temperature (celsius)
+            self.tmax = float(tmax)       # Average maximum temperature (celsius)
+            self.tmin = float(tmin)       # Average minimum temperature (celsius)
             self.rain = float(r)        # Average rainfall (cm)
             self.solar_rad = float(sr)         # Average solar radiation (kwh/m2)
             self.frost_days = int(fd)        # Average number of frost days (int)
@@ -226,7 +307,8 @@ class Forest:
                 print(f"ERROR Invalid soil texture: {soil_texture}")
                 return None
 
-            soil_water = random.uniform(soil_min,soil_max)
+            #soil_water = random.uniform(soil_min,soil_max)
+            soil_water = (soil_max - soil_min) / 2 # TODO just taking the average for now to check 3-pg calculations 
             max_soil_water = soil_max
             return soil_water, max_soil_water
 
@@ -235,9 +317,9 @@ class Forest:
             """
             Prints this month's climate data.
             """
-            print(f'============ Climate data for {self.month} ============')
+            print(f'\n============ Climate data for {self.month} ============')
             print(f'Temperature: between {self.tmin} and {self.tmax} degrees Celsius.')
-            print(f'Average rainfall: {self.rain} days this month.')
+            print(f'Average rainfall: {self.rain} cm.')
             print(f'Solar radiation: about {self.solar_rad} kwh/m2.')
             print(f'Frost days: {self.frost_days} this month.')
             print(f'Soil: {self.soil_texture}, around {self.soil_water} cm/ft of water \

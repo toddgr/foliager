@@ -1,6 +1,4 @@
-Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)
-Ponderosa Pine,Pinus ponderosa,needle,medium,evergreen,green,pyramidal,deep,temperate,furrows,gray
-Douglas Fir,Pseudotsuga menziesii,needle,medium,evergreen,green,pyramidal,shallow,temperate,furrows,gray
-Western Juniper,Juniperus occidentalis,needle,medium,evergreen,green,irregular,shallow,arid,furrows,gray
-Quaking Aspen,Populus tremuloides,round,medium,deciduous,green,pyramidal,shallow,temperate,smooth,white
-Oregon White Oak,Quercus garryana,oval,medium,deciduous,green,round,deep,temperate,ridges,brown
+name,scientific_name,leaf_shape,canopy_density,deciduous_evergreen,leaf_color,tree_form,tree_roots,habitat,bark_texture,bark_color,masting_cycle,seeding_age
+Ponderosa Pine,Pinus ponderosa,needle,medium,evergreen,green,pyramidal,deep,temperate,furrows,gray,5,10
+Douglas Fir,Pseudotsuga menziesii,needle,dense,evergreen,green,pyramidal,shallow,temperate,furrows,gray,7,10
+Western Juniper,Juniperus occidentalis,needle,thin,evergreen,green,columnar,deep,arid,furrows,gray,3,5
