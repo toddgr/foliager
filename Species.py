@@ -38,8 +38,9 @@ class Species:
 		if attributes: # then it's a knowledge base item
 			self.__dict__.update(attributes.__dict__)
 		else: # attributes need to be estimated
-			self.knowledge_base = load_knowledge_base(filepath='test_data/species_data_kb.csv') # TODO this is volatile
-			self.estimate_attributes()
+			#self.knowledge_base = load_knowledge_base(filepath='C:/Users/Grace/Documents/Masters_Project/foliager/test_data/species_data_kb.csv') # TODO this is volatile
+			#self.estimate_attributes()
+			pass
 
 		# Data calculated from 3-PG
 		self.b = 0

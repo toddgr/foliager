@@ -12,8 +12,8 @@ Description: This file uses Blender Geometry nodes and particle systems to gener
 import bpy
 
 DBH = 0.203 # diameter at breast height for now
-TOTAL_HEIGHT = 10
-TRUNK_HEIGHT = TOTAL_HEIGHT / 3
+HEIGHT = 10
+TRUNK_HEIGHT = HEIGHT / 3
 CANOPY_DENSITY = 30
 C_DIAM = 8
 C_RADIUS = C_DIAM / 2
@@ -35,13 +35,13 @@ def link_curve_nodes(node_tree, from_node, to_node):
     node_tree.links.new(from_node.outputs["Curve"], to_node.inputs["Curve"])
 
 
-def create_geometry_node_tree():
+def create_geometry_node_tree(tree):
     bpy.ops.node.new_geometry_nodes_modifier()
     node_tree = bpy.data.node_groups["Geometry Nodes"]
     node_tree.name = "ScriptTesting"
 
-    node_location, curve_to_mesh, resample_curve = create_tree_base(node_tree)
-    node_location, instance_on_points = create_branches(node_tree, base_branches=True)
+    node_location, curve_to_mesh, resample_curve = create_tree_base(node_tree, tree)
+    node_location, instance_on_points = create_branches(node_tree, tree, base_branches=True)
     link_nodes(node_tree, resample_curve, "Curve", instance_on_points, "Points")
 
     # join geometry
@@ -58,7 +58,7 @@ def create_geometry_node_tree():
     out_node.location = (node_location, 0)
     link_nodes(node_tree, realize_instances, "Geometry", out_node, "Geometry")
 
-def create_tree_base(node_tree):
+def create_tree_base(node_tree, tree):
     """
     Create the base of the tree
     Input: Group Input
@@ -89,7 +89,8 @@ def create_tree_base(node_tree):
     # resample curve
     resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
     link_curve_nodes(node_tree, trim_curve, resample_curve)
-    resample_curve.inputs[2].default_value = CANOPY_DENSITY # Set the count to the density
+    resample_curve.mode = 'LENGTH'
+    resample_curve.inputs[3].default_value = 0.1 # canopy density!!! 0.1, 0.5, 1
     resample_curve.parent = frame_node
     
     # branch trimming
@@ -101,7 +102,7 @@ def create_tree_base(node_tree):
     set_curve_radius.parent = frame_node
 
     #   set trunk thickness
-    curve_radius = set_thickness(node_tree, DBH, node_x_location-(SPACING * 5), node_y_location + (SPACING * 1.5), "Taper trunk / Scale to DBH", trunk=True)
+    curve_radius = set_thickness(node_tree, tree, node_x_location-(SPACING * 5), node_y_location + (SPACING * 1.5), "Taper trunk / Scale to DBH", trunk=True)
     link_nodes(node_tree, curve_radius, "Value", set_curve_radius, "Radius")
 
     # curve to mesh
@@ -120,7 +121,7 @@ def create_tree_base(node_tree):
     
     return node_x_location, curve_to_mesh, resample_curve
 
-def set_thickness(node_tree, dbh, node_x_location, node_y_location, frame_label, trunk=False):
+def set_thickness(node_tree, tree, node_x_location, node_y_location, frame_label, trunk=False):
     """
     Input: Diameter at breast height (m)
     Output: Radius value for Set Curve Radius
@@ -145,7 +146,7 @@ def set_thickness(node_tree, dbh, node_x_location, node_y_location, frame_label,
     subtract_location = (node_x_location, node_y_location)
     subtract, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMath")
     subtract.operation = 'SUBTRACT'
-    subtract.inputs[1].default_value = 1.0  # Set the second input to 1
+    subtract.inputs[1].default_value = 1.0
     subtract.location = subtract_location
     link_nodes(node_tree, float_curve, "Value", subtract, "Value")
     subtract.parent = frame_node
@@ -154,7 +155,7 @@ def set_thickness(node_tree, dbh, node_x_location, node_y_location, frame_label,
         # multiply
         multiply, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMath")
         multiply.operation = 'MULTIPLY'
-        multiply.inputs[1].default_value = dbh
+        multiply.inputs[1].default_value = tree.dbh/2
         multiply.location.y = node_y_location
         link_nodes(node_tree, subtract, "Value", multiply, "Value")
         multiply.parent = frame_node
@@ -170,7 +171,7 @@ def set_thickness(node_tree, dbh, node_x_location, node_y_location, frame_label,
     return subtract
 
 
-def create_branches(node_tree, node_x_location=0, node_y_location=(-SPACING * 3.5), set_position_base=None, base_branches=False):
+def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACING * 3.5), set_position_base=None, base_branches=False):
     """
     Create the base of the tree
     Input: Group Input
@@ -191,9 +192,9 @@ def create_branches(node_tree, node_x_location=0, node_y_location=(-SPACING * 3.
     curve_line.location.y = node_y_location
     curve_line.mode = 'DIRECTION'
     if base_branches:
-        curve_line.inputs[3].default_value = C_RADIUS + (C_RADIUS/4)
+        curve_line.inputs[3].default_value = (tree.c_diam / 2) #length
     else:
-        curve_line.inputs[3].default_value = C_RADIUS/4
+        curve_line.inputs[3].default_value = (tree.c_diam / 2)/4
     curve_line.parent = frame_node
 
     # resample curve
@@ -220,7 +221,7 @@ def create_branches(node_tree, node_x_location=0, node_y_location=(-SPACING * 3.
     set_curve_radius.parent = frame_node
 
     # branch thickness  
-    radius = set_thickness(node_tree, DBH, node_x_location - (SPACING*5), node_y_location + (SPACING * 1.5), "Taper branch")
+    radius = set_thickness(node_tree, tree.dbh/4, node_x_location - (SPACING*5), node_y_location + (SPACING * 1.5), "Taper branch")
     link_nodes(node_tree, radius, "Value", set_curve_radius, "Radius")
     
     # curve to mesh
@@ -233,9 +234,9 @@ def create_branches(node_tree, node_x_location=0, node_y_location=(-SPACING * 3.
     curve_circle, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveCircle")
     curve_circle.location = curve_circle_location
     if base_branches:
-        curve_circle.inputs[4].default_value = 0.1 # branch radius needs to be small
+        curve_circle.inputs[4].default_value = tree.dbh/10 # branch radius needs to be small
     else:
-        curve_circle.inputs[4].default_value = 0.05 # branch radius needs to be smaller
+        curve_circle.inputs[4].default_value = tree.dbh/4 # branch radius needs to be smaller
 
     link_nodes(node_tree, curve_circle, "Curve", curve_to_mesh, "Profile Curve")
     curve_circle.parent = frame_node
@@ -250,13 +251,13 @@ def create_branches(node_tree, node_x_location=0, node_y_location=(-SPACING * 3.
     # Could influence tree shape?
     map_range_radius.inputs[1].default_value = 0    # from min
     map_range_radius.inputs[2].default_value = 0 # from max
-    map_range_radius.inputs[3].default_value = -1  # to min
+    map_range_radius.inputs[3].default_value = -2  # to min
     map_range_radius.inputs[4].default_value = 1  # to max
     map_range_radius.parent = frame_node
 
     if base_branches:
         # create the branches on the branches
-        x_location, branch_level_two_instances = create_branches(node_tree, node_x_location - (SPACING * 9), node_y_location - (SPACING*5), set_position)
+        x_location, branch_level_two_instances = create_branches(node_tree, tree, node_x_location - (SPACING * 9), node_y_location - (SPACING*5), set_position)
         link_nodes(node_tree, set_position, "Geometry", branch_level_two_instances, "Points")
     
         # join geometry
@@ -278,7 +279,7 @@ def create_branches(node_tree, node_x_location=0, node_y_location=(-SPACING * 3.
     instance_on_points.parent = frame_node
     
     # branch trimming
-    selection = trim_branches(node_tree, node_x_location, node_y_location, base_branches)
+    selection = trim_branches(node_tree, tree, node_x_location, node_y_location, base_branches)
     link_nodes(node_tree, selection, "Result", instance_on_points, "Selection")
 
     frame_node.width = (instance_on_points.location.x  - curve_line.location.x - SPACING)  # Adjust width to fit nodes
@@ -320,7 +321,7 @@ def add_branch_curves(node_tree, node_x_location, node_y_location, base_branches
 
     return vector_rotate
 
-def trim_branches(node_tree, node_x_location, node_y_location, base_branches):
+def trim_branches(node_tree, tree, node_x_location, node_y_location, base_branches):
     node_x_location -= SPACING * 4
     node_y_location += SPACING * 2
 
@@ -334,10 +335,10 @@ def trim_branches(node_tree, node_x_location, node_y_location, base_branches):
     subtract, _ = create_node(node_tree, node_x_location, "ShaderNodeMath")
     subtract.operation = 'SUBTRACT'
     if base_branches:
-        subtract.inputs[0].default_value = CANOPY_DENSITY - ((CANOPY_DENSITY/10) * 3)
-        subtract.inputs[1].default_value = 1.0  # Set the second input to 1
+        subtract.inputs[0].default_value = tree.height / 0.1 # canopy density!!
+        subtract.inputs[1].default_value = 0.0  # Set the second input to 1
     else:
-        subtract.inputs[0].default_value = ((C_RADIUS/4) + 0.1)
+        subtract.inputs[0].default_value = (((tree.c_diam / 2)/4) + 0.1)
         subtract.inputs[1].default_value = 0.0  # Set the second input to 1
     subtract.location.y = node_y_location
 
@@ -359,9 +360,9 @@ def trim_branches(node_tree, node_x_location, node_y_location, base_branches):
     greater_than.operation = 'GREATER_THAN'
     greater_than.location.y = node_y_location - SPACING
     if base_branches:
-        greater_than.inputs[1].default_value = TRUNK_HEIGHT
+        greater_than.inputs[1].default_value = (tree.height - tree.lcl) / 0.1 # canopy density!!!
     else:
-        greater_than.inputs[1].default_value = C_RADIUS - 0.1
+        greater_than.inputs[1].default_value = (tree.c_diam / 2) - 0.1
 
     link_nodes(node_tree, spline_parameter, "Index", greater_than, "A")
     greater_than.parent = frame_node
@@ -425,10 +426,15 @@ def create_level_two_branches(node_tree, node_x_location, node_y_location, set_p
     return None
 
 
-def init_tree_mesh(name, height):
+def init_tree_mesh(tree):
+    #height = tree.height - tree.lcl
+    height = tree.height
+    name = tree.key
+    x = tree.position[0] / 10000
+    y = tree.position[1] / 10000
 
     # Define the vertices
-    vertices = [(0, 0, 0), (0, 0, height)]
+    vertices = [(x, y, 0), (x, y, height)]
     
     # Define edges (a line connecting the two vertices)
     edges = [(0, 1)]
@@ -461,5 +467,13 @@ def create_tree_with_geometry_nodes(name, height):
     # Create the geometry node tree
     create_geometry_node_tree()
 
+def create_tree(tree):
+    init_tree_mesh(tree)
+    create_geometry_node_tree(tree)
+
 if __name__ == '__main__':
-    create_tree_with_geometry_nodes("Douglas_Fir", TOTAL_HEIGHT)
+    #create_tree_with_geometry_nodes("Douglas_Fir", tree.height)
+
+    # with tree class object
+    # create_tree(tree)
+    pass

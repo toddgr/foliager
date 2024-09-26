@@ -68,8 +68,8 @@ class Tree():
         average = dimension
         stddev = (dimension + 0.05) / 4 # TODO make this var more accurate
 
-        new_dimension = Gaussian(average, stddev)
-        return abs(new_dimension) # dimension can't be negative
+        #new_dimension = Gaussian(average, stddev)
+        #return abs(new_dimension) # dimension can't be negative
         # TODO testing without gauss dimension
         return round(dimension, 3)
 
