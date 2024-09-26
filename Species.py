@@ -60,7 +60,7 @@ class Species:
 		print(f'{self.name} are a {self.deciduous_evergreen[0]} species, \
 and are commonly found in {", ".join(self.habitat)} climates.')
 		print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.tree_form)} form, \
-with {", ".join(self.leaf_color)}, {", ".join(self.leaf_shape)}-type leaves.')
+with {", ".join(self.leaf_color)}, {", ".join(self.leaf_shape)}-type leaves that form {", ".join(self.canopy_density)} canopies.')
 		print(f'WOOD: The bark of {self.name} have a {" or ".join(self.bark_texture)} texture \
 and tend to be {" and ".join(self.bark_color)} in color.')
 		print(f'SEEDING: It takes the {self.name} {self.seeding_age} years to be able to produce \

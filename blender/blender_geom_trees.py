@@ -252,10 +252,24 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     map_range_radius.inputs[1].default_value = 0    # from min
     map_range_radius.inputs[2].default_value = 0.1 # from max
     map_range_radius.inputs[3].default_value = 1  # to min
-    map_range_radius.inputs[4].default_value = 1  # to max
+    map_range_radius.inputs[4].default_value = 0.8  # to max
     map_range_radius.parent = frame_node
 
     if base_branches:
+        # add a map range for tree shape
+        # conical
+        map_range_shape, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMapRange")
+        map_range_shape.location.y = curve_circle_location[1]
+        map_range_shape.location.x = curve_circle_location[0] + SPACING
+        map_range_shape.clamp = False
+        link_nodes(node_tree, map_range_radius, "Result", map_range_shape, "Value")
+
+        map_range_shape.inputs[1].default_value = 0    # from min
+        map_range_shape.inputs[2].default_value = 6.1  # from max
+        map_range_shape.inputs[3].default_value = 0    # to min
+        map_range_shape.inputs[4].default_value = 3.2  # to max
+        map_range_shape.parent = frame_node
+
         # create the branches on the branches
         x_location, branch_level_two_instances = create_branches(node_tree, tree, node_x_location - (SPACING * 9), node_y_location - (SPACING*5), set_position)
         link_nodes(node_tree, set_position, "Geometry", branch_level_two_instances, "Points")
@@ -272,10 +286,14 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     instance_on_points, node_x_location = create_node(node_tree, node_x_location-SPACING, "GeometryNodeInstanceOnPoints")
     instance_on_points.location.y = node_y_location
     link_nodes(node_tree, curve_to_mesh, "Mesh", instance_on_points, "Instance")
-    link_nodes(node_tree, map_range_radius, "Result", instance_on_points, "Scale")
-    link_nodes(node_tree, rotation, "Rotation", instance_on_points, "Rotation")
+
     if base_branches:
+        link_nodes(node_tree, map_range_shape, "Result", instance_on_points, "Scale")
         link_nodes(node_tree, join_geometry, "Geometry", instance_on_points, "Instance")
+    else:
+        link_nodes(node_tree, map_range_radius, "Result", instance_on_points, "Scale")
+    
+    link_nodes(node_tree, rotation, "Rotation", instance_on_points, "Rotation")
     instance_on_points.parent = frame_node
     
     # branch trimming
@@ -403,10 +421,7 @@ def rotate_branches(node_tree, node_x_location, node_y_location, base_branches=F
     random_value, node_x_location = create_node(node_tree, node_x_location, "FunctionNodeRandomValue")
     random_value.location.y = node_y_location - SPACING
     random_value.data_type = 'FLOAT_VECTOR'
-    if base_branches:
-        random_value.inputs[1].default_value = (0, 0, 360) # set the max Z-axis rotation to 360
-    else:
-        random_value.inputs[1].default_value = (360, 360, 360) # set the max Z-axis rotation to 360
+    random_value.inputs[1].default_value = (0, 0, 360) # set the max Z-axis rotation to 360
 
     # align euler to vector
     euler_to_vector, _ = create_node(node_tree, node_x_location, "FunctionNodeAlignEulerToVector")
