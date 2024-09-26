@@ -380,7 +380,7 @@ def trim_branches(node_tree, tree, node_x_location, node_y_location, base_branch
     if base_branches:
         greater_than.inputs[1].default_value = (tree.height - tree.lcl) / tree.bl_canopy_factor
     else:
-        greater_than.inputs[1].default_value = (tree.c_diam / 2) - tree.bl_canopy_factor
+        greater_than.inputs[1].default_value = ((tree.c_diam / 2) - tree.bl_canopy_factor)/2
 
     link_nodes(node_tree, spline_parameter, "Index", greater_than, "A")
     greater_than.parent = frame_node
@@ -445,8 +445,8 @@ def init_tree_mesh(tree):
     #height = tree.height - tree.lcl
     height = tree.height
     name = tree.key
-    x = tree.position[0] / 10000
-    y = tree.position[1] / 10000
+    x = tree.position[0] / 100
+    y = tree.position[1] / 100
 
     # Define the vertices
     vertices = [(x, y, 0), (x, y, height)]
