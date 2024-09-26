@@ -15,15 +15,15 @@ with open('parameters/secret_key.txt', 'r') as file:
 
 client = OpenAI(api_key=api_key)
 initial_species_attributes = "Common_name,scientific_name,leaf_shape_(oval/truncate/elliptical/lancolate/linear/other),canopy_density_(very_thin/thin/medium/dense/very_dense),deciduous_or_evergreen,leaf_color_(green),tree_form_(round/spreading/pyramidal/oval/conical/vase/columnar/open/weeping/irregular),tree_roots_(deep/shallow),habitat_(polar/temperate/dry/continental/tropical/subtropical/subcontinental/mediterranean/alpine/arid/subarctic/subalpine),bark_texture_(smooth/lenticels/furrows/ridges/cracks/scales/strips),bark_color_(gray/white/red/brown)\n"
-initial_climate_attributes = "month,tmax(average_maximum_monthly_temperature_celsius),tmin(average_minimum_monthly_temperature_celsius),rain(cm),solar_rad(kwh/m2),frost_days(average_number_of_monthly_frost_days),soil_texture(very_coarse_sand/coarse_sand/fine_sand/loamy_sand/sandy_loams/fine_sandy_loams/very_fine_sandy_loams/loams/silt_loams/clay_loams/silt_clay_loams/sandy_clay_loams/sandy_clays/silty_clays/clays)"
+initial_climate_attributes = "month,tmax(average_maximum_monthly_temperature_celsius),tmin(average_minimum_monthly_temperature_celsius),rain(cm),solar_rad(kwh/m2),frost_days(average_number_of_monthly_frost_days),soil_texture(very_coarse_sand/coarse_sand/fine_sand/loamy_sand/sandy_loams/fine_sandy_loams/very_fine_sandy_loams/loams/silt_loams/clay_loams/silt_clay_loams/sandy_clay_loams/sandy_clays/silty_clays/clays), vpd(average_monthly_vapor_pressure_deficit_kPa)"
 
 import re
 from parse_tree_input import  csv_file_to_string
 
-from plot_trees_random import init_trees
-from threepg_species_data import parse_species_data, get_tree_names
+from junk_drawer.plot_trees_random import init_trees
+from junk_drawer.threepg_species_data import parse_species_data, get_tree_names
 from parse_csv_file import *
-from threepg import threepg
+from junk_drawer.threepg import threepg
 from param_estimator import estimate_tree_list
 #from blender_place_trees import gen_trees_in_blender
 
@@ -53,7 +53,7 @@ def generate_climate_prompt(location):
     climate_prompt = "Output a csv providing the data for monthly values for the following: "
     climate_prompt += initial_climate_attributes
     climate_prompt += "for " + location
-    climate_prompt += "\n use the headers [month, tmax, tmin, rain, solar_rad, frost_days, soil_texture]. \
+    climate_prompt += "\n use the headers [month, tmax, tmin, rain, solar_rad, frost_days, soil_texture,vpd]. \
         for soil_texture, choose one of the options provided in the parentheses."
 
     #print(climate_prompt)
