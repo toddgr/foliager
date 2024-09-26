@@ -10,15 +10,14 @@ Description: This file uses Blender Geometry nodes and particle systems to gener
 """
 
 import bpy
-#import bmesh
 
 DBH = 0.203 # diameter at breast height for now
-TOTAL_HEIGHT = 5
+TOTAL_HEIGHT = 10
 TRUNK_HEIGHT = TOTAL_HEIGHT / 3
-CANOPY_DENSITY = 10
-C_DIAM = 4
+CANOPY_DENSITY = 30
+C_DIAM = 8
 C_RADIUS = C_DIAM / 2
-BRANCH_BEND = 0.1
+BRANCH_BEND = 0.15
 
 SPACING = 250
 
@@ -42,7 +41,7 @@ def create_geometry_node_tree():
     node_tree.name = "ScriptTesting"
 
     node_location, curve_to_mesh, resample_curve = create_tree_base(node_tree)
-    node_location, instance_on_points = create_base_branches(node_tree)
+    node_location, instance_on_points = create_branches(node_tree, base_branches=True)
     link_nodes(node_tree, resample_curve, "Curve", instance_on_points, "Points")
 
     # join geometry
@@ -171,35 +170,41 @@ def set_thickness(node_tree, dbh, node_x_location, node_y_location, frame_label,
     return subtract
 
 
-def create_base_branches(node_tree):
+def create_branches(node_tree, node_x_location=0, node_y_location=(-SPACING * 3.5), set_position_base=None, base_branches=False):
     """
     Create the base of the tree
     Input: Group Input
     Output: Curve to Mesh
     """
-    node_x_location = 0
-    node_y_location = -SPACING * 3.5
 
     # Create a Frame node
     frame_node = node_tree.nodes.new(type='NodeFrame')
-    frame_node.label = "Base Branch Generation"
+    if base_branches:
+        frame_node.label = "Base Branch Generation"
+    else:
+        frame_node.label = "Sub-branch Generation"
+
     frame_node.location = (node_x_location, node_y_location-SPACING)  # Position the frame
 
     # curve line
     curve_line, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveLine")
     curve_line.location.y = node_y_location
     curve_line.mode = 'DIRECTION'
-    curve_line.inputs[3].default_value = C_RADIUS + (C_RADIUS/4)
+    if base_branches:
+        curve_line.inputs[3].default_value = C_RADIUS + (C_RADIUS/4)
+    else:
+        curve_line.inputs[3].default_value = C_RADIUS/4
     curve_line.parent = frame_node
 
     # resample curve
     resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
     resample_curve.location.y = node_y_location
+    resample_curve.inputs[2].default_value = 5 # num resamples
     link_curve_nodes(node_tree, curve_line, resample_curve)
     resample_curve.parent = frame_node
     
     # set position
-    position = add_branch_curves(node_tree, node_x_location - (SPACING * 3), node_y_location - (SPACING))
+    position = add_branch_curves(node_tree, node_x_location - (SPACING * 3), node_y_location - (SPACING), base_branches)
 
     set_position, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeSetPosition")
     set_position.location.y = node_y_location
@@ -227,7 +232,11 @@ def create_base_branches(node_tree):
     # curve circle
     curve_circle, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveCircle")
     curve_circle.location = curve_circle_location
-    curve_circle.inputs[4].default_value = 0.1 # branch radius needs to be small
+    if base_branches:
+        curve_circle.inputs[4].default_value = 0.1 # branch radius needs to be small
+    else:
+        curve_circle.inputs[4].default_value = 0.05 # branch radius needs to be smaller
+
     link_nodes(node_tree, curve_circle, "Curve", curve_to_mesh, "Profile Curve")
     curve_circle.parent = frame_node
     
@@ -241,19 +250,22 @@ def create_base_branches(node_tree):
     # Could influence tree shape?
     map_range_radius.inputs[1].default_value = 0    # from min
     map_range_radius.inputs[2].default_value = 0 # from max
-    map_range_radius.inputs[3].default_value = 1  # to min
+    map_range_radius.inputs[3].default_value = -1  # to min
     map_range_radius.inputs[4].default_value = 1  # to max
     map_range_radius.parent = frame_node
 
-    # create the branches on the branches
-    branch_level_two_instances = create_level_two_branches(node_tree, node_x_location, node_y_location, set_position)
+    if base_branches:
+        # create the branches on the branches
+        x_location, branch_level_two_instances = create_branches(node_tree, node_x_location - (SPACING * 9), node_y_location - (SPACING*5), set_position)
+        link_nodes(node_tree, set_position, "Geometry", branch_level_two_instances, "Points")
     
-    # join geometry
-    #   create join geometry node
-    #   link curve to mesh to it
-    #   link bl2instances to it
-    
-    rotation = rotate_branches(node_tree, node_x_location, node_y_location)
+        # join geometry
+        join_geometry, _ = create_node(node_tree, node_x_location, "GeometryNodeJoinGeometry")
+        join_geometry.location = (x_location, node_y_location - (SPACING * 5))
+        link_nodes(node_tree, curve_to_mesh, "Mesh", join_geometry, "Geometry")
+        link_nodes(node_tree, branch_level_two_instances, "Instances", join_geometry, "Geometry")
+
+    rotation = rotate_branches(node_tree, node_x_location, node_y_location, base_branches)
     
     # instance on points
     instance_on_points, node_x_location = create_node(node_tree, node_x_location-SPACING, "GeometryNodeInstanceOnPoints")
@@ -261,10 +273,12 @@ def create_base_branches(node_tree):
     link_nodes(node_tree, curve_to_mesh, "Mesh", instance_on_points, "Instance")
     link_nodes(node_tree, map_range_radius, "Result", instance_on_points, "Scale")
     link_nodes(node_tree, rotation, "Rotation", instance_on_points, "Rotation")
+    if base_branches:
+        link_nodes(node_tree, join_geometry, "Geometry", instance_on_points, "Instance")
     instance_on_points.parent = frame_node
     
     # branch trimming
-    selection = trim_branches(node_tree, node_x_location, node_y_location)
+    selection = trim_branches(node_tree, node_x_location, node_y_location, base_branches)
     link_nodes(node_tree, selection, "Result", instance_on_points, "Selection")
 
     frame_node.width = (instance_on_points.location.x  - curve_line.location.x - SPACING)  # Adjust width to fit nodes
@@ -272,7 +286,7 @@ def create_base_branches(node_tree):
     
     return node_x_location, instance_on_points
 
-def add_branch_curves(node_tree, node_x_location, node_y_location):
+def add_branch_curves(node_tree, node_x_location, node_y_location, base_branches):
     """
     Input: node tree, starting position
     Output: Position of the branch segment to be set
@@ -285,7 +299,10 @@ def add_branch_curves(node_tree, node_x_location, node_y_location):
     # multiply
     multiply, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMath")
     multiply.operation = 'MULTIPLY'
-    multiply.inputs[1].default_value = BRANCH_BEND
+    if base_branches:
+        multiply.inputs[1].default_value = BRANCH_BEND
+    else:
+        multiply.inputs[1].default_value = BRANCH_BEND / 5
     multiply.location.y = node_y_location - SPACING
     link_nodes(node_tree, index, "Index", multiply, "Value")
     
@@ -303,7 +320,7 @@ def add_branch_curves(node_tree, node_x_location, node_y_location):
 
     return vector_rotate
 
-def trim_branches(node_tree, node_x_location, node_y_location):
+def trim_branches(node_tree, node_x_location, node_y_location, base_branches):
     node_x_location -= SPACING * 4
     node_y_location += SPACING * 2
 
@@ -316,8 +333,12 @@ def trim_branches(node_tree, node_x_location, node_y_location):
     # subtract
     subtract, _ = create_node(node_tree, node_x_location, "ShaderNodeMath")
     subtract.operation = 'SUBTRACT'
-    subtract.inputs[0].default_value = CANOPY_DENSITY - ((CANOPY_DENSITY/10) * 3)
-    subtract.inputs[1].default_value = 1.0  # Set the second input to 1
+    if base_branches:
+        subtract.inputs[0].default_value = CANOPY_DENSITY - ((CANOPY_DENSITY/10) * 3)
+        subtract.inputs[1].default_value = 1.0  # Set the second input to 1
+    else:
+        subtract.inputs[0].default_value = ((C_RADIUS/4) + 0.1)
+        subtract.inputs[1].default_value = 0.0  # Set the second input to 1
     subtract.location.y = node_y_location
 
     # spline parameter
@@ -337,7 +358,11 @@ def trim_branches(node_tree, node_x_location, node_y_location):
     greater_than, node_x_location = create_node(node_tree, node_x_location, "FunctionNodeCompare")
     greater_than.operation = 'GREATER_THAN'
     greater_than.location.y = node_y_location - SPACING
-    greater_than.inputs[1].default_value = TRUNK_HEIGHT
+    if base_branches:
+        greater_than.inputs[1].default_value = TRUNK_HEIGHT
+    else:
+        greater_than.inputs[1].default_value = C_RADIUS - 0.1
+
     link_nodes(node_tree, spline_parameter, "Index", greater_than, "A")
     greater_than.parent = frame_node
 
@@ -354,7 +379,7 @@ def trim_branches(node_tree, node_x_location, node_y_location):
     
     return equal
 
-def rotate_branches(node_tree, node_x_location, node_y_location):
+def rotate_branches(node_tree, node_x_location, node_y_location, base_branches=False):
     node_x_location -= SPACING * 4
     node_y_location -= SPACING * 2
 
@@ -369,7 +394,7 @@ def rotate_branches(node_tree, node_x_location, node_y_location):
     # TODO make these values dynamic
     map_range.inputs[1].default_value = 0    # from min
     map_range.inputs[2].default_value = 0 # from max
-    map_range.inputs[3].default_value = 0  # to min
+    map_range.inputs[3].default_value = 10  # to min
     map_range.inputs[4].default_value = 1  # to max
     link_nodes(node_tree, spline_parameter, "Length", map_range, "Value")
     
@@ -377,7 +402,10 @@ def rotate_branches(node_tree, node_x_location, node_y_location):
     random_value, node_x_location = create_node(node_tree, node_x_location, "FunctionNodeRandomValue")
     random_value.location.y = node_y_location - SPACING
     random_value.data_type = 'FLOAT_VECTOR'
-    random_value.inputs[1].default_value = (0, 0, 360) # set the max Z-axis rotation to 360
+    if base_branches:
+        random_value.inputs[1].default_value = (0, 0, 360 * 2) # set the max Z-axis rotation to 360
+    else:
+        random_value.inputs[1].default_value = (360, 360, 360) # set the max Z-axis rotation to 360
 
     # align euler to vector
     euler_to_vector, _ = create_node(node_tree, node_x_location, "FunctionNodeAlignEulerToVector")
@@ -389,6 +417,11 @@ def rotate_branches(node_tree, node_x_location, node_y_location):
     return euler_to_vector
 
 def create_level_two_branches(node_tree, node_x_location, node_y_location, set_position):
+    node_x_location = node_x_location # for now
+    node_y_location -= SPACING * 5
+
+    rotation = rotate_branches(node_tree, node_x_location, node_y_location)
+    
     return None
 
 
