@@ -102,8 +102,8 @@ class Tree():
         """
 
         name = self.name.split()[0] # First word of the species name
-        x = str(int(self.position[0] * 1000)) # ex. 0.183444 -> '183'
-        y = str(int(self.position[1] * 1000)) # ex. 0.234950 -> '234'
+        x = str(int(self.position[0])) # ex. 0.183444 -> '183'
+        y = str(int(self.position[1])) # ex. 0.234950 -> '234'
 
         return name + x + y
 
