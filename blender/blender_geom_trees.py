@@ -488,11 +488,30 @@ def init_tree_mesh(tree, branches=False):
 
 
 def create_tree(tree):
-    init_tree_mesh(tree)
+    # create the trunk
+    trunk = init_tree_mesh(tree)
     create_geometry_node_tree(tree, making_trunk=True)
+    # visual geometry to mesh
+    # Ensure the object is selected and active
+    bpy.context.view_layer.objects.active = trunk
+    trunk.select_set(True)
 
-    init_tree_mesh(tree, branches=True)
+    # Convert the object to mesh
+    bpy.ops.object.convert(target='MESH')
+
+    # create the branches
+    branches = init_tree_mesh(tree, branches=True)
     create_geometry_node_tree(tree, making_trunk=False)
+    # visual geometry to mesh
+    # Ensure the object is selected and active
+    bpy.context.view_layer.objects.active = branches
+    branches.select_set(True)
+
+    # Convert the object to mesh
+    bpy.ops.object.convert(target='MESH')
+
+
+
 
 
 if __name__ == '__main__':
