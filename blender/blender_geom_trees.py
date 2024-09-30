@@ -35,7 +35,7 @@ def link_curve_nodes(node_tree, from_node, to_node):
     node_tree.links.new(from_node.outputs["Curve"], to_node.inputs["Curve"])
 
 
-def create_geometry_node_tree(tree):
+def create_geometry_node_tree(tree, making_trunk):
     bpy.ops.node.new_geometry_nodes_modifier()
     node_tree = bpy.data.node_groups["Geometry Nodes"]
     node_tree.name = "ScriptTesting"
@@ -46,8 +46,10 @@ def create_geometry_node_tree(tree):
 
     # join geometry
     join_geometry, node_location = create_node(node_tree, node_location, "GeometryNodeJoinGeometry")
-    link_nodes(node_tree, curve_to_mesh, "Mesh", join_geometry, "Geometry")
-    link_nodes(node_tree, instance_on_points, "Instances", join_geometry, "Geometry")
+    if making_trunk:
+        link_nodes(node_tree, curve_to_mesh, "Mesh", join_geometry, "Geometry")
+    else:
+        link_nodes(node_tree, instance_on_points, "Instances", join_geometry, "Geometry")
 
     # realize instances
     realize_instances, node_location = create_node(node_tree, node_location, "GeometryNodeRealizeInstances")
@@ -57,6 +59,8 @@ def create_geometry_node_tree(tree):
     out_node = node_tree.nodes["Group Output"]
     out_node.location = (node_location, 0)
     link_nodes(node_tree, realize_instances, "Geometry", out_node, "Geometry")
+
+    return node_tree
 
 def create_tree_base(node_tree, tree):
     """
@@ -441,10 +445,13 @@ def create_level_two_branches(node_tree, node_x_location, node_y_location, set_p
     return None
 
 
-def init_tree_mesh(tree):
+def init_tree_mesh(tree, branches=False):
     #height = tree.height - tree.lcl
     height = tree.height
-    name = tree.key
+    if branches:
+        name = tree.key + "_branches"
+    else:
+        name = tree.key
     x = tree.position[0] / 100
     y = tree.position[1] / 100
 
@@ -458,8 +465,12 @@ def init_tree_mesh(tree):
     faces = []
 
     # Create a new mesh and object
-    mesh = bpy.data.meshes.new(name=name+"_mesh")
-    obj = bpy.data.objects.new(name, mesh)
+    if branches: 
+        mesh = bpy.data.meshes.new(name=name+"_branches")
+        obj = bpy.data.objects.new(name, mesh)
+    else:
+        mesh = bpy.data.meshes.new(name=name+"_mesh")
+        obj = bpy.data.objects.new(name, mesh)
 
     # Link the object to the scene collection
     bpy.context.collection.objects.link(obj)
@@ -475,16 +486,14 @@ def init_tree_mesh(tree):
 
     return obj
 
-def create_tree_with_geometry_nodes(name, height):
-    # Create the mesh first
-    obj = init_tree_mesh(name, height)
-
-    # Create the geometry node tree
-    create_geometry_node_tree()
 
 def create_tree(tree):
     init_tree_mesh(tree)
-    create_geometry_node_tree(tree)
+    create_geometry_node_tree(tree, making_trunk=True)
+
+    init_tree_mesh(tree, branches=True)
+    create_geometry_node_tree(tree, making_trunk=False)
+
 
 if __name__ == '__main__':
     #create_tree_with_geometry_nodes("Douglas_Fir", tree.height)
