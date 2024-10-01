@@ -487,7 +487,76 @@ def init_tree_mesh(tree, branches=False):
     return obj
 
 
+def create_leaves(tree, branches):
+    # Deselect all objects first to isolate the context for 'branches'
+    bpy.ops.object.select_all(action='DESELECT')
+
+    # Ensure the branches object is of type 'MESH'
+    if branches.type != 'MESH':
+        print("Error: Branches object must be a mesh.")
+        return
+
+    # Ensure the branches are selected and active
+    bpy.context.view_layer.objects.active = branches
+    branches.select_set(True)
+
+    # Check if the object already has a particle system
+    if branches.particle_systems:
+        psys = branches.particle_systems[-1]  # Get the existing particle system
+        print(f"Using existing particle system for {branches.name}")
+    else:
+        # Add a new particle system slot to the branches
+        particle_system = branches.modifiers.new(name=tree.key+'_particle_system', type='PARTICLE_SYSTEM')
+        psys = branches.particle_systems[-1]  # Get the newly created particle system
+        
+        # Create new particle settings only if needed
+        psys.settings = bpy.data.particles.new(name=tree.key+'_particle_settings')
+
+    # Configure the particle system settings
+    psys.settings.count = 1000               # Number of particles
+
+    # Set particles as hair
+    psys.settings.type = 'HAIR'
+
+    # Emit from vertices
+    psys.settings.emit_from = 'VERT'         # Emit from mesh vertices
+
+    # Render as objects -> load in leaf object from the scene and use it
+    if 'round_leaf_prototype' in bpy.data.objects:
+        psys.settings.render_type = 'OBJECT'  # Render particles as objects
+        psys.settings.instance_object = bpy.data.objects['round_leaf_prototype']
+    else:
+        print("Error: 'round_leaf_prototype' object not found.")
+        return
+    
+    # Set particle size and randomness
+    psys.settings.particle_size = 0.05
+    psys.settings.size_random = 0.5
+
+    # Set simple children
+    psys.settings.child_type = 'SIMPLE'
+    psys.settings.child_roundness = 1
+
+    # Force update to ensure the particle system is linked to the object
+    bpy.context.view_layer.update()
+
+    # Deselect the branches after adding the particle system
+    branches.select_set(False)
+
+    print(f"Particle system successfully added to {branches.name}")
+
+
+
 def create_tree(tree):
+    """
+    Input: tree dimensions and data from LLM
+    1. Create the base of the tree (trunk) according to dimensions
+    2. Create the branches as a separate mesh according to dimensions
+    3. Generate a particle system for the leaves along the branches
+    4. Assign materials to everything?
+    5. Merge everything together as one final tree object
+    """
+
     # create the trunk
     trunk = init_tree_mesh(tree)
     create_geometry_node_tree(tree, making_trunk=True)
@@ -495,7 +564,6 @@ def create_tree(tree):
     # Ensure the object is selected and active
     bpy.context.view_layer.objects.active = trunk
     trunk.select_set(True)
-
     # Convert the object to mesh
     bpy.ops.object.convert(target='MESH')
 
@@ -506,9 +574,10 @@ def create_tree(tree):
     # Ensure the object is selected and active
     bpy.context.view_layer.objects.active = branches
     branches.select_set(True)
-
     # Convert the object to mesh
     bpy.ops.object.convert(target='MESH')
+
+    create_leaves(tree, branches)
 
 
 
