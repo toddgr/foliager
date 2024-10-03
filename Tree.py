@@ -61,17 +61,17 @@ class Tree():
         for density in self.species.canopy_density:
             match density:
                 case "very_thin":
-                    self.bl_canopy_factor = 0.75
+                    self.bl_canopy_factor = 1
                 case "thin":
-                    self.bl_canopy_factor = 0.5
+                    self.bl_canopy_factor = 2
                 case "medium":
-                    self.bl_canopy_factor = 0.25
+                    self.bl_canopy_factor = 5
                 case "dense":
-                    self.bl_canopy_factor = 0.05
+                    self.bl_canopy_factor = 8
                 case "very_dense":
-                    self.bl_canopy_factor = 0.01
+                    self.bl_canopy_factor = 10
                 case _:
-                    self.bl_canopy_factor = 0.1
+                    self.bl_canopy_factor = 5
 
 
 

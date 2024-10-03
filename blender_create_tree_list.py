@@ -39,7 +39,7 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
 
     header = 'name, scientific_name, leaf_shape, canopy_density, deciduous_evergreen, leaf_color, tree_form, tree_roots, habitat, bark_texture, bark_color, masting_cycle, seeding_age, foliage_biomass, stem_biomass, root_biomass\n'
     ponderosa_pine = 'Ponderosa Pine, Pinus ponderosa, linear, medium, evergreen, green, conical, deep, temperate, furrows, brown, 3, 5, 1.5, 2.0, 0.5\n'
-    western_red_cedar = 'Western Red Cedar, Thuja plicata, other, dense, evergreen, green, spreading, shallow, temperate, strips, brown, 4, 7, 1.2, 1.8, 0.4\n'
+    western_red_cedar = 'Western Red Cedar, Thuja plicata, oth er, dense, evergreen, green, spreading, shallow, temperate, strips, brown, 4, 7, 1.2, 1.8, 0.4\n'
     quaking_aspen = 'Quaking Aspen,Populus tremuloides,oval,medium,deciduous,green,irregular,shallow,temperate,smooth,white,2,3,0.8,1.0,0.3\n'
     black_cottonwood = 'Black Cottonwood,Populus trichocarpa,oval,medium,deciduous,green,spreading,shallow,temperate,furrows,brown,3,5,1.0,1.5,0.4\n'
     sugar_maple = 'Sugar Maple,Acer saccharum,truncate,medium,deciduous,green,round,shallow,temperate,smooth,gray,4,6,1.0,1.2,0.3\n'
@@ -49,11 +49,10 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
     
     example_species = header+ponderosa_pine+western_red_cedar+quaking_aspen+black_cottonwood+sugar_maple+douglas_fir+red_alder+lodgepole_pine
 
-    forest = Forest(example_climate, example_species, num_trees=8)
+    forest = Forest(example_climate, example_species, num_trees=3)
 
     for each_species in forest.species_list:
         each_species.get_basic_info()
-
     # generate "fake data" for each species
     def populate_dimensions(tree, height, dbh, lcl, c_diam):
         tree.height = height

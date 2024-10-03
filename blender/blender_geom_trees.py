@@ -94,7 +94,7 @@ def create_tree_base(node_tree, tree):
     resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
     link_curve_nodes(node_tree, trim_curve, resample_curve)
     resample_curve.mode = 'LENGTH'
-    resample_curve.inputs[3].default_value = tree.bl_canopy_factor
+    resample_curve.inputs[3].default_value = (tree.bl_canopy_factor/20)
     resample_curve.parent = frame_node
     
     # branch trimming
@@ -198,23 +198,26 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     if base_branches:
         curve_line.inputs[3].default_value = (tree.c_diam / 2) #length
     else:
-        curve_line.inputs[3].default_value = (tree.c_diam / 2)/8
+        curve_line.inputs[3].default_value = tree.c_diam / 16
     curve_line.parent = frame_node
 
     # resample curve
     resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
     resample_curve.location.y = node_y_location
-    resample_curve.inputs[2].default_value = 5 # num resamples
+    if base_branches:
+        resample_curve.inputs[2].default_value = tree.c_diam * tree.bl_canopy_factor # num resamples
+    else:
+        resample_curve.inputs[2].default_value = int(tree.c_diam) # num resamples
     link_curve_nodes(node_tree, curve_line, resample_curve)
     resample_curve.parent = frame_node
     
     # set position
-    position = add_branch_curves(node_tree, node_x_location - (SPACING * 3), node_y_location - (SPACING), base_branches)
+    #position = add_branch_curves(node_tree, node_x_location - (SPACING * 3), node_y_location - (SPACING), base_branches)
 
     set_position, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeSetPosition")
     set_position.location.y = node_y_location
     link_nodes(node_tree, resample_curve, "Curve", set_position, "Geometry")
-    link_nodes(node_tree, position, "Vector", set_position, "Position")
+    #link_nodes(node_tree, position, "Vector", set_position, "Position")
     set_position.parent = frame_node
 
     # set curve radius
@@ -357,10 +360,10 @@ def trim_branches(node_tree, tree, node_x_location, node_y_location, base_branch
     subtract, _ = create_node(node_tree, node_x_location, "ShaderNodeMath")
     subtract.operation = 'SUBTRACT'
     if base_branches:
-        subtract.inputs[0].default_value = tree.height / tree.bl_canopy_factor
+        subtract.inputs[0].default_value = tree.height / (tree.bl_canopy_factor/100)
         subtract.inputs[1].default_value = 0.0  # Set the second input to 1
     else:
-        subtract.inputs[0].default_value = (((tree.c_diam / 2)/4) + 0.1)
+        subtract.inputs[0].default_value = (tree.c_diam / 2)
         subtract.inputs[1].default_value = 0.0  # Set the second input to 1
     subtract.location.y = node_y_location
 
@@ -382,9 +385,9 @@ def trim_branches(node_tree, tree, node_x_location, node_y_location, base_branch
     greater_than.operation = 'GREATER_THAN'
     greater_than.location.y = node_y_location - SPACING
     if base_branches:
-        greater_than.inputs[1].default_value = (tree.height - tree.lcl) / tree.bl_canopy_factor
+        greater_than.inputs[1].default_value = (tree.height - tree.lcl) / (tree.bl_canopy_factor/20)
     else:
-        greater_than.inputs[1].default_value = ((tree.c_diam / 2) - tree.bl_canopy_factor)/2
+        greater_than.inputs[1].default_value = tree.c_diam * 8
 
     link_nodes(node_tree, spline_parameter, "Index", greater_than, "A")
     greater_than.parent = frame_node
@@ -572,12 +575,12 @@ def create_tree(tree):
     create_geometry_node_tree(tree, making_trunk=False)
     # visual geometry to mesh
     # Ensure the object is selected and active
-    bpy.context.view_layer.objects.active = branches
-    branches.select_set(True)
+    #bpy.context.view_layer.objects.active = branches
+    #branches.select_set(True)
     # Convert the object to mesh
-    bpy.ops.object.convert(target='MESH')
+    #bpy.ops.object.convert(target='MESH')
 
-    create_leaves(tree, branches)
+    #create_leaves(tree, branches)
 
 
 
