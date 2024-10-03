@@ -35,32 +35,34 @@ def link_curve_nodes(node_tree, from_node, to_node):
     node_tree.links.new(from_node.outputs["Curve"], to_node.inputs["Curve"])
 
 
-def create_geometry_node_tree(tree, making_trunk):
+def create_geometry_node_tree(tree, making_trunk=True):
     bpy.ops.node.new_geometry_nodes_modifier()
     node_tree = bpy.data.node_groups["Geometry Nodes"]
     node_tree.name = "ScriptTesting"
 
     node_location, curve_to_mesh, resample_curve = create_tree_base(node_tree, tree)
-    node_location, instance_on_points = create_branches(node_tree, tree, base_branches=True)
+    node_location, instance_on_points = create_base_branches(node_tree, tree, making_trunk)
     link_nodes(node_tree, resample_curve, "Curve", instance_on_points, "Points")
 
     # join geometry
     join_geometry, node_location = create_node(node_tree, node_location, "GeometryNodeJoinGeometry")
     if making_trunk:
         link_nodes(node_tree, curve_to_mesh, "Mesh", join_geometry, "Geometry")
+        link_nodes(node_tree, instance_on_points, "Instances", join_geometry, "Geometry")
     else:
+    #     link_nodes(node_tree, curve_to_mesh, "Mesh", join_geometry, "Geometry")
         link_nodes(node_tree, instance_on_points, "Instances", join_geometry, "Geometry")
 
     # realize instances
     realize_instances, node_location = create_node(node_tree, node_location, "GeometryNodeRealizeInstances")
     link_nodes(node_tree, join_geometry, "Geometry", realize_instances, "Geometry")
-
     
     out_node = node_tree.nodes["Group Output"]
     out_node.location = (node_location, 0)
     link_nodes(node_tree, realize_instances, "Geometry", out_node, "Geometry")
 
     return node_tree
+
 
 def create_tree_base(node_tree, tree):
     """
@@ -175,7 +177,7 @@ def set_thickness(node_tree, tree, node_x_location, node_y_location, frame_label
     return subtract
 
 
-def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACING * 3.5), set_position_base=None, base_branches=False):
+def create_base_branches(node_tree, tree, making_trunk, node_x_location=0, node_y_location=(-SPACING * 3.5)):
     """
     Create the base of the tree
     Input: Group Input
@@ -184,30 +186,20 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
 
     # Create a Frame node
     frame_node = node_tree.nodes.new(type='NodeFrame')
-    if base_branches:
-        frame_node.label = "Base Branch Generation"
-    else:
-        frame_node.label = "Sub-branch Generation"
-
+    frame_node.label = "Base Branch Generation"
     frame_node.location = (node_x_location, node_y_location-SPACING)  # Position the frame
 
     # curve line
     curve_line, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveLine")
     curve_line.location.y = node_y_location
     curve_line.mode = 'DIRECTION'
-    if base_branches:
-        curve_line.inputs[3].default_value = (tree.c_diam / 2) #length
-    else:
-        curve_line.inputs[3].default_value = tree.c_diam / 16
+    curve_line.inputs[3].default_value = (tree.c_diam / 2) #length
     curve_line.parent = frame_node
 
     # resample curve
     resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
     resample_curve.location.y = node_y_location
-    if base_branches:
-        resample_curve.inputs[2].default_value = tree.c_diam * tree.bl_canopy_factor # num resamples
-    else:
-        resample_curve.inputs[2].default_value = int(tree.c_diam) # num resamples
+    resample_curve.inputs[2].default_value = tree.c_diam * tree.bl_canopy_factor # num resamples
     link_curve_nodes(node_tree, curve_line, resample_curve)
     resample_curve.parent = frame_node
     
@@ -240,10 +232,130 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     # curve circle
     curve_circle, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveCircle")
     curve_circle.location = curve_circle_location
-    if base_branches:
-        curve_circle.inputs[4].default_value = tree.dbh/10 # branch radius needs to be small
+    curve_circle.inputs[4].default_value = tree.dbh/10 # branch radius needs to be small
+    link_nodes(node_tree, curve_circle, "Curve", curve_to_mesh, "Profile Curve")
+    curve_circle.parent = frame_node
+    
+    # map range for branch radius
+    map_range_radius, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMapRange")
+    map_range_radius.location.y = curve_circle_location[1]
+    map_range_radius.location.x = curve_circle_location[0] + SPACING
+    map_range_radius.clamp = False
+    link_nodes(node_tree, radius, "Value", map_range_radius, "Value")
+    # TODO make these values dynamic, will be affected by the C_DIAM
+    # Could influence tree shape?
+    map_range_radius.inputs[1].default_value = 0    # from min
+    map_range_radius.inputs[2].default_value = 0.1 # from max
+    map_range_radius.inputs[3].default_value = 1  # to min
+    map_range_radius.inputs[4].default_value = 0.8  # to max
+    map_range_radius.parent = frame_node
+
+    # add a map range for tree shape
+    # conical
+    map_range_shape, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMapRange")
+    map_range_shape.location.y = curve_circle_location[1]
+    map_range_shape.location.x = curve_circle_location[0] + SPACING
+    map_range_shape.clamp = False
+    link_nodes(node_tree, map_range_radius, "Result", map_range_shape, "Value")
+
+    map_range_shape.inputs[1].default_value = 0    # from min
+    map_range_shape.inputs[2].default_value = tree.c_diam  # from max
+    map_range_shape.inputs[3].default_value = 0    # to min
+    map_range_shape.inputs[4].default_value = tree.c_diam - ((tree.lcl - tree.c_diam) / 2)  # to max
+    map_range_shape.parent = frame_node
+
+    # create the branches on the branches
+    x_location, branch_level_two_instances = create_sub_branches(node_tree, tree, node_x_location - (SPACING * 9), node_y_location - (SPACING*5))
+    link_nodes(node_tree, set_position, "Geometry", branch_level_two_instances, "Points")
+
+    # join geometry
+    join_geometry, _ = create_node(node_tree, node_x_location, "GeometryNodeJoinGeometry")
+    join_geometry.location = (x_location, node_y_location - (SPACING * 5))
+    if making_trunk:
+        link_nodes(node_tree, curve_to_mesh, "Mesh", join_geometry, "Geometry")
     else:
-        curve_circle.inputs[4].default_value = tree.dbh/40 # branch radius needs to be smaller
+        link_nodes(node_tree, branch_level_two_instances, "Instances", join_geometry, "Geometry")
+
+    rotation = rotate_branches(node_tree, node_x_location, node_y_location, True)
+    
+    # instance on points
+    instance_on_points, node_x_location = create_node(node_tree, node_x_location-SPACING, "GeometryNodeInstanceOnPoints")
+    instance_on_points.location.y = node_y_location
+    link_nodes(node_tree, curve_to_mesh, "Mesh", instance_on_points, "Instance")
+
+    link_nodes(node_tree, map_range_shape, "Result", instance_on_points, "Scale")
+    link_nodes(node_tree, join_geometry, "Geometry", instance_on_points, "Instance")
+
+    
+    link_nodes(node_tree, rotation, "Rotation", instance_on_points, "Rotation")
+    instance_on_points.parent = frame_node
+    
+    # branch trimming
+    selection = trim_branches(node_tree, tree, node_x_location, node_y_location, True)
+    link_nodes(node_tree, selection, "Result", instance_on_points, "Selection")
+
+    frame_node.width = (instance_on_points.location.x  - curve_line.location.x - SPACING)  # Adjust width to fit nodes
+    frame_node.height = (curve_line.location.y  - SPACING) # Adjust height
+    
+    return node_x_location, instance_on_points
+
+def create_sub_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACING * 3.5)):
+    """
+    Create the base of the tree
+    Input: Group Input
+    Output: Curve to Mesh
+    """
+
+    # Create a Frame node
+    frame_node = node_tree.nodes.new(type='NodeFrame')
+    frame_node.label = "Sub-branch Generation"
+
+    frame_node.location = (node_x_location, node_y_location-SPACING)  # Position the frame
+
+    # curve line
+    curve_line, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveLine")
+    curve_line.location.y = node_y_location
+    curve_line.mode = 'DIRECTION'
+    curve_line.inputs[3].default_value = tree.c_diam / 16
+    curve_line.parent = frame_node
+
+    # resample curve
+    resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
+    resample_curve.location.y = node_y_location
+    resample_curve.inputs[2].default_value = int(tree.c_diam) # num resamples
+    link_curve_nodes(node_tree, curve_line, resample_curve)
+    resample_curve.parent = frame_node
+    
+    # set position
+    #position = add_branch_curves(node_tree, node_x_location - (SPACING * 3), node_y_location - (SPACING), base_branches)
+
+    set_position, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeSetPosition")
+    set_position.location.y = node_y_location
+    link_nodes(node_tree, resample_curve, "Curve", set_position, "Geometry")
+    #link_nodes(node_tree, position, "Vector", set_position, "Position")
+    set_position.parent = frame_node
+
+    # set curve radius
+    curve_circle_location = (node_x_location, node_y_location - (SPACING / 2))
+    set_curve_radius , node_x_location = create_node(node_tree, node_x_location, "GeometryNodeSetCurveRadius")
+    set_curve_radius.location.y = node_y_location
+    link_nodes(node_tree, set_position, "Geometry", set_curve_radius, "Curve")
+    set_curve_radius.parent = frame_node
+
+    # branch thickness  
+    radius = set_thickness(node_tree, tree.dbh/4, node_x_location - (SPACING*5), node_y_location + (SPACING * 1.5), "Taper branch")
+    link_nodes(node_tree, radius, "Value", set_curve_radius, "Radius")
+    
+    # curve to mesh
+    curve_to_mesh, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurveToMesh")
+    curve_to_mesh.location.y = node_y_location
+    link_curve_nodes(node_tree, set_curve_radius, curve_to_mesh)
+    curve_to_mesh.parent = frame_node
+    
+    # curve circle
+    curve_circle, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveCircle")
+    curve_circle.location = curve_circle_location
+    curve_circle.inputs[4].default_value = tree.dbh/40 # branch radius needs to be smaller
 
     link_nodes(node_tree, curve_circle, "Curve", curve_to_mesh, "Profile Curve")
     curve_circle.parent = frame_node
@@ -262,55 +374,26 @@ def create_branches(node_tree, tree, node_x_location=0, node_y_location=(-SPACIN
     map_range_radius.inputs[4].default_value = 0.8  # to max
     map_range_radius.parent = frame_node
 
-    if base_branches:
-        # add a map range for tree shape
-        # conical
-        map_range_shape, node_x_location = create_node(node_tree, node_x_location, "ShaderNodeMapRange")
-        map_range_shape.location.y = curve_circle_location[1]
-        map_range_shape.location.x = curve_circle_location[0] + SPACING
-        map_range_shape.clamp = False
-        link_nodes(node_tree, map_range_radius, "Result", map_range_shape, "Value")
-
-        map_range_shape.inputs[1].default_value = 0    # from min
-        map_range_shape.inputs[2].default_value = tree.c_diam  # from max
-        map_range_shape.inputs[3].default_value = 0    # to min
-        map_range_shape.inputs[4].default_value = tree.c_diam - ((tree.lcl - tree.c_diam) / 2)  # to max
-        map_range_shape.parent = frame_node
-
-        # create the branches on the branches
-        x_location, branch_level_two_instances = create_branches(node_tree, tree, node_x_location - (SPACING * 9), node_y_location - (SPACING*5), set_position)
-        link_nodes(node_tree, set_position, "Geometry", branch_level_two_instances, "Points")
-    
-        # join geometry
-        join_geometry, _ = create_node(node_tree, node_x_location, "GeometryNodeJoinGeometry")
-        join_geometry.location = (x_location, node_y_location - (SPACING * 5))
-        link_nodes(node_tree, curve_to_mesh, "Mesh", join_geometry, "Geometry")
-        link_nodes(node_tree, branch_level_two_instances, "Instances", join_geometry, "Geometry")
-
-    rotation = rotate_branches(node_tree, node_x_location, node_y_location, base_branches)
+    rotation = rotate_branches(node_tree, node_x_location, node_y_location, False)
     
     # instance on points
     instance_on_points, node_x_location = create_node(node_tree, node_x_location-SPACING, "GeometryNodeInstanceOnPoints")
     instance_on_points.location.y = node_y_location
     link_nodes(node_tree, curve_to_mesh, "Mesh", instance_on_points, "Instance")
-
-    if base_branches:
-        link_nodes(node_tree, map_range_shape, "Result", instance_on_points, "Scale")
-        link_nodes(node_tree, join_geometry, "Geometry", instance_on_points, "Instance")
-    else:
-        link_nodes(node_tree, map_range_radius, "Result", instance_on_points, "Scale")
+    link_nodes(node_tree, map_range_radius, "Result", instance_on_points, "Scale")
     
     link_nodes(node_tree, rotation, "Rotation", instance_on_points, "Rotation")
     instance_on_points.parent = frame_node
     
     # branch trimming
-    selection = trim_branches(node_tree, tree, node_x_location, node_y_location, base_branches)
+    selection = trim_branches(node_tree, tree, node_x_location, node_y_location, False)
     link_nodes(node_tree, selection, "Result", instance_on_points, "Selection")
 
     frame_node.width = (instance_on_points.location.x  - curve_line.location.x - SPACING)  # Adjust width to fit nodes
     frame_node.height = (curve_line.location.y  - SPACING) # Adjust height
     
     return node_x_location, instance_on_points
+
 
 def add_branch_curves(node_tree, node_x_location, node_y_location, base_branches):
     """
@@ -562,13 +645,13 @@ def create_tree(tree):
 
     # create the trunk
     trunk = init_tree_mesh(tree)
-    create_geometry_node_tree(tree, making_trunk=True)
+    create_geometry_node_tree(tree)
     # visual geometry to mesh
     # Ensure the object is selected and active
-    bpy.context.view_layer.objects.active = trunk
-    trunk.select_set(True)
+    #bpy.context.view_layer.objects.active = trunk
+    #trunk.select_set(True)
     # Convert the object to mesh
-    bpy.ops.object.convert(target='MESH')
+    #bpy.ops.object.convert(target='MESH')
 
     # create the branches
     branches = init_tree_mesh(tree, branches=True)
