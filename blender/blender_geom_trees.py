@@ -676,6 +676,8 @@ def create_leaves(tree, branches):
     # Convert all particle instances to meshes
     bpy.ops.object.convert(target='MESH')
 
+    obj = add_material(obj, 'green')
+
     # Create or get a collection for the leaves and branches
     collection_name = tree.key + "_collection"
     if collection_name not in bpy.data.collections:
@@ -695,7 +697,7 @@ def create_leaves(tree, branches):
     print(f"Particle system objects moved to collection: {collection_name}")
 
 
-def add_material(obj, bark_color, bark_texture=None, material_name="defaultMat"):
+def add_material(obj, color, texture=None, material_name="defaultMat"):
     """Applies a material to the new tree."""
     
     # Select the object
@@ -709,20 +711,24 @@ def add_material(obj, bark_color, bark_texture=None, material_name="defaultMat")
     def add_randomness(rgb, min_val=-0.1, max_val=0.1):
         return tuple(max(0, min(1, channel + random.uniform(min_val, max_val))) for channel in rgb)
     
-    match bark_color:
+    match color:
         # Gray/white/red/brown with randomness added
         case 'gray':
-            #color = add_randomness((0.116, 0.090, 0.076))
-            color = (0.116, 0.090, 0.076, 1.)
+            color = add_randomness((0.116, 0.090, 0.076))
         case 'white':
-            #color = add_randomness((0.518, 0.522, 0.371))
-            color = (0.518, 0.522, 0.371, 1.)
+            color = add_randomness((0.518, 0.522, 0.371))
         case 'red':
-            #color = add_randomness((0.152, 0.034, 0.030))
-            color = (0.152, 0.034, 0.030, 1.)
+            color = add_randomness((0.152, 0.034, 0.030))
         case 'brown':
-            #color = add_randomness((0.092, 0.037, 0.007))
-            color = (0.092, 0.037, 0.007, 1.)
+            color = add_randomness((0.092, 0.037, 0.007))
+        case 'green':
+            color = add_randomness((0., 0.116, 0.005, 1.))
+        case 'yellow':
+            color = add_randomness((0.578, 0.625, 0.0, 1.))
+        case 'orange':
+            color = add_randomness((0.625, 0.2, 0.01, 1.))
+        case 'red':
+            color = add_randomness((0.626, 0.095, 0.039, 1.))
         case _:
             color = (1.0, 1.0, 1.0, 1.0)
     
