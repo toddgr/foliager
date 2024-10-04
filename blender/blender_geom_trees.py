@@ -10,6 +10,7 @@ Description: This file uses Blender Geometry nodes and particle systems to gener
 """
 
 import bpy
+import random
 
 DBH = 0.203 # diameter at breast height for now
 HEIGHT = 10
@@ -193,13 +194,14 @@ def create_base_branches(node_tree, tree, making_trunk, node_x_location=0, node_
     curve_line, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveLine")
     curve_line.location.y = node_y_location
     curve_line.mode = 'DIRECTION'
-    curve_line.inputs[3].default_value = (tree.c_diam / 2) #length
+    curve_line.inputs[3].default_value = (tree.c_diam / 2.5) #length
+    #curve_line.inputs[3].default_value = (0.875*tree.c_diam) - 0.5
     curve_line.parent = frame_node
 
     # resample curve
     resample_curve, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeResampleCurve")
     resample_curve.location.y = node_y_location
-    resample_curve.inputs[2].default_value = tree.c_diam * tree.bl_canopy_factor # num resamples
+    resample_curve.inputs[2].default_value = int( tree.c_diam * tree.bl_canopy_factor) # num resamples
     link_curve_nodes(node_tree, curve_line, resample_curve)
     resample_curve.parent = frame_node
     
@@ -316,6 +318,9 @@ def create_sub_branches(node_tree, tree, node_x_location=0, node_y_location=(-SP
     curve_line, node_x_location = create_node(node_tree, node_x_location, "GeometryNodeCurvePrimitiveLine")
     curve_line.location.y = node_y_location
     curve_line.mode = 'DIRECTION'
+    if tree.c_diam >= 10:
+        curve_line.inputs[3].default_value = 0.2
+
     curve_line.inputs[3].default_value = tree.c_diam / 16
     curve_line.parent = frame_node
 
@@ -598,22 +603,35 @@ def create_leaves(tree, branches):
         # Create new particle settings only if needed
         psys.settings = bpy.data.particles.new(name=tree.key+'_particle_settings')
 
+    leaf_shape = tree.species.leaf_shape[0]
     # Configure the particle system settings
-    psys.settings.count = 1000               # Number of particles
+    if leaf_shape == 'linear': # Number of particles
+        psys.settings.count = tree.bl_canopy_factor * 200
+    else:
+        psys.settings.count = tree.bl_canopy_factor * 100
+
+    if tree.c_diam > 10 or tree.lcl > 10:
+        psys.settings.count *= 5
 
     # Set particles as hair
     psys.settings.type = 'HAIR'
 
     # Emit from vertices
-    psys.settings.emit_from = 'VERT'         # Emit from mesh vertices
+    psys.settings.emit_from = 'FACE'         # Emit from mesh faces
+    psys.settings.render_type = 'OBJECT'  # Render particles as objects
 
     # Render as objects -> load in leaf object from the scene and use it
-    if 'round_leaf_prototype' in bpy.data.objects:
-        psys.settings.render_type = 'OBJECT'  # Render particles as objects
-        psys.settings.instance_object = bpy.data.objects['round_leaf_prototype']
-    else:
-        print("Error: 'round_leaf_prototype' object not found.")
-        return
+    # TODO create the prototypes for each of the leaves, and then apply it
+    
+    match leaf_shape:
+        case 'oval':
+            psys.settings.instance_object = bpy.data.objects['oval']
+        case 'linear':
+            psys.settings.instance_object = bpy.data.objects['linear']
+        case 'truncate':
+            psys.settings.instance_object = bpy.data.objects['truncate']
+        case 'other':
+            psys.settings.instance_object = bpy.data.objects['other']
     
     # Set particle size and randomness
     psys.settings.particle_size = 0.05
@@ -622,6 +640,22 @@ def create_leaves(tree, branches):
     # Set simple children
     psys.settings.child_type = 'SIMPLE'
     psys.settings.child_roundness = 1
+    psys.settings.child_radius = 4
+    # Children display and render amount -> count = canopy factor * 10
+    if leaf_shape == 'linear':
+        psys.settings.child_percent = 50
+    else:
+        psys.settings.child_percent = 10
+
+    if tree.c_diam > 10 or tree.lcl > 10:
+        #psys.settings.child_percent *= 2
+        pass
+
+    # Clumping - make it clump really good
+    if leaf_shape == 'linear':
+        psys.settings.clump_factor = -1
+    else:
+        psys.settings.clump_factor = -0.9
 
     # Force update to ensure the particle system is linked to the object
     bpy.context.view_layer.update()
@@ -631,6 +665,60 @@ def create_leaves(tree, branches):
 
     print(f"Particle system successfully added to {branches.name}")
 
+
+def add_material(obj, bark_color, bark_texture=None, material_name="defaultMat"):
+    """Applies a material to the new tree."""
+    
+    # Select the object
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    
+    # Create a new material
+    material = bpy.data.materials.new(name=material_name)
+    material.use_nodes = True  # Enable nodes for material
+    
+    def add_randomness(rgb, min_val=-0.1, max_val=0.1):
+        return tuple(max(0, min(1, channel + random.uniform(min_val, max_val))) for channel in rgb)
+    
+    match bark_color:
+        # Gray/white/red/brown with randomness added
+        case 'gray':
+            #color = add_randomness((0.116, 0.090, 0.076))
+            color = (0.116, 0.090, 0.076, 1.)
+        case 'white':
+            #color = add_randomness((0.518, 0.522, 0.371))
+            color = (0.518, 0.522, 0.371, 1.)
+        case 'red':
+            #color = add_randomness((0.152, 0.034, 0.030))
+            color = (0.152, 0.034, 0.030, 1.)
+        case 'brown':
+            #color = add_randomness((0.092, 0.037, 0.007))
+            color = (0.092, 0.037, 0.007, 1.)
+        case _:
+            color = (1.0, 1.0, 1.0, 1.0)
+    
+    # Find the Principled BSDF node
+    nodes = material.node_tree.nodes
+    bsdf_node = nodes.get('Principled BSDF')
+    
+    if not bsdf_node:
+        bsdf_node = nodes.new(type='ShaderNodeBsdfPrincipled')
+    
+    # Set the Base Color
+    bsdf_node.inputs['Base Color'].default_value = color
+    
+    # Assign the material to the object
+    if len(obj.data.materials) > 0:
+        obj.data.materials[0] = material
+    else:
+        obj.data.materials.append(material)
+    
+    # Update the scene after material assignment
+    bpy.context.view_layer.update()
+    
+    obj.select_set(False)
+    
+    return obj
 
 
 def create_tree(tree):
@@ -648,22 +736,27 @@ def create_tree(tree):
     create_geometry_node_tree(tree)
     # visual geometry to mesh
     # Ensure the object is selected and active
-    #bpy.context.view_layer.objects.active = trunk
-    #trunk.select_set(True)
+    bpy.context.view_layer.objects.active = trunk
+    trunk.select_set(True)
     # Convert the object to mesh
-    #bpy.ops.object.convert(target='MESH')
+    bpy.ops.object.convert(target='MESH')
+    trunk = add_material(trunk, tree.bark_color[0], material_name=tree.bark_color[0]+'_material')
+
 
     # create the branches
     branches = init_tree_mesh(tree, branches=True)
     create_geometry_node_tree(tree, making_trunk=False)
     # visual geometry to mesh
     # Ensure the object is selected and active
-    #bpy.context.view_layer.objects.active = branches
-    #branches.select_set(True)
+    bpy.context.view_layer.objects.active = branches
+    branches.select_set(True)
     # Convert the object to mesh
-    #bpy.ops.object.convert(target='MESH')
+    bpy.ops.object.convert(target='MESH')
+    branches = add_material(branches, tree.bark_color[0], material_name=tree.bark_color[0]+'_material')
 
-    #create_leaves(tree, branches)
+
+    create_leaves(tree, branches)
+
 
 
 
