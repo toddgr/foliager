@@ -579,6 +579,9 @@ def init_tree_mesh(tree, branches=False):
 
 
 def create_leaves(tree, branches):
+    # Disable viewport updates
+    bpy.context.view_layer.depsgraph.update()
+
     # Deselect all objects first to isolate the context for 'branches'
     bpy.ops.object.select_all(action='DESELECT')
 
@@ -605,7 +608,7 @@ def create_leaves(tree, branches):
 
     leaf_shape = tree.species.leaf_shape[0]
     # Configure the particle system settings
-    if leaf_shape == 'linear': # Number of particles
+    if leaf_shape == 'linear':  # Number of particles
         psys.settings.count = tree.bl_canopy_factor * 200
     else:
         psys.settings.count = tree.bl_canopy_factor * 100
@@ -617,12 +620,10 @@ def create_leaves(tree, branches):
     psys.settings.type = 'HAIR'
 
     # Emit from vertices
-    psys.settings.emit_from = 'FACE'         # Emit from mesh faces
+    psys.settings.emit_from = 'FACE'  # Emit from mesh faces
     psys.settings.render_type = 'OBJECT'  # Render particles as objects
 
     # Render as objects -> load in leaf object from the scene and use it
-    # TODO create the prototypes for each of the leaves, and then apply it
-    
     match leaf_shape:
         case 'oval':
             psys.settings.instance_object = bpy.data.objects['oval']
@@ -632,7 +633,7 @@ def create_leaves(tree, branches):
             psys.settings.instance_object = bpy.data.objects['truncate']
         case 'other':
             psys.settings.instance_object = bpy.data.objects['other']
-    
+
     # Set particle size and randomness
     psys.settings.particle_size = 0.05
     psys.settings.size_random = 0.5
@@ -641,17 +642,15 @@ def create_leaves(tree, branches):
     psys.settings.child_type = 'SIMPLE'
     psys.settings.child_roundness = 1
     psys.settings.child_radius = 4
-    # Children display and render amount -> count = canopy factor * 10
     if leaf_shape == 'linear':
         psys.settings.child_percent = 50
     else:
         psys.settings.child_percent = 10
 
     if tree.c_diam > 10 or tree.lcl > 10:
-        #psys.settings.child_percent *= 2
         pass
 
-    # Clumping - make it clump really good
+    # Clumping
     if leaf_shape == 'linear':
         psys.settings.clump_factor = -1
     else:
@@ -660,10 +659,40 @@ def create_leaves(tree, branches):
     # Force update to ensure the particle system is linked to the object
     bpy.context.view_layer.update()
 
-    # Deselect the branches after adding the particle system
-    branches.select_set(False)
+    # Convert particle instances to real objects
+    bpy.ops.object.select_all(action='DESELECT')
+    branches.select_set(True)
 
-    print(f"Particle system successfully added to {branches.name}")
+    # Make particle instances real
+    bpy.ops.object.duplicates_make_real()
+    bpy.ops.object.modifier_apply(modifier=tree.key+'_particle_system')
+
+    # Select all newly created objects (leaves)
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in bpy.context.view_layer.objects:
+        if obj.name.startswith(tree.key) or obj.name.startswith(tree.leaf_shape[0]):
+            obj.select_set(True)
+
+    # Convert all particle instances to meshes
+    bpy.ops.object.convert(target='MESH')
+
+    # Create or get a collection for the leaves and branches
+    collection_name = tree.key + "_collection"
+    if collection_name not in bpy.data.collections:
+        collection = bpy.data.collections.new(name=collection_name)
+        bpy.context.scene.collection.children.link(collection)
+    else:
+        collection = bpy.data.collections[collection_name]
+
+    # Move the leaves and branches to the new collection
+    for obj in bpy.context.selected_objects:
+        collection.objects.link(obj)
+        bpy.context.scene.collection.objects.unlink(obj)  # Remove from the main collection
+
+    # Deselect all after adding them to the collection
+    bpy.ops.object.select_all(action='DESELECT')
+
+    print(f"Particle system objects moved to collection: {collection_name}")
 
 
 def add_material(obj, bark_color, bark_texture=None, material_name="defaultMat"):
@@ -730,6 +759,11 @@ def create_tree(tree):
     4. Assign materials to everything?
     5. Merge everything together as one final tree object
     """
+
+    # Enable GPU rendering
+    bpy.context.scene.render.engine = 'CYCLES'
+    bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'  # or 'OPTIX', 'OPENCL'
+    bpy.context.scene.cycles.device = 'GPU'
 
     # create the trunk
     trunk = init_tree_mesh(tree)

@@ -49,7 +49,7 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
     
     example_species = header+ponderosa_pine+western_red_cedar+quaking_aspen+black_cottonwood+sugar_maple+douglas_fir+red_alder+lodgepole_pine
 
-    forest = Forest(example_climate, example_species, num_trees=10)
+    forest = Forest(example_climate, example_species, num_trees=2)
 
     for each_species in forest.species_list:
         each_species.get_basic_info()
