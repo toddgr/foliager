@@ -3,6 +3,6 @@ pandas
 matplotlib
 pyarrow
 scipy
-
+tkinter
 bpy
 bmesh
