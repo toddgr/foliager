@@ -23,7 +23,6 @@ class Forest:
             - Trees : [Tree]
         """
         # create climate list
-        print(climate)
         self.climate_list = self.read_climate_data(climate)
 
         self.start_age = 5 # stand is 5 years old at the start of the simulation
@@ -32,6 +31,7 @@ class Forest:
         self.start_year = 1960 # year when the simulation starts. Used mostly for Co2 calculations
 
         self.t = self.end_month - self.start_month # number of months in the simulation
+        self.hectares = 1
 
         # initialize list of trees
         self.trees_list = []
