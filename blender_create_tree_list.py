@@ -17,11 +17,40 @@ Description: TEMPORARY file to be used for creating fake tree data to be importe
 import sys
 sys.path.append('C:/Users/Grace/Documents/Masters_Project/foliager/')
 
+obj_files = [
+    "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/linear.obj",
+    "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/oval.obj",
+    "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/truncate.obj",
+    "C:/Users/Grace/Documents/Masters_Project/foliager/blender/assets/other.obj",
+]
+
+import bpy
+import os
 from Tree import Tree, plot_trees
 from create_forest import *
 from blender.blender_geom_trees import create_tree
 
 if __name__ == "__main__":
+    # create the blend file
+    blend_file_path = "C:/Users/Grace/Documents/Masters_Project/foliager/blender/test_automation/TESTAUTOMATION.blend"
+    directory=os.path.dirname(blend_file_path)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+
+    # load in the leaf assets
+    for obj_file in obj_files:
+        if os.path.exists(obj_file):
+            bpy.ops.wm.obj_import(filepath=obj_file)
+
+    for obj in bpy.context.selected_objects:
+        # hide the object in the scene
+        obj.hide_viewport = True
+        obj.hide_render = True
+        obj.select_set(False)
+
     # set up the forest
     example_climate = "month,tmax,tmin,rain,solar_rad,frost_days,soil_texture,vpd\n\
 January,3.5,-6.1,3.8,2.5,12,loams,1.2\n\
@@ -49,10 +78,11 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
     
     example_species = header+ponderosa_pine+western_red_cedar+quaking_aspen+black_cottonwood+sugar_maple+douglas_fir+red_alder+lodgepole_pine
 
-    forest = Forest(example_climate, example_species, num_trees=2)
+    forest = Forest(example_climate, example_species, num_trees=1)
 
     for each_species in forest.species_list:
         each_species.get_basic_info()
+
     # generate "fake data" for each species
     def populate_dimensions(tree, height, dbh, lcl, c_diam):
         tree.height = height
@@ -82,5 +112,11 @@ December,4.0,-5.0,4.0,2.0,12,loams,1.4"
     
     # now that we have all the data:
     for each_tree in forest.trees_list:
+        print("======================================")
+        print(f"Creating {each_tree.key}...")
         create_tree(each_tree)
         pass
+
+    print("======================================")
+
+    bpy.ops.wm.save_as_mainfile(filepath=blend_file_path)

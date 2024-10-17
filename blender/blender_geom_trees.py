@@ -626,13 +626,27 @@ def create_leaves(tree, branches):
     # Render as objects -> load in leaf object from the scene and use it
     match leaf_shape:
         case 'oval':
-            psys.settings.instance_object = bpy.data.objects['oval']
+            ref_leaf = bpy.data.objects['oval']
         case 'linear':
-            psys.settings.instance_object = bpy.data.objects['linear']
+            ref_leaf = bpy.data.objects['linear']
         case 'truncate':
-            psys.settings.instance_object = bpy.data.objects['truncate']
+            ref_leaf = bpy.data.objects['truncate']
         case 'other':
-            psys.settings.instance_object = bpy.data.objects['other']
+            ref_leaf = bpy.data.objects['other']
+
+    bpy.ops.object.select_all(action='DESELECT')  # Deselect everything first
+    ref_leaf.select_set(True)
+    # Make the object active
+    bpy.context.view_layer.objects.active = ref_leaf
+    bpy.ops.object.duplicate()
+
+    # Access the duplicated object (it will be the active object after duplication)
+    leaf = bpy.context.view_layer.objects.active
+
+    # Rename the duplicated object
+    leaf.name = tree.key + '_leaf'
+
+    psys.settings.instance_object = leaf
 
     # Set particle size and randomness
     psys.settings.particle_size = 0.05
@@ -670,7 +684,7 @@ def create_leaves(tree, branches):
     # Select all newly created objects (leaves)
     bpy.ops.object.select_all(action='DESELECT')
     for obj in bpy.context.view_layer.objects:
-        if obj.name.startswith(tree.key) or obj.name.startswith(tree.leaf_shape[0]):
+        if obj.name.startswith(tree.key):# or obj.name.startswith(tree.leaf_shape[0]+'.'):
             obj.select_set(True)
 
     # Convert all particle instances to meshes
@@ -689,7 +703,8 @@ def create_leaves(tree, branches):
     # Move the leaves and branches to the new collection
     for obj in bpy.context.selected_objects:
         collection.objects.link(obj)
-        bpy.context.scene.collection.objects.unlink(obj)  # Remove from the main collection
+        if obj in bpy.context.selected_objects:
+            bpy.context.scene.collection.objects.unlink(obj)  # Remove from the main collection
 
     # Deselect all after adding them to the collection
     bpy.ops.object.select_all(action='DESELECT')
@@ -708,19 +723,19 @@ def add_material(obj, color, texture=None, material_name="defaultMat"):
     material = bpy.data.materials.new(name=material_name)
     material.use_nodes = True  # Enable nodes for material
     
-    def add_randomness(rgb, min_val=-0.1, max_val=0.1):
+    def add_randomness(rgb, min_val=-0.01, max_val=0.01):
         return tuple(max(0, min(1, channel + random.uniform(min_val, max_val))) for channel in rgb)
     
     match color:
         # Gray/white/red/brown with randomness added
         case 'gray':
-            color = add_randomness((0.116, 0.090, 0.076))
+            color = add_randomness((0.116, 0.090, 0.076, 1.))
         case 'white':
-            color = add_randomness((0.518, 0.522, 0.371))
+            color = add_randomness((0.518, 0.522, 0.371, 1.))
         case 'red':
-            color = add_randomness((0.152, 0.034, 0.030))
+            color = add_randomness((0.152, 0.034, 0.030, 1.))
         case 'brown':
-            color = add_randomness((0.092, 0.037, 0.007))
+            color = add_randomness((0.092, 0.037, 0.007, 1.))
         case 'green':
             color = add_randomness((0., 0.116, 0.005, 1.))
         case 'yellow':
@@ -794,7 +809,7 @@ def create_tree(tree):
     bpy.ops.object.convert(target='MESH')
     branches = add_material(branches, tree.bark_color[0], material_name=tree.bark_color[0]+'_material')
 
-
+    print("Branches created :) \nNow doing the leaves...")
     create_leaves(tree, branches)
 
 
