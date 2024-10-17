@@ -15,8 +15,9 @@ initial_trees = 100 # initial_trees = forest.num_trees
 
 # Define the function to be called when the button is clicked
 def on_button_click():
-    # Disable the button while processing
+    # Disable the buttons while processing
     generate_button.config(state=tk.DISABLED)
+    filepath_button.config(state=tk.DISABLED)
     
     # Simulate a time-consuming operation (replace this with your actual function)
     print("=== Generating forest ===")
@@ -41,6 +42,7 @@ def select_file_path():
         split_path = file_path.split(os.sep)
         last_two_dirs = os.path.join("..", *split_path[-2:])  # Join the last two directories with "../"
         filepath_button.config(text=last_two_dirs)  # Update the button text with the last two directories
+        print(f"Output to: {file_path}")
 
 
 # Define a function to open the settings window
@@ -77,7 +79,9 @@ def open_settings():
     tk.Button(settings_window, text="Save", command=save_settings).pack(pady=20)
 
 
-if __name__ == '__main__':
+def create_gui():
+    global root, generate_button, filepath_button, location
+
     # Create the main window
     root = tk.Tk()
     root.title("Foliager")
@@ -116,3 +120,7 @@ if __name__ == '__main__':
 
     # Start the main loop to display the window
     root.mainloop()
+
+
+if __name__ == '__main__':
+    create_gui()
