@@ -7,9 +7,9 @@ Description: A test implementation for a GUI to streamline the foliager process.
 """
 
 import tkinter as tk
-from tkinter import filedialog, Toplevel
-import time
+from tkinter import filedialog, Toplevel, Frame, Scrollbar, Canvas
 import os
+import calendar
 from main import *
 
 initial_trees = 100 # initial_trees = forest.num_trees
@@ -25,16 +25,22 @@ def on_button_click():
     start_trees = initial_trees
     user_location = location.get()
 
-    species_data = get_species_data(user_location)
-    climate_data = get_climate_data(user_location)
+    print("Getting species data...")
 
+    species_data = static_species_data()
+    climate_data = static_climate_data()
+
+    print("Creating forest...")
     forest = create_forest(climate_data, species_data, num_trees=initial_trees)
 
+    print("Printing data for each species...")
+    species_dict = {}
     for each_species in forest.species_list:
-        each_species.get_basic_info()
+        entry = each_species.get_basic_info()
+        species_dict[each_species.name] = entry
+        print(entry)
 
-    print(f'Location: {user_location}')
-    print(f'Number of trees: {start_trees}')
+    open_result_window(forest)
     
     #time.sleep(5)  # Simulating a long-running function with sleep
 
@@ -42,6 +48,72 @@ def on_button_click():
     print("=== Forest generated! ===")
     filepath_button.config(state=tk.NORMAL)
     generate_button.config(state=tk.NORMAL)
+
+
+# Define a function to open a new window and display the string
+def open_result_window(forest):
+    result_window = Toplevel(root)
+    result_window.title("Forest Information")
+    result_window.geometry("900x600")
+    
+    # Create a frame for the canvas and scrollbar
+    frame = Frame(result_window)
+    frame.pack(fill=tk.BOTH, expand=True)
+
+    # Create a canvas
+    canvas = Canvas(frame)
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Create a scrollbar and link it to the canvas
+    scrollbar = Scrollbar(frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Create another frame to hold the forest general data inside the canvas
+    general_data_frame = Frame(canvas)
+    canvas.create_window((0, 0), window=general_data_frame, anchor="nw")
+
+    # Add general data about the forest
+    forest_data = f"{calendar.month_name[forest.start_month]} {forest.start_year} - {calendar.month_name[int(forest.end_month / 12)]} {int(forest.start_year + (forest.end_month/12))}\n"\
+                  f"Forest Size: {forest.hectares} hectare(s)\n" \
+                  f"Initial Trees: {initial_trees}\n" \
+                  f"Trees Spawned: {forest.num_trees - initial_trees}\n" \
+
+    # Create a label for the forest general data
+    general_data_label = tk.Label(general_data_frame, text=forest_data, wraplength=280, justify="left", font=("Helvetica", 12))
+    general_data_label.pack(pady=5)
+
+    # Create a separator between the general data and species info (optional)
+    separator = tk.Frame(general_data_frame, height=1, bd=1, relief=tk.SUNKEN)
+    separator.pack(fill=tk.X, padx=5, pady=5)
+
+    # Create a frame to hold the species info inside the canvas
+    species_frame = Frame(canvas)
+    canvas.create_window((0, 100), window=species_frame, anchor="nw")  # Adjusted y-position
+
+    for each_species in forest.species_list:
+        entry = each_species.get_basic_info()
+
+        # Create a header label for the species name
+        header_label = tk.Label(species_frame, text=each_species.name, font=("Helvetica", 14, "bold"))
+        header_label.pack(pady=5)
+
+        # Create a label for the species information
+        info_label = tk.Label(species_frame, text=entry, wraplength=280, justify="left", font=("Helvetica", 12))
+        info_label.pack(pady=5)
+
+        # Add a separator between species (optional)
+        separator = tk.Frame(species_frame, height=1, bd=1, relief=tk.SUNKEN)
+        separator.pack(fill=tk.X, padx=5, pady=5)
+
+    # Update the scroll region of the canvas to encompass the new frame
+    general_data_frame.update_idletasks()  # Update the frame to get its size
+    species_frame.update_idletasks()  # Ensure species frame is updated
+    canvas.config(scrollregion=canvas.bbox("all"))  # Set the scrollable area
+
+    # Add a button to close the window
+    close_button = tk.Button(result_window, text="Close", command=result_window.destroy, font=("Helvetica", 12))
+    close_button.pack(pady=10)
 
 
 # Define a function to open the file dialog
@@ -62,7 +134,7 @@ def open_settings():
     # Create a new top-level window (the settings window)
     settings_window = Toplevel(root)
     settings_window.title("Settings")
-    settings_window.geometry("300x200")
+    settings_window.geometry("600x400")
     
     # Add some settings options
     tk.Label(settings_window, text="Settings Page", font=("Helvetica", 14)).pack(pady=10)
