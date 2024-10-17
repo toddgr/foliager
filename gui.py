@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import filedialog, Toplevel
 import time
 import os
+from main import *
 
 initial_trees = 100 # initial_trees = forest.num_trees
 
@@ -24,13 +25,22 @@ def on_button_click():
     start_trees = initial_trees
     user_location = location.get()
 
+    species_data = get_species_data(user_location)
+    climate_data = get_climate_data(user_location)
+
+    forest = create_forest(climate_data, species_data, num_trees=initial_trees)
+
+    for each_species in forest.species_list:
+        each_species.get_basic_info()
+
     print(f'Location: {user_location}')
     print(f'Number of trees: {start_trees}')
     
-    time.sleep(5)  # Simulating a long-running function with sleep
+    #time.sleep(5)  # Simulating a long-running function with sleep
 
     # Once the function is complete, re-enable the button
     print("=== Forest generated! ===")
+    filepath_button.config(state=tk.NORMAL)
     generate_button.config(state=tk.NORMAL)
 
 

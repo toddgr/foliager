@@ -90,8 +90,8 @@ vpd(average_monthly_vapor_pressure_deficit_kPa)"
 
 if __name__ == '__main__':
     # 1. Prompt user for a climate, city, or location:
-    #location = input("Enter the climate, city, or area: ")
-    location = 'Bend, Oregon'
+    location = input("Enter the climate, city, or area: ")
+    #location = 'Bend, Oregon'
 
     # 2. LLM generates tree data, outputs two strings:
     species_data = get_species_data(location, print_out=True)
