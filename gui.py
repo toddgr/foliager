@@ -8,16 +8,29 @@ Description: A test implementation for a GUI to streamline the foliager process.
 
 import tkinter as tk
 from tkinter import filedialog, Toplevel
+import time
 import os
 
 initial_trees = 100 # initial_trees = forest.num_trees
 
 # Define the function to be called when the button is clicked
 def on_button_click():
-    # Get the text from the text box
-    user_input = text_box.get()
-    # Print or process the input (for demonstration, we print it)
-    print(f"Location: {user_input}")
+    # Disable the button while processing
+    generate_button.config(state=tk.DISABLED)
+    
+    # Simulate a time-consuming operation (replace this with your actual function)
+    print("=== Generating forest ===")
+    start_trees = initial_trees
+    user_location = location.get()
+
+    print(f'Location: {user_location}')
+    print(f'Number of trees: {start_trees}')
+    
+    time.sleep(5)  # Simulating a long-running function with sleep
+
+    # Once the function is complete, re-enable the button
+    print("=== Forest generated! ===")
+    generate_button.config(state=tk.NORMAL)
 
 
 # Define a function to open the file dialog
@@ -27,7 +40,7 @@ def select_file_path():
         # Get the last two directories from the file path
         split_path = file_path.split(os.sep)
         last_two_dirs = os.path.join("..", *split_path[-2:])  # Join the last two directories with "../"
-        file_button.config(text=last_two_dirs)  # Update the button text with the last two directories
+        filepath_button.config(text=last_two_dirs)  # Update the button text with the last two directories
 
 
 # Define a function to open the settings window
@@ -81,20 +94,20 @@ if __name__ == '__main__':
     settings_icon.place(x=5, y=5)  # Placing the button in the top-left corner
 
     # Add a label for the text box
-    text_box_label = tk.Label(root, text="Choose an area/location/climate for your forest below:", font=("Helvetica", 14))
-    text_box_label.pack(pady=5)
+    location_label = tk.Label(root, text="Choose an area/location/climate for your forest below:", font=("Helvetica", 14))
+    location_label.pack(pady=5)
 
     # Add a text box (Entry widget) for user input
-    text_box = tk.Entry(root, width=40)
-    text_box.pack(pady=10)
+    location = tk.Entry(root, width=40)
+    location.pack(pady=10)
 
     # Add a button to open the file dialog, which will display the path as the button text
-    file_button = tk.Button(root, text="Choose Filepath", command=select_file_path)
-    file_button.pack(pady=10)
+    filepath_button = tk.Button(root, text="Choose Filepath", command=select_file_path)
+    filepath_button.pack(pady=10)
 
     # Add a button that calls the function when clicked, but only the first time
-    button = tk.Button(root, text="Generate", command=on_button_click)
-    button.pack(pady=20)
+    generate_button = tk.Button(root, text="Generate", command=on_button_click)
+    generate_button.pack(pady=20)
 
     # Add a check box
     checkbox_var = tk.IntVar()  # Variable to store checkbox state
