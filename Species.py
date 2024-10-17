@@ -56,16 +56,19 @@ class Species:
 		"""
 		Prints the qualitative data about a tree species. Just for fun, but also for fact checking.
 		"""
-		print(f'\n================== {self.name} ({self.name_scientific}) ===================')
-		print(f'{self.name} are a {self.deciduous_evergreen[0]} species, \
-and are commonly found in {", ".join(self.habitat)} climates.')
-		print(f'FOLIAGE: {self.name} tend to have a {", ".join(self.tree_form)} form, \
-with {", ".join(self.leaf_color)}, {", ".join(self.leaf_shape)}-type leaves that form {", ".join(self.canopy_density)} canopies.')
-		print(f'WOOD: The bark of {self.name} have a {" or ".join(self.bark_texture)} texture \
-and tend to be {" and ".join(self.bark_color)} in color.')
-		print(f'SEEDING: It takes the {self.name} {self.seeding_age} years to be able to produce \
+		info = f'({self.name_scientific})\n\
+\n{self.name} are a {self.deciduous_evergreen[0]} species, and are commonly found in {", ".join(self.habitat)} \
+climates.\nFOLIAGE: {self.name} tend to have a {", ".join(self.tree_form)} form, \
+with {", ".join(self.leaf_color)}, {", ".join(self.leaf_shape)}-type leaves that form \
+{", ".join(self.canopy_density)} canopies.\n\
+WOOD: The bark of {self.name} have a {" or ".join(self.bark_texture)} texture \
+and tend to be {" and ".join(self.bark_color)} in color.\n\
+SEEDING: It takes the {self.name} {self.seeding_age} years to be able to produce \
 seeds in a {" or ".join(self.habitat)} climate. \nAfter this age, seeds are produced approximately every \
-{self.masting_cycle} years.\n')
+{self.masting_cycle} years.\n'
+		print(info)
+		return info
+		
 
 	def estimate_attributes(self):
 		"""
